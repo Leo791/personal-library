@@ -5,6 +5,7 @@ import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.repository.BookRepository;
 import com.github.leo791.personal_library.exception.BookNotFoundException;
+import com.github.leo791.personal_library.util.BookUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +36,8 @@ public class BookService {
     public void insertBook(BookDTO book) {
         try {
             Book bookEntity = bookMapper.toEntity(book);
+            // Capitalize string fields in the book entity
+            BookUtils.capitalizeStringFields(bookEntity);
             bookRepository.save(bookEntity);
         } catch (DataAccessException e) {
             throw new BookInsertException(book.getTitle());

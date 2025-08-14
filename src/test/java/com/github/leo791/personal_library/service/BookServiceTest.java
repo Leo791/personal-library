@@ -6,6 +6,7 @@ import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.repository.BookRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -51,6 +52,25 @@ class BookServiceTest {
     }
 
     @Test
+    void testInsertBook_CapitalizeFields() {
+        // Arrange
+        Book book = new Book("1234567890", "the great gatsby", "f. scott fitzgerald", "fiction");
+        BookDTO bookDTO = new BookDTO(1L, "1234567890", "The Great Gatsby", "F. Scott Fitzgerald", "Fiction");
+        when(bookMapper.toEntity(bookDTO)).thenReturn(book);
+
+        // Act
+        bookService.insertBook(bookDTO);
+
+        // Assert
+        ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
+        verify(bookRepository).save(captor.capture());
+        Book savedBook = captor.getValue();
+        assertEquals("The Great Gatsby", savedBook.getTitle());
+        assertEquals("F. Scott Fitzgerald", savedBook.getAuthor());
+        assertEquals("Fiction", savedBook.getGenre());
+    }
+
+    @Test
     void testInsertBook_Failure() {
         // Arrange
         Book book = new Book("1234567890", "Dracula", "Bram Stoker", "Horror");
@@ -64,6 +84,7 @@ class BookServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBook(bookDTO));
         assertEquals("Failed to insert Dracula in Database", exception.getMessage());
     }
+
     @Test
     void testGetAllBooks() {
         // Arrange
