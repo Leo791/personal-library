@@ -101,7 +101,11 @@ public class BookService {
      * Deletes a book entity by its isbn.
      * @param isbn the isbn of the book to delete
      */
-    public void deleteBookByIsbn(String isbn) {
+    public void deleteBook(String isbn) {
+        Book book = bookRepository.findByIsbn(isbn);
+        if (book == null) {
+            throw new RuntimeException("Book with ISBN " + isbn + " not found in database");
+        }
         bookRepository.deleteByIsbn(isbn);
     }
 
