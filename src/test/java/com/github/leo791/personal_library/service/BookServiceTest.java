@@ -1,5 +1,6 @@
 package com.github.leo791.personal_library.service;
 
+import com.github.leo791.personal_library.exception.BookInsertException;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.repository.BookRepository;
@@ -57,11 +58,11 @@ class BookServiceTest {
 
         // Mock
         when(bookMapper.toEntity(bookDTO)).thenReturn(book);
-        when(bookRepository.save(book)).thenThrow(new RuntimeException("Failed to insert Dracula in Database"));
+        when(bookRepository.save(book)).thenThrow(new BookInsertException(book.getTitle()));
 
         // Assert
-        assertThrows(RuntimeException.class, () -> bookService.insertBook(bookDTO));
-
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBook(bookDTO));
+        assertEquals("Failed to insert Dracula in Database", exception.getMessage());
     }
     @Test
     void testGetAllBooks() {

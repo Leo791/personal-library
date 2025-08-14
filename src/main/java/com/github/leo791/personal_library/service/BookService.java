@@ -1,8 +1,10 @@
 package com.github.leo791.personal_library.service;
 
+import com.github.leo791.personal_library.exception.BookInsertException;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.repository.BookRepository;
+import com.github.leo791.personal_library.exception.BookNotFoundException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +37,7 @@ public class BookService {
             Book bookEntity = bookMapper.toEntity(book);
             bookRepository.save(bookEntity);
         } catch (DataAccessException e) {
-            throw new RuntimeException("Failed to insert " + book.getTitle() + "in Database", e);
+            throw new BookInsertException(book.getTitle());
         }
     }
 
@@ -104,7 +106,7 @@ public class BookService {
     public void deleteBook(String isbn) {
         Book book = bookRepository.findByIsbn(isbn);
         if (book == null) {
-            throw new RuntimeException("Book with ISBN " + isbn + " not found in database");
+            throw new BookNotFoundException(isbn);
         }
         bookRepository.deleteByIsbn(isbn);
     }
