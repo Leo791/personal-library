@@ -1,0 +1,78 @@
+package com.github.leo791.personal_library.controller;
+
+import com.github.leo791.personal_library.exception.BookNotFoundException;
+import com.github.leo791.personal_library.model.dto.BookDTO;
+import com.github.leo791.personal_library.model.dto.ErrorResponse;
+import com.github.leo791.personal_library.service.BookService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * Controller for managing book-related operations.
+ * This class handles HTTP requests related to books, such as retrieving, adding, updating, and deleting books.
+ */
+@RestController
+@RequestMapping("api/v1/books")
+public class BookController {
+
+    private final BookService bookService;
+
+    public BookController(BookService bookService) {
+        this.bookService = bookService;
+    }
+
+    // ================= Insert / Update =================
+
+    /**
+     * This method handles POST requests to add a new book.
+     * It expects a JSON object in the request body, with the book's data.
+     * @param book the book object to be added
+     */
+    @PostMapping
+    public ResponseEntity<Void> addNewBook(@RequestBody BookDTO book) {
+
+        bookService.insertBook(book);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * This method handles PUT requests to update an existing book.
+     * It expects a JSON object in the request body, with the updated book's data.
+     * @param isbn the isbn of the book to be updated
+     * @param book the book object with updated data
+     */
+    @PutMapping("/{isbn}")
+    public ResponseEntity<ErrorResponse> updateBook(@PathVariable String isbn, @RequestBody BookDTO book) {
+        try {
+            bookService.updateBook(isbn, book);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            if (e instanceof IllegalArgumentException) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
+            } else if (e instanceof BookNotFoundException) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
+    // ================= Search =================
+
+    /**
+     * This method handles GET requests to retrieve a book by its ISBN.
+     * It returns the book's data as a JSON object.
+     * @param isbn the isbn of the book to be retrieved
+     * @return the book object if found, or a 404 Not Found status if not found
+     */
+    @GetMapping("/{isbn}")
+    public ResponseEntity<BookDTO> getBook(@PathVariable String isbn) {
+        BookDTO book = bookService.getBookByIsbn(isbn);
+        if (book == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(book);
+    }
+
+}
