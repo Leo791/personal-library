@@ -38,7 +38,7 @@ class BookServiceTest {
     void testInsertBook() {
         // Arrange
         Book book = new Book("1234567890", "Frankenstein", "Mary Shelley", "Fiction");
-        BookDTO bookDTO = new BookDTO(1L, "1234567890", "Frankenstein", "Mary Shelley", "Fiction");
+        BookDTO bookDTO = new BookDTO( "1234567890", "Frankenstein", "Mary Shelley", "Fiction");
 
         // Mock
         when(bookMapper.toEntity(bookDTO)).thenReturn(book);
@@ -55,7 +55,7 @@ class BookServiceTest {
     void testInsertBook_CapitalizeFields() {
         // Arrange
         Book book = new Book("1234567890", "the great gatsby", "f. scott fitzgerald", "fiction");
-        BookDTO bookDTO = new BookDTO(1L, "1234567890", "The Great Gatsby", "F. Scott Fitzgerald", "Fiction");
+        BookDTO bookDTO = new BookDTO( "1234567890", "The Great Gatsby", "F. Scott Fitzgerald", "Fiction");
         when(bookMapper.toEntity(bookDTO)).thenReturn(book);
 
         // Act
@@ -74,7 +74,7 @@ class BookServiceTest {
     void testInsertBook_Failure() {
         // Arrange
         Book book = new Book("1234567890", "Dracula", "Bram Stoker", "Horror");
-        BookDTO bookDTO = new BookDTO(1L, "1234567890", "Dracula", "Bram Stoker", "Horror");
+        BookDTO bookDTO = new BookDTO( "1234567890", "Dracula", "Bram Stoker", "Horror");
 
         // Mock
         when(bookMapper.toEntity(bookDTO)).thenReturn(book);
@@ -90,8 +90,8 @@ class BookServiceTest {
         // Arrange
         String isbn = "1234567890";
         Book existingBook = new Book(isbn, "Frankstein", "Bram Stoker", "Fiction");
-        Book newBook = new Book(isbn, "Frankenstein", "Mary Shelley", "Horror");
-        BookDTO updatedBookDTO = new BookDTO(1L, isbn, "Frankenstein", "Mary Shelley", "Horror");
+        Book newBook = new Book(null, "Frankenstein", "Mary Shelley", "Horror");
+        BookDTO updatedBookDTO = new BookDTO(null, "Frankenstein", "Mary Shelley", "Horror");
 
         // Mock
         when(bookRepository.findByIsbn(isbn)).thenReturn(existingBook);
@@ -117,8 +117,8 @@ class BookServiceTest {
         // Arrange
         String isbn = "1234567890";
         Book existingBook = new Book(isbn, "Frankenstein", "Bram Stoker", "Fiction");
-        Book newBook = new Book(isbn, null, "Mary Shelley", null);
-        BookDTO updatedBookDTO = new BookDTO(1L, isbn, "Frankenstein", "Mary Shelley", "Fiction");
+        Book newBook = new Book(null, null, "Mary Shelley", null);
+        BookDTO updatedBookDTO = new BookDTO(null, "Frankenstein", "Mary Shelley", "Fiction");
 
         // Mock
         when(bookRepository.findByIsbn(isbn)).thenReturn(existingBook);
@@ -140,12 +140,42 @@ class BookServiceTest {
     }
 
     @Test
+    void updateBook_IsbnChange() {
+        // Arrange
+        String isbn = "1234567890";
+        Book existingBook = new Book(isbn, "Frankenstein", "Bram Stoker", "Fiction");
+        Book newBook = new Book("0987654321", "Frankenstein", "Mary Shelley", "Horror");
+        BookDTO updatedBookDTO = new BookDTO("0987654321", "Frankenstein", "Mary Shelley", "Horror");
+
+        // Mock
+        when(bookRepository.findByIsbn(isbn)).thenReturn(existingBook);
+
+        // Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> bookService.updateBook(isbn, updatedBookDTO));
+        assertEquals("ISBN cannot be changed.", exception.getMessage());
+    }
+
+    @Test
+    void updateBook_NotFound() {
+        // Arrange
+        String isbn = "1234567890";
+        BookDTO updatedBookDTO = new BookDTO("1234567890", "Frankenstein", "Mary Shelley", "Horror");
+
+        // Mock
+        when(bookRepository.findByIsbn(isbn)).thenReturn(null);
+
+        // Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.updateBook(isbn, updatedBookDTO));
+        assertEquals("Book with ISBN 1234567890 not found in database", exception.getMessage());
+    }
+
+    @Test
     void testGetAllBooks() {
         // Arrange
         Book book1 = new Book("1234567890", "Frankenstein", "Mary Shelley", "Fiction");
         Book book2 = new Book("0987654321", "Dracula", "Bram Stoker", "Horror");
-        BookDTO bookDTO1 = new BookDTO(1L, "1234567890", "Frankenstein", "Mary Shelley", "Fiction");
-        BookDTO bookDTO2 = new BookDTO(2L, "0987654321", "Dracula", "Bram Stoker", "Horror");
+        BookDTO bookDTO1 = new BookDTO("1234567890", "Frankenstein", "Mary Shelley", "Fiction");
+        BookDTO bookDTO2 = new BookDTO("0987654321", "Dracula", "Bram Stoker", "Horror");
         List<BookDTO> books = List.of(bookDTO1, bookDTO2);
 
         // Mock
@@ -181,7 +211,7 @@ class BookServiceTest {
         // Arrange
         String isbn = "1234567890";
         Book book = new Book(isbn, "Scarlet Letter", "Nathaniel Hawthorne", "Fiction");
-        BookDTO bookDTO = new BookDTO(1L, isbn, "Scarlet Letter", "Nathaniel Hawthorne", "Fiction");
+        BookDTO bookDTO = new BookDTO( isbn, "Scarlet Letter", "Nathaniel Hawthorne", "Fiction");
 
         // Mock
         when(bookRepository.findByIsbn(isbn)).thenReturn(book);
@@ -223,8 +253,8 @@ class BookServiceTest {
         String genre = "Fiction";
         Book book1 = new Book("1234567890", title, author, genre);
         Book book2 = new Book("0987654321", title, author, genre);
-        BookDTO bookDTO1 = new BookDTO(1L, "1234567890", title, author, genre);
-        BookDTO bookDTO2 = new BookDTO(2L, "0987654321", title, author, genre);
+        BookDTO bookDTO1 = new BookDTO( "1234567890", title, author, genre);
+        BookDTO bookDTO2 = new BookDTO( "0987654321", title, author, genre);
         List<BookDTO> books = List.of(bookDTO1, bookDTO2);
 
         // Mock
@@ -248,7 +278,7 @@ class BookServiceTest {
         String author = "F. Scott Fitzgerald";
         String genre = "Fiction";
         Book book1 = new Book("1234567890", "The Great Gatsby", author, genre);
-        BookDTO bookDTO1 = new BookDTO(1L, "1234567890", "The Great Gatsby", author, genre);
+        BookDTO bookDTO1 = new BookDTO( "1234567890", "The Great Gatsby", author, genre);
         List<BookDTO> books = List.of(bookDTO1);
 
         // Mock
@@ -288,8 +318,8 @@ class BookServiceTest {
         String author = "George Orwell";
         Book book1 = new Book("1234567890", "1984", author, "Dystopian");
         Book book2 = new Book("0987654321", "Animal Farm", author, "Political Satire");
-        BookDTO bookDTO1 = new BookDTO(1L, "1234567890", "1984", author, "Dystopian");
-        BookDTO bookDTO2 = new BookDTO(2L, "0987654321", "Animal Farm", author, "Political Satire");
+        BookDTO bookDTO1 = new BookDTO( "1234567890", "1984", author, "Dystopian");
+        BookDTO bookDTO2 = new BookDTO( "0987654321", "Animal Farm", author, "Political Satire");
         List<BookDTO> books = List.of(bookDTO1, bookDTO2);
 
         // Mock
@@ -311,7 +341,7 @@ class BookServiceTest {
         // Arrange
         String author = "george orwell";
         Book book1 = new Book("1234567890", "1984", "George Orwell", "Dystopian");
-        BookDTO bookDTO1 = new BookDTO(1L, "1234567890", "1984", "George Orwell", "Dystopian");
+        BookDTO bookDTO1 = new BookDTO( "1234567890", "1984", "George Orwell", "Dystopian");
         List<BookDTO> books = List.of(bookDTO1);
 
         // Mock
@@ -351,8 +381,8 @@ class BookServiceTest {
         String genre = "Science Fiction";
         Book book1 = new Book("1234567890", "Dune", "Frank Herbert", genre);
         Book book2 = new Book("0987654321", "Neuromancer", "William Gibson", genre);
-        BookDTO bookDTO1 = new BookDTO(1L, "1234567890", "Dune", "Frank Herbert", genre);
-        BookDTO bookDTO2 = new BookDTO(2L, "0987654321", "Neuromancer", "William Gibson", genre);
+        BookDTO bookDTO1 = new BookDTO( "1234567890", "Dune", "Frank Herbert", genre);
+        BookDTO bookDTO2 = new BookDTO( "0987654321", "Neuromancer", "William Gibson", genre);
         List<BookDTO> books = List.of(bookDTO1, bookDTO2);
 
         // Mock
@@ -373,7 +403,7 @@ class BookServiceTest {
         // Arrange
         String genre = "science fiction";
         Book book1 = new Book("1234567890", "Dune", "Frank Herbert", "Science Fiction");
-        BookDTO bookDTO1 = new BookDTO(1L, "1234567890", "Dune", "Frank Herbert", "Science Fiction");
+        BookDTO bookDTO1 = new BookDTO( "1234567890", "Dune", "Frank Herbert", "Science Fiction");
         List<BookDTO> books = List.of(bookDTO1);
 
         // Mock

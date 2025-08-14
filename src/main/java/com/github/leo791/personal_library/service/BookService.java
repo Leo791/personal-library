@@ -54,6 +54,9 @@ public class BookService {
         if (existingBook == null) {
             throw new BookNotFoundException(isbn);
         }
+        if (newBook.getIsbn() != null && !newBook.getIsbn().equals(isbn)) {
+            throw new IllegalArgumentException("ISBN cannot be changed.");
+        }
         // Update the existing book entity with the new data where applicable
         BookUtils.updateBookFields(existingBook, bookMapper.toEntity(newBook));
         // Capitalize string fields in the updated book entity
