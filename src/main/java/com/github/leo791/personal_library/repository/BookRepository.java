@@ -34,7 +34,18 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      */
     List<Book> findByGenre(String genre);
 
+    /**
+     * Finds a book by its ISBN.
+     *
+     * @param isbn the ISBN of the book to search for
+     * @return the book entity with the specified ISBN, or null if not found
+     */
     Book findByIsbn(String isbn);
 
+    /**
+     * Deletes a book by its ISBN.
+     *
+     * @param isbn the ISBN of the book to delete
+     */
     void deleteByIsbn(String isbn);
 }
