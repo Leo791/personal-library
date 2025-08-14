@@ -10,7 +10,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
 /**
  * Service class for managing Book entities.
  * This class provides methods to interact with the BookRepository.
@@ -42,6 +41,25 @@ public class BookService {
         } catch (DataAccessException e) {
             throw new BookInsertException(book.getTitle());
         }
+    }
+
+    /**
+     * Updates an existing book entity by its ISBN.
+     *
+     * @param isbn the ISBN of the book to update
+     * @param newBook the book entity with updated data
+     */
+    public void updateBook(String isbn, BookDTO newBook) {
+        Book existingBook = bookRepository.findByIsbn(isbn);
+        if (existingBook == null) {
+            throw new BookNotFoundException(isbn);
+        }
+        // Update the existing book entity with the new data where applicable
+        BookUtils.updateBookFields(existingBook, bookMapper.toEntity(newBook));
+        // Capitalize string fields in the updated book entity
+        BookUtils.capitalizeStringFields(existingBook);
+
+        bookRepository.save(existingBook);
     }
 
     // ================= Search =================

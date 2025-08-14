@@ -35,7 +35,7 @@ class BookServiceTest {
     private BookService bookService;
 
     @Test
-    void testInsertBook_Success() {
+    void testInsertBook() {
         // Arrange
         Book book = new Book("1234567890", "Frankenstein", "Mary Shelley", "Fiction");
         BookDTO bookDTO = new BookDTO(1L, "1234567890", "Frankenstein", "Mary Shelley", "Fiction");
@@ -83,6 +83,60 @@ class BookServiceTest {
         // Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBook(bookDTO));
         assertEquals("Failed to insert Dracula in Database", exception.getMessage());
+    }
+
+    @Test
+    void updateBook() {
+        // Arrange
+        String isbn = "1234567890";
+        Book existingBook = new Book(isbn, "Frankstein", "Bram Stoker", "Fiction");
+        Book newBook = new Book(isbn, "Frankenstein", "Mary Shelley", "Horror");
+        BookDTO updatedBookDTO = new BookDTO(1L, isbn, "Frankenstein", "Mary Shelley", "Horror");
+
+        // Mock
+        when(bookRepository.findByIsbn(isbn)).thenReturn(existingBook);
+        when(bookMapper.toEntity(updatedBookDTO)).thenReturn(newBook);
+
+        // Act
+        bookService.updateBook(isbn, updatedBookDTO);
+
+        // Assert
+        verify(bookRepository).findByIsbn(isbn);
+        verify(bookMapper).toEntity(updatedBookDTO);
+
+        ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
+        verify(bookRepository).save(captor.capture());
+        Book savedBook = captor.getValue();
+        assertEquals("Frankenstein", savedBook.getTitle());
+        assertEquals("Mary Shelley", savedBook.getAuthor());
+        assertEquals("Horror", savedBook.getGenre());
+    }
+
+    @Test
+    void updateBook_NullValues(){
+        // Arrange
+        String isbn = "1234567890";
+        Book existingBook = new Book(isbn, "Frankenstein", "Bram Stoker", "Fiction");
+        Book newBook = new Book(isbn, null, "Mary Shelley", null);
+        BookDTO updatedBookDTO = new BookDTO(1L, isbn, "Frankenstein", "Mary Shelley", "Fiction");
+
+        // Mock
+        when(bookRepository.findByIsbn(isbn)).thenReturn(existingBook);
+        when(bookMapper.toEntity(updatedBookDTO)).thenReturn(newBook);
+
+        // Act
+        bookService.updateBook(isbn, updatedBookDTO);
+
+        // Assert
+        verify(bookRepository).findByIsbn(isbn);
+        verify(bookMapper).toEntity(updatedBookDTO);
+
+        ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
+        verify(bookRepository).save(captor.capture());
+        Book savedBook = captor.getValue();
+        assertEquals("Frankenstein", savedBook.getTitle());
+        assertEquals("Mary Shelley", savedBook.getAuthor());
+        assertEquals("Fiction", savedBook.getGenre());
     }
 
     @Test
