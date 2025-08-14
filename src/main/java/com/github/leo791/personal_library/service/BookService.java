@@ -73,7 +73,7 @@ public class BookService {
      * @return the books with the specified title, or null if not found
      */
     public List<BookDTO> getBooksByTitle(String title) {
-        List<Book> books = bookRepository.findByTitle(title);
+        List<Book> books = bookRepository.findByTitleIgnoreCase(title);
         return bookMapper.toDtoList(books);
     }
 
@@ -83,7 +83,7 @@ public class BookService {
      * @return the books with the specified author, or null if not found
      */
     public List<BookDTO> getBooksByAuthor(String author) {
-       List<Book> books = bookRepository.findByAuthor(author);
+       List<Book> books = bookRepository.findByAuthorIgnoreCase(author);
        return bookMapper.toDtoList(books);
     }
 
@@ -93,7 +93,7 @@ public class BookService {
      * @return the books with the specified genre, or null if not found
      */
     public List<BookDTO> getBooksByGenre(String genre) {
-        List<Book> books =  bookRepository.findByGenre(genre);
+        List<Book> books =  bookRepository.findByGenreIgnoreCase(genre);
         return bookMapper.toDtoList(books);
     }
 

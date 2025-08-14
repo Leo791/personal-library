@@ -153,7 +153,7 @@ class BookServiceTest {
         List<BookDTO> books = List.of(bookDTO1, bookDTO2);
 
         // Mock
-        when(bookRepository.findByTitle(title)).thenReturn(List.of(book1, book2));
+        when(bookRepository.findByTitleIgnoreCase(title)).thenReturn(List.of(book1, book2));
         when(bookMapper.toDtoList(List.of(book1, book2))).thenReturn(books);
 
         // Act
@@ -161,9 +161,32 @@ class BookServiceTest {
 
         // Assert
         assertEquals(books, result);
-        verify(bookRepository).findByTitle(title);
+        verify(bookRepository).findByTitleIgnoreCase(title);
         verify(bookMapper).toDtoList(List.of(book1, book2));
 
+    }
+
+    @Test
+    void testGetBooksByTitle_IgnoreCase() {
+        // Arrange
+        String title = "the great gatsby";
+        String author = "F. Scott Fitzgerald";
+        String genre = "Fiction";
+        Book book1 = new Book("1234567890", "The Great Gatsby", author, genre);
+        BookDTO bookDTO1 = new BookDTO(1L, "1234567890", "The Great Gatsby", author, genre);
+        List<BookDTO> books = List.of(bookDTO1);
+
+        // Mock
+        when(bookRepository.findByTitleIgnoreCase(title)).thenReturn(List.of(book1));
+        when(bookMapper.toDtoList(List.of(book1))).thenReturn(books);
+
+        // Act
+        var result = bookService.getBooksByTitle(title);
+
+        // Assert
+        assertEquals(books, result);
+        verify(bookRepository).findByTitleIgnoreCase(title);
+        verify(bookMapper).toDtoList(List.of(book1));
     }
 
     @Test
@@ -172,7 +195,7 @@ class BookServiceTest {
         String title = "Nonexistent Book";
 
         // Mock
-        when(bookRepository.findByTitle(title)).thenReturn(List.of());
+        when(bookRepository.findByTitleIgnoreCase(title)).thenReturn(List.of());
         when(bookMapper.toDtoList(List.of())).thenReturn(List.of());
 
         // Act
@@ -180,7 +203,7 @@ class BookServiceTest {
 
         // Assert
         assertEquals(List.of(), result);
-        verify(bookRepository).findByTitle(title);
+        verify(bookRepository).findByTitleIgnoreCase(title);
         verify(bookMapper).toDtoList(List.of());
     }
 
@@ -195,7 +218,7 @@ class BookServiceTest {
         List<BookDTO> books = List.of(bookDTO1, bookDTO2);
 
         // Mock
-        when(bookRepository.findByAuthor(author)).thenReturn(List.of(book1, book2));
+        when(bookRepository.findByAuthorIgnoreCase(author)).thenReturn(List.of(book1, book2));
         when(bookMapper.toDtoList(List.of(book1, book2))).thenReturn(books);
 
         // Act
@@ -203,9 +226,30 @@ class BookServiceTest {
 
         // Assert
         assertEquals(books, result);
-        verify(bookRepository).findByAuthor(author);
+        verify(bookRepository).findByAuthorIgnoreCase(author);
         verify(bookMapper).toDtoList(List.of(book1, book2));
 
+    }
+
+    @Test
+    void testGetBooksByAuthor_IgnoreCase() {
+        // Arrange
+        String author = "george orwell";
+        Book book1 = new Book("1234567890", "1984", "George Orwell", "Dystopian");
+        BookDTO bookDTO1 = new BookDTO(1L, "1234567890", "1984", "George Orwell", "Dystopian");
+        List<BookDTO> books = List.of(bookDTO1);
+
+        // Mock
+        when(bookRepository.findByAuthorIgnoreCase(author)).thenReturn(List.of(book1));
+        when(bookMapper.toDtoList(List.of(book1))).thenReturn(books);
+
+        // Act
+        var result = bookService.getBooksByAuthor(author);
+
+        // Assert
+        assertEquals(books, result);
+        verify(bookRepository).findByAuthorIgnoreCase(author);
+        verify(bookMapper).toDtoList(List.of(book1));
     }
 
     @Test
@@ -214,7 +258,7 @@ class BookServiceTest {
         String author = "Unknown Author";
 
         // Mock
-        when(bookRepository.findByAuthor(author)).thenReturn(List.of());
+        when(bookRepository.findByAuthorIgnoreCase(author)).thenReturn(List.of());
         when(bookMapper.toDtoList(List.of())).thenReturn(List.of());
 
         // Act
@@ -222,7 +266,7 @@ class BookServiceTest {
 
         // Assert
         assertEquals(List.of(), result);
-        verify(bookRepository).findByAuthor(author);
+        verify(bookRepository).findByAuthorIgnoreCase(author);
         verify(bookMapper).toDtoList(List.of());
     }
 
@@ -237,7 +281,7 @@ class BookServiceTest {
         List<BookDTO> books = List.of(bookDTO1, bookDTO2);
 
         // Mock
-        when(bookRepository.findByGenre(genre)).thenReturn(List.of(book1, book2));
+        when(bookRepository.findByGenreIgnoreCase(genre)).thenReturn(List.of(book1, book2));
         when(bookMapper.toDtoList(List.of(book1, book2))).thenReturn(books);
 
         // Act
@@ -245,8 +289,29 @@ class BookServiceTest {
 
         // Assert
         assertEquals(books, result);
-        verify(bookRepository).findByGenre(genre);
+        verify(bookRepository).findByGenreIgnoreCase(genre);
         verify(bookMapper).toDtoList(List.of(book1, book2));
+    }
+
+    @Test
+    void testGetBooksByGenre_IgnoreCase() {
+        // Arrange
+        String genre = "science fiction";
+        Book book1 = new Book("1234567890", "Dune", "Frank Herbert", "Science Fiction");
+        BookDTO bookDTO1 = new BookDTO(1L, "1234567890", "Dune", "Frank Herbert", "Science Fiction");
+        List<BookDTO> books = List.of(bookDTO1);
+
+        // Mock
+        when(bookRepository.findByGenreIgnoreCase(genre)).thenReturn(List.of(book1));
+        when(bookMapper.toDtoList(List.of(book1))).thenReturn(books);
+
+        // Act
+        var result = bookService.getBooksByGenre(genre);
+
+        // Assert
+        assertEquals(books, result);
+        verify(bookRepository).findByGenreIgnoreCase(genre);
+        verify(bookMapper).toDtoList(List.of(book1));
     }
 
     @Test
@@ -255,7 +320,7 @@ class BookServiceTest {
         String genre = "Nonexistent Genre";
 
         // Mock
-        when(bookRepository.findByGenre(genre)).thenReturn(List.of());
+        when(bookRepository.findByGenreIgnoreCase(genre)).thenReturn(List.of());
         when(bookMapper.toDtoList(List.of())).thenReturn(List.of());
 
         // Act
@@ -263,7 +328,7 @@ class BookServiceTest {
 
         // Assert
         assertEquals(List.of(), result);
-        verify(bookRepository).findByGenre(genre);
+        verify(bookRepository).findByGenreIgnoreCase(genre);
         verify(bookMapper).toDtoList(List.of());
     }
 
