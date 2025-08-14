@@ -3,6 +3,7 @@ package com.github.leo791.personal_library.service;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.repository.BookRepository;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,8 +31,12 @@ public class BookService {
      * @param book the book entity to save
      */
     public void insertBook(BookDTO book) {
-        Book bookEntity = bookMapper.toEntity(book);
-        bookRepository.save(bookEntity);
+        try {
+            Book bookEntity = bookMapper.toEntity(book);
+            bookRepository.save(bookEntity);
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Failed to insert " + book.getTitle() + "in Database", e);
+        }
     }
 
     // ================= Search =================
