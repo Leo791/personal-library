@@ -23,8 +23,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
 
-
-    // I want to use classics in this test class, think frankestine, dracula, for whom the bell tolls, etc.
     @Mock
     private BookRepository bookRepository;
 
