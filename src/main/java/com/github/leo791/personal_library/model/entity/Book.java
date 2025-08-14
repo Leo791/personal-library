@@ -10,6 +10,7 @@ import java.util.Objects;
  * The ISBN is unique and cannot be null.
  */
 @Entity
+@Table(name = "books")
 public class Book {
 
     @Id
