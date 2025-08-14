@@ -269,6 +269,33 @@ class BookServiceTest {
     }
 
     @Test
-    void deleteBookByIsbn() {
+    void testDeleteBook() {
+        // Arrange
+        String isbn = "1234567890";
+        Book book = new Book(isbn, "The Great Gatsby", "F. Scott Fitzgerald", "Fiction");
+
+        // Mock
+        when(bookRepository.findByIsbn(isbn)).thenReturn(book);
+
+        // Act
+        bookService.deleteBook(isbn);
+
+        // Assert
+        verify(bookRepository).findByIsbn(isbn);
+        verify(bookRepository).deleteByIsbn(isbn);
+    }
+
+    @Test
+    void testDeleteBook_NotFound() {
+        // Arrange
+        String isbn = "1234567890";
+
+        // Mock
+        when(bookRepository.findByIsbn(isbn)).thenReturn(null);
+
+        // Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.deleteBook(isbn));
+        assertEquals("Book with ISBN " + isbn + " not found in database", exception.getMessage());
+        verify(bookRepository).findByIsbn(isbn);
     }
 }
