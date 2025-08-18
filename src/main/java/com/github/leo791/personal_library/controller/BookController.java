@@ -75,4 +75,24 @@ public class BookController {
         return ResponseEntity.ok(book);
     }
 
+
+    /**
+     * This method handles GET requests to search for books by title, author, or genre.
+     * It returns a list of books that match the search criteria as a JSON array.
+     * If no search criteria are provided, it returns all books.
+     * @param title the title of the book to search for (optional)
+     * @param author the author of the book to search for (optional)
+     * @param genre the genre of the book to search for (optional)
+     * @return a list of books that match the search criteria, or an empty list if no books match
+     */
+
+    @GetMapping
+    public ResponseEntity<Iterable<BookDTO>> searchBooks(@RequestParam(required = false) String title,
+                                                         @RequestParam(required = false) String author,
+                                                         @RequestParam(required = false) String genre) {
+        Iterable<BookDTO> books = bookService.searchBooks(title, author, genre);
+        return ResponseEntity.ok(books);
+    }
+
+
 }
