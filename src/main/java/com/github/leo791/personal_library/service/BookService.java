@@ -89,38 +89,6 @@ public class BookService {
         Book book = bookRepository.findByIsbn(isbn);
         return bookMapper.toDto(book);
     }
-
-    /**
-     * Retrieves books entity by the title.
-     *
-     * @param title the title of the book to retrieve
-     * @return the books with the specified title, or null if not found
-     */
-    public List<BookDTO> getBooksByTitle(String title) {
-        List<Book> books = bookRepository.findByTitleIgnoreCase(title);
-        return bookMapper.toDtoList(books);
-    }
-
-    /**
-     * Retrieves books by their author
-     * @param author the author of the books to retrieve
-     * @return the books with the specified author, or null if not found
-     */
-    public List<BookDTO> getBooksByAuthor(String author) {
-       List<Book> books = bookRepository.findByAuthorIgnoreCase(author);
-       return bookMapper.toDtoList(books);
-    }
-
-    /**
-     * Retrieves books by their genre
-     * @param genre the author of the books to retrieve
-     * @return the books with the specified genre, or null if not found
-     */
-    public List<BookDTO> getBooksByGenre(String genre) {
-        List<Book> books =  bookRepository.findByGenreIgnoreCase(genre);
-        return bookMapper.toDtoList(books);
-    }
-
     // ================= Delete =================
 
     /**
@@ -136,4 +104,26 @@ public class BookService {
     }
 
 
+    /**
+     * Searches for books based on title, author, or genre.
+     * If no parameters are provided, it returns all books.
+     * If multiple parameters are provided, it prioritizes title > author > genre.
+     * @param title the title of the book to search for (optional)
+     * @param author the author of the book to search for (optional)
+     * @param genre the genre of the book to search for (optional)
+     * @return an iterable of BookDTO objects that match the search criteria
+     */
+    public Iterable<BookDTO> searchBooks(String title, String author, String genre) {
+        List<Book> books;
+        if (title != null) {
+            books = bookRepository.findByTitleIgnoreCase(title);
+        } else if (author != null) {
+            books = bookRepository.findByAuthorIgnoreCase(author);
+        } else if (genre != null) {
+            books = bookRepository.findByGenreIgnoreCase(genre);
+        } else {
+            books = bookRepository.findAll();
+        }
+        return bookMapper.toDtoList(books);
+    }
 }
