@@ -87,7 +87,7 @@ public class BookService {
      * @param genre the genre of the book to search for (optional)
      * @return an iterable of BookDTO objects that match the search criteria
      */
-    public Iterable<BookDTO> searchBooks(String title, String author, String genre) {
+    public List<BookDTO> searchBooks(String title, String author, String genre) {
         List<Book> books;
         if (title != null) {
             books = bookRepository.findByTitleIgnoreCase(title);

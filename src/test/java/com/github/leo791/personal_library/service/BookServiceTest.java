@@ -143,12 +143,7 @@ class BookServiceTest {
     void updateBook_IsbnChange() {
         // Arrange
         String isbn = "1234567890";
-        Book existingBook = new Book(isbn, "Frankenstein", "Bram Stoker", "Fiction");
-        Book newBook = new Book("0987654321", "Frankenstein", "Mary Shelley", "Horror");
         BookDTO updatedBookDTO = new BookDTO("0987654321", "Frankenstein", "Mary Shelley", "Horror");
-
-        // Mock
-        when(bookRepository.findByIsbn(isbn)).thenReturn(existingBook);
 
         // Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> bookService.updateBook(isbn, updatedBookDTO));
@@ -204,6 +199,93 @@ class BookServiceTest {
         assertNull(result);
         verify(bookRepository).findByIsbn(isbn);
         verify(bookMapper).toDto(null);
+    }
+
+    @Test
+    void testSearchBooks_All() {
+        // Arrange
+        Book book1 = new Book("1234567890", "The Great Gatsby", "F. Scott Fitzgerald", "Fiction");
+        Book book2 = new Book("0987654321", "To Kill a Mockingbird", "Harper Lee", "Fiction");
+        List<Book> books = List.of(book1, book2);
+
+        // Mock
+        when(bookRepository.findAll()).thenReturn(books);
+        when(bookMapper.toDtoList(books)).thenReturn(List.of(
+                new BookDTO("1234567890", "The Great Gatsby", "F. Scott Fitzgerald", "Fiction"),
+                new BookDTO("0987654321", "To Kill a Mockingbird", "Harper Lee", "Fiction")
+        ));
+        // Act
+        List<BookDTO> result = bookService.searchBooks(null, null, null);
+
+        // Assert
+        assertEquals(2, result.size());
+        verify(bookRepository).findAll();
+    }
+
+    @Test
+    void testSearchBooks_ByTitle() {
+        // Arrange
+        String title = "The Great Gatsby";
+        Book book = new Book("1234567890", title, "F. Scott Fitzgerald", "Fiction");
+        List<Book> books = List.of(book);
+
+        // Mock
+        when(bookRepository.findByTitleIgnoreCase(title)).thenReturn(books);
+        when(bookMapper.toDtoList(books)).thenReturn(List.of(new BookDTO("1234567890", title, "F. Scott Fitzgerald", "Fiction")));
+
+        // Act
+        List<BookDTO> result = bookService.searchBooks(title, null, null);
+
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals(title, result.getFirst().getTitle());
+        verify(bookRepository).findByTitleIgnoreCase(title);
+    }
+
+    @Test
+    void testSearchBooks_ByAuthor() {
+        // Arrange
+        String author = "Harper Lee";
+        Book book = new Book("0987654321", "To Kill a Mockingbird", author, "Fiction");
+        List<Book> books = List.of(book);
+
+        // Mock
+        when(bookRepository.findByAuthorIgnoreCase(author)).thenReturn(books);
+        when(bookMapper.toDtoList(books)).thenReturn(List.of(new BookDTO("0987654321", "To Kill a Mockingbird", author, "Fiction")));
+
+        // Act
+        List<BookDTO> result = bookService.searchBooks(null, author, null);
+
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals(author, result.getFirst().getAuthor());
+        verify(bookRepository).findByAuthorIgnoreCase(author);
+    }
+
+    @Test
+    void testSearchBooks_ByGenre() {
+        // Arrange
+        String genre = "Fiction";
+        Book book = new Book("1234567890", "The Great Gatsby", "F. Scott Fitzgerald", genre);
+        Book book1 = new Book("0987654321", "To Kill a Mockingbird", "Harper Lee", genre);
+        Book book2 = new Book("1122334455", "1984", "George Orwell", "Distopian");
+        List<Book> books = List.of(book, book1, book2);
+
+        // Mock
+        when(bookRepository.findByGenreIgnoreCase(genre)).thenReturn(books);
+        when(bookMapper.toDtoList(books)).thenReturn(List.of(
+                new BookDTO("1234567890", "The Great Gatsby", "F. Scott Fitzgerald", genre),
+                new BookDTO("0987654321", "To Kill a Mockingbird", "Harper Lee", genre)
+        ));
+
+        // Act
+        List<BookDTO> result = bookService.searchBooks(null, null, genre);
+
+        // Assert
+        assertEquals(2, result.size());
+        assertEquals(genre, result.getFirst().getGenre());
+        assertEquals(genre, result.get(1).getGenre());
+        verify(bookRepository).findByGenreIgnoreCase(genre);
     }
 
     @Test
