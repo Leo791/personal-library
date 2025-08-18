@@ -6,6 +6,7 @@ import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.repository.BookRepository;
 import com.github.leo791.personal_library.exception.BookNotFoundException;
 import com.github.leo791.personal_library.util.BookUtils;
+import jakarta.transaction.Transactional;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +50,7 @@ public class BookService {
      * @param isbn the ISBN of the book to update
      * @param newBook the book entity with updated data
      */
+    @Transactional
     public void updateBook(String isbn, BookDTO newBook) {
         if (newBook.getIsbn() != null && !newBook.getIsbn().equals(isbn)) {
             throw new IllegalArgumentException("ISBN cannot be changed.");
@@ -107,6 +109,7 @@ public class BookService {
      * Deletes a book entity by its isbn.
      * @param isbn the isbn of the book to delete
      */
+    @Transactional
     public void deleteBook(String isbn) {
         Book book = bookRepository.findByIsbn(isbn);
         if (book == null) {

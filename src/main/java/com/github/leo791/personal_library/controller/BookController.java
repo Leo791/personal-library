@@ -94,5 +94,22 @@ public class BookController {
         return ResponseEntity.ok(books);
     }
 
+    // ================= Delete =================
+    /**
+     * This method handles DELETE requests to remove a book by its ISBN.
+     * It returns a 204 No Content status if the book was successfully deleted,
+     * or a 404 Not Found status if the book was not found.
+     * @param isbn the isbn of the book to be deleted
+     */
+    @DeleteMapping("/{isbn}")
+    public ResponseEntity<Void> deleteBook(@PathVariable String isbn) {
+        try {
+            bookService.deleteBook(isbn);
+            return ResponseEntity.noContent().build();
+        } catch (BookNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
 
 }
