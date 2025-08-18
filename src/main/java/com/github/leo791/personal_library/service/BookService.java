@@ -68,18 +68,6 @@ public class BookService {
     // ================= Search =================
 
     /**
-     * Retrieves all books from the repository.
-     *
-     * @return a list of all books
-     */
-    public List<BookDTO> getAllBooks() {
-        List<Book> bookEntities = bookRepository.findAll();
-        return bookMapper.toDtoList(bookEntities);
-
-
-    }
-
-    /**
      * Retrieves a book entity by its ISBN.
      *
      * @param isbn the ISBN of the book to retrieve
@@ -89,20 +77,6 @@ public class BookService {
         Book book = bookRepository.findByIsbn(isbn);
         return bookMapper.toDto(book);
     }
-    // ================= Delete =================
-
-    /**
-     * Deletes a book entity by its isbn.
-     * @param isbn the isbn of the book to delete
-     */
-    public void deleteBook(String isbn) {
-        Book book = bookRepository.findByIsbn(isbn);
-        if (book == null) {
-            throw new BookNotFoundException(isbn);
-        }
-        bookRepository.deleteByIsbn(isbn);
-    }
-
 
     /**
      * Searches for books based on title, author, or genre.
@@ -126,4 +100,19 @@ public class BookService {
         }
         return bookMapper.toDtoList(books);
     }
+
+    // ================= Delete =================
+
+    /**
+     * Deletes a book entity by its isbn.
+     * @param isbn the isbn of the book to delete
+     */
+    public void deleteBook(String isbn) {
+        Book book = bookRepository.findByIsbn(isbn);
+        if (book == null) {
+            throw new BookNotFoundException(isbn);
+        }
+        bookRepository.deleteByIsbn(isbn);
+    }
+
 }
