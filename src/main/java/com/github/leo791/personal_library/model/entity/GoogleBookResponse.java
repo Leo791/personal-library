@@ -3,14 +3,15 @@ package com.github.leo791.personal_library.model.entity;
 import java.util.List;
 
 public class GoogleBookResponse {
-    private List<Item> items;
+    private static List<Item> items;
 
-    public List<Item> getItems() {
+
+    public static List<Item> getItems() {
         return items;
     }
 
     public void setItems(List<Item> items) {
-        this.items = items;
+        GoogleBookResponse.items = items;
     }
 
     public static class Item {
@@ -25,6 +26,24 @@ public class GoogleBookResponse {
         }
     }
 
+    public static class IndustryIdentifier {
+        private String type;
+        private String identifier;
+
+        public String getType() {
+            return type;
+        }
+        public void setType(String type) {
+            this.type = type;
+        }
+        public String getIdentifier() {
+            return identifier;
+        }
+        public void SetIdentifier(String identifier) {
+            this.identifier = identifier;
+        }
+    }
+
     public static class VolumeInfo {
         private String title;
         private List<String> authors;
@@ -34,6 +53,8 @@ public class GoogleBookResponse {
         private String description;
         private String language;
         private int pageCount;
+        private List<IndustryIdentifier> industryIdentifiers;
+
 
         public String getTitle() {
             return title;
@@ -97,6 +118,14 @@ public class GoogleBookResponse {
 
         public void setPageCount(int pageCount) {
             this.pageCount = pageCount;
+        }
+
+        public List<IndustryIdentifier> getIndustryIdentifiers() {
+            return industryIdentifiers;
+        }
+
+        public void setIndustryIdentifiers(List<IndustryIdentifier> industryIdentifiers) {
+            this.industryIdentifiers = industryIdentifiers;
         }
     }
 }

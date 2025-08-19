@@ -8,17 +8,16 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class GoogleBooksClient {
 
-    private String apiKey = System.getenv("GOOGLE_BOOKS_API_KEY");
-    private RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+    private final String apiKey;
 
-    public GoogleBooksClient(RestTemplate restTemplate, String apiKey) {
+    public GoogleBooksClient(RestTemplate restTemplate, @Value("${google.books.api.key}") String apiKey) {
         this.restTemplate = restTemplate;
         this.apiKey = apiKey;
     }
 
     public GoogleBookResponse fetchBookByIsbn(String isbn) {
-        String url = "https://www.googleapis.com/books/v1/volumes?q=isbn:"
-                + isbn + "&key=" + apiKey;
+        String url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + isbn + "&key=" + apiKey;
         return restTemplate.getForObject(url, GoogleBookResponse.class);
     }
 }
