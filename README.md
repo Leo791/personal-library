@@ -70,14 +70,9 @@ The project will be considered successful when:
   POSTGRES_PASSWORD=your_password
   POSTGRES_DB=db_name
   ```
-2. Start PostgreSQL with docker compose
+2. Build and start the application with docker compose
 
   ```
-  docker compose up -d
-  ```
-3. Run the application
-
-  ```
-  ./mvnw spring-boot:run
+  docker compose up --build -d
   ```
 
