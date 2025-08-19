@@ -3,6 +3,7 @@ package com.github.leo791.personal_library.service;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.model.entity.GoogleBookResponse;
+import com.github.leo791.personal_library.util.BookUtils;
 import org.springframework.beans.PropertyValues;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +22,9 @@ public class BookMapper {
         if (book == null) {
             return null;
         }
-        return new BookDTO(book.getIsbn(), book.getTitle(), book.getAuthor(), book.getGenre());
+        return new BookDTO(book.getIsbn(), book.getTitle(), book.getAuthor(), book.getGenre(),
+                           book.getDescription(), book.getLanguage(), book.getPageCount(),
+                           book.getPublisher(), book.getPublishedDate());
     }
 
     // DTO to Entity conversion
@@ -29,7 +32,9 @@ public class BookMapper {
         if( bookDTO == null) {
             return null;
         }
-        return new Book(bookDTO.getIsbn(), bookDTO.getTitle(), bookDTO.getAuthor(), bookDTO.getGenre());
+        return new Book(bookDTO.getIsbn(), bookDTO.getTitle(), bookDTO.getAuthor(), bookDTO.getGenre(),
+                        bookDTO.getDescription(), bookDTO.getLanguage(), bookDTO.getPageCount(),
+                        bookDTO.getPublisher(), bookDTO.getPublishedDate());
     }
 
     // Convert a list of entities to a list of DTOs
@@ -64,15 +69,32 @@ public Book fromGoogleResponseToBook(GoogleBookResponse googleBookResponse) {
 
     // Get the first author, if available
     String author = (volumeInfo.getAuthors() != null && !volumeInfo.getAuthors().isEmpty())
-            ? volumeInfo.getAuthors().get(0)
+            ? volumeInfo.getAuthors().getFirst()
             : null;
 
     // Get the first genre out of categories, if available
     String genre = (volumeInfo.getCategories() != null && !volumeInfo.getCategories().isEmpty())
-            ? volumeInfo.getCategories().get(0)
+            ? volumeInfo.getCategories().getFirst()
             : null;
 
-    return new Book(isbn, title, author, genre);
+    // Get the description, if available
+    String rawDescription = volumeInfo.getDescription() != null ? volumeInfo.getDescription() : "";
+    String description = BookUtils.cleanDescription(rawDescription);
+
+    // Get the language, if available
+    String language = volumeInfo.getLanguage() != null ? volumeInfo.getLanguage() : "";
+
+    // Get the page count, if available
+    int pageCount = Math.max(volumeInfo.getPageCount(), 0);
+
+    // Get the publisher, if available
+    String publisher = volumeInfo.getPublisher() != null ? volumeInfo.getPublisher() : "";
+
+    // Get the published date, if available
+    String rawPublishedDate = volumeInfo.getPublishedDate() != null ? volumeInfo.getPublishedDate() : "";
+    String publishedDate = rawPublishedDate.substring(0, 4);
+
+    return new Book(isbn, title, author, genre, description, language, pageCount, publisher, publishedDate);
 }
 
 
