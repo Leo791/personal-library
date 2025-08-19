@@ -6,9 +6,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BookTest {
 
-    private final Book book1 = new Book("1234567890", "The Hitchhiker's Guide to the Galaxy", "Douglas Adams", "Fantasy");
-    private final Book book2 = new Book("1234567890", "Hitchhiker's Guide to the Galaxy", "Douglas Adams", "Fantasy");
-    private final Book book3 = new Book("0987654321", "Dune", "Frank Herbert", "Science Fiction");
+    private final Book book1 = new Book("1234567890", "The Hitchhiker's Guide to the Galaxy", "Douglas Adams", "Fantasy",
+            "A science fiction comedy novel.", "English", 224, "Pan Books", "1979");
+    private final Book book2 = new Book("1234567890", "Hitchhiker's Guide to the Galaxy", "Douglas Adams", "Fantasy",
+            "A science fiction comedy novel.", "English", 224, "Pan Books", "1979");
+    private final Book book3 = new Book("0987654321", "Dune", "Frank Herbert", "Science Fiction",
+            "A science fiction novel set in a distant future.", "English", 412, "Chilton Books", "1965");
 
 
     @Test

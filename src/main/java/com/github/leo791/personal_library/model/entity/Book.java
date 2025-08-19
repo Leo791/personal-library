@@ -1,6 +1,7 @@
 package com.github.leo791.personal_library.model.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 
 import java.util.Objects;
 
@@ -23,6 +24,17 @@ public class Book {
     private String title;
     private String author;
     private String genre;
+    private String description;
+    private String language;
+    private String publisher;
+
+    @Column(name = "page_count")
+    private int pageCount;
+
+    @Size(max=4, message="Published date must be in the format YYYY")
+    @Column(name = "published_date", length = 4)
+    private String publishedDate;
+
 
     /**
      * Default constructor for JPA.
@@ -39,11 +51,17 @@ public class Book {
      * @param author the author of the book
      * @param genre  the genre of the book
      */
-    public Book(String isbn, String title, String author, String genre) {
+    public Book(String isbn, String title, String author, String genre, String description, String language, int pageCount, String publisher, String publishedDate) {
         this.isbn = isbn;
         this.title = title;
         this.author = author;
         this.genre = genre;
+        this.description = description;
+        this.language = language;
+        this.pageCount = pageCount;
+        this.publisher = publisher;
+        this.publishedDate = publishedDate;
+
     }
 
     public Long getId() {
@@ -84,6 +102,46 @@ public class Book {
 
     public void setGenre(String genre) {
         this.genre = genre;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public String getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
+    public int getPageCount() {
+        return pageCount;
+    }
+
+    public void setPageCount(int pageCount) {
+        this.pageCount = pageCount;
+    }
+
+    public String getPublishedDate() {
+        return publishedDate;
+    }
+
+    public void setPublishedDate(String publishedDate) {
+        this.publishedDate = publishedDate;
     }
 
     @Override
