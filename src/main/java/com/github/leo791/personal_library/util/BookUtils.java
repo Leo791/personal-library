@@ -9,7 +9,8 @@ import org.apache.commons.text.WordUtils;
 public class BookUtils{
 
     /**
-     * Capitalizes all string fields in the given object.
+     * Capitalizes the following fields: title, author, genre, publisher.
+     * Capitalizes the whole string in the case of language.
      * This method uses reflection to access and modify string fields of the object.
      *
      * @param obj the object whose string fields are to be capitalized
@@ -20,8 +21,17 @@ public class BookUtils{
                 field.setAccessible(true);
                 try {
                     String value = (String) field.get(obj);
-                    if (value != null) {
-                        field.set(obj, WordUtils.capitalizeFully(value));
+                    if (value == null || value.isBlank()) {
+                        continue; // Skip null or blank values
+                    }
+                    if ("language".equals(field.getName())) {
+                        // Capitalize the whole string for language
+                            field.set(obj, value.toUpperCase());
+                    } else if ("description".equals(field.getName())) {
+                        // Do not capitalize description, leave it as is
+                        continue;
+                    } else {
+                            field.set(obj, WordUtils.capitalizeFully(value));
                     }
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException("Failed to access field: " + field.getName(), e);
@@ -49,4 +59,43 @@ public class BookUtils{
             }
         }
     }
+
+
+    /**
+     * Cleans up a book description by removing trailing copyright notices,
+     * publisher disclaimers, or extraneous characters.
+     */
+    public static String cleanDescription(String description) {
+        if (description == null || description.isBlank()) {
+            return description;
+        }
+
+        // Normalize whitespace
+        String cleaned = description.trim().replaceAll("\\s+", " ");
+
+        // Cut off at "Copyright" (case-insensitive)
+        int copyrightIndex = cleaned.toLowerCase().indexOf("copyright");
+        if (copyrightIndex != -1) {
+            cleaned = cleaned.substring(0, copyrightIndex).trim();
+        }
+
+        // Cut off at em dash or en dash if present (– or —)
+        int dashIndex = cleaned.indexOf("–");  // en dash
+        int emDashIndex = cleaned.indexOf("—"); // em dash
+        int splitIndex = -1;
+
+        if (dashIndex != -1 && emDashIndex != -1) {
+            splitIndex = Math.min(dashIndex, emDashIndex);
+        } else {
+            splitIndex = Math.max(dashIndex, emDashIndex);
+        }
+
+        if (splitIndex != -1) {
+            cleaned = cleaned.substring(0, splitIndex).trim();
+        }
+
+        return cleaned;
+    }
+
+
 }
