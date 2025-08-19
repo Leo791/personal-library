@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.github.leo791</groupId>
 	<artifactId>personal-library</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>personal-library</name>
 	<description>The Personal Library Organizer is a web application designed to help users catalog, search, and manage their personal book collections.</description>
 	<url/>
