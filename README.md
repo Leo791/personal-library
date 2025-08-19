@@ -47,7 +47,7 @@ Users can enter a book’s **ISBN** to automatically retrieve its details from a
 - **Build Tool:** Maven
 - **Database:** PostgreSQL
 - **External API:** Open Library API or Google Books API
-- **Deployment:** Optional Docker support for portability
+- **Deployment:** Docker support for portability
 
 ## 5. Success Criteria
 The project will be considered successful when:
@@ -70,14 +70,9 @@ The project will be considered successful when:
   POSTGRES_PASSWORD=your_password
   POSTGRES_DB=db_name
   ```
-2. Start PostgreSQL with docker compose
+2. Build and start the application with docker compose
 
   ```
-  docker compose up -d
-  ```
-3. Run the application
-
-  ```
-  ./mvnw spring-boot:run
+  docker compose up --build -d
   ```
 
