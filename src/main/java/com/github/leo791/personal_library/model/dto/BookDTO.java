@@ -23,7 +23,7 @@ public class BookDTO {
     public BookDTO() {
     }
 
-    public BookDTO(String isbn, String title, String author, String genre, String description, String language, int pageCount, String publisher, String publishedDate) {
+    public BookDTO(String isbn, String title, String author, String genre, String description, String language, Integer pageCount, String publisher, String publishedDate) {
 
         this.isbn = isbn;
         this.title = title;
@@ -85,11 +85,11 @@ public class BookDTO {
         this.language = language;
     }
 
-    public int getPageCount() {
+    public Integer getPageCount() {
         return pageCount;
     }
 
-    public void setPageCount(int pageCount) {
+    public void setPageCount(Integer pageCount) {
         this.pageCount = pageCount;
     }
 
@@ -107,5 +107,20 @@ public class BookDTO {
 
     public void setPublishedDate(String publishedDate) {
         this.publishedDate = publishedDate;
+    }
+
+    @Override
+    public String toString() {
+        return "BookDTO{" +
+                "isbn='" + isbn + '\'' +
+                ", title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                ", genre='" + genre + '\'' +
+                ", description='" + description + '\'' +
+                ", language='" + language + '\'' +
+                ", pageCount=" + pageCount +
+                ", publisher='" + publisher + '\'' +
+                ", publishedDate='" + publishedDate + '\'' +
+                '}';
     }
 }

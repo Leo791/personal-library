@@ -53,7 +53,7 @@ public class Book {
      * @param author the author of the book
      * @param genre  the genre of the book
      */
-    public Book(String isbn, String title, String author, String genre, String description, String language, int pageCount, String publisher, String publishedDate) {
+    public Book(String isbn, String title, String author, String genre, String description, String language, Integer pageCount, String publisher, String publishedDate) {
         this.isbn = isbn;
         this.title = title;
         this.author = author;
@@ -130,11 +130,11 @@ public class Book {
         this.publisher = publisher;
     }
 
-    public int getPageCount() {
+    public Integer getPageCount() {
         return pageCount;
     }
 
-    public void setPageCount(int pageCount) {
+    public void setPageCount(Integer pageCount) {
         this.pageCount = pageCount;
     }
 
@@ -144,6 +144,22 @@ public class Book {
 
     public void setPublishedDate(String publishedDate) {
         this.publishedDate = publishedDate;
+    }
+
+    @Override
+    public String toString() {
+        return "Book{" +
+                "id=" + id +
+                ", isbn='" + isbn + '\'' +
+                ", title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                ", genre='" + genre + '\'' +
+                ", description='" + description + '\'' +
+                ", language='" + language + '\'' +
+                ", publisher='" + publisher + '\'' +
+                ", pageCount=" + pageCount +
+                ", publishedDate='" + publishedDate + '\'' +
+                '}';
     }
 
     @Override

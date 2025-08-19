@@ -29,7 +29,7 @@ public class BookMapper {
 
     // DTO to Entity conversion
     public Book DTOtoBook(BookDTO bookDTO) {
-        if( bookDTO == null) {
+        if(bookDTO == null) {
             return null;
         }
         return new Book(bookDTO.getIsbn(), bookDTO.getTitle(), bookDTO.getAuthor(), bookDTO.getGenre(),
