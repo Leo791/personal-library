@@ -39,7 +39,7 @@ public class GoogleBookResponse {
         public String getIdentifier() {
             return identifier;
         }
-        public void SetIdentifier(String identifier) {
+        public void setIdentifier(String identifier) {
             this.identifier = identifier;
         }
     }

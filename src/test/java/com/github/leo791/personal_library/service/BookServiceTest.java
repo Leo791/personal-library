@@ -1,22 +1,24 @@
 package com.github.leo791.personal_library.service;
 
-import com.github.leo791.personal_library.exception.BookInsertException;
+import com.github.leo791.personal_library.client.GoogleBooksClient;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
+import com.github.leo791.personal_library.model.entity.GoogleBookResponse;
 import com.github.leo791.personal_library.repository.BookRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataAccessException;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /** Unit tests for the BookService class.
  * This class is responsible for testing the functionality of the BookService,
@@ -24,6 +26,7 @@ import static org.mockito.Mockito.when;
  */
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
+    private GoogleBookResponse mockResponse;
 
     @Mock
     private BookRepository bookRepository;
@@ -31,59 +34,112 @@ class BookServiceTest {
     @Mock
     private BookMapper bookMapper;
 
+    @Mock
+    private GoogleBooksClient googleBooksClient;
+
     @InjectMocks
     private BookService bookService;
 
-    @Test
-    void testInsertBook() {
-        // Arrange
-        Book book = new Book("1234567890", "Frankenstein", "Mary Shelley", "Fiction");
-        BookDTO bookDTO = new BookDTO( "1234567890", "Frankenstein", "Mary Shelley", "Fiction");
+    private void setUpGoogleBooksResponse() {
+        // Arrange a googleBooksClient response
+        GoogleBookResponse.IndustryIdentifier isbn10 = new GoogleBookResponse.IndustryIdentifier();
+        isbn10.setType("ISBN_10");
+        isbn10.setIdentifier("1234567890");
 
-        // Mock
-        when(bookMapper.toEntity(bookDTO)).thenReturn(book);
+        GoogleBookResponse.VolumeInfo volumeInfo = new GoogleBookResponse.VolumeInfo();
+        volumeInfo.setTitle("Frankenstein");
+        volumeInfo.setAuthors(List.of("Mary Shelley"));
+        volumeInfo.setCategories(List.of("Horror"));
+        volumeInfo.setIndustryIdentifiers(List.of(isbn10));
 
-        // Act
-        bookService.insertBook(bookDTO);
+        GoogleBookResponse.Item item = new GoogleBookResponse.Item();
+        item.setVolumeInfo(volumeInfo);
 
-        // Assert
-        verify(bookMapper).toEntity(bookDTO);
-        verify(bookRepository).save(book);
+        this.mockResponse = new GoogleBookResponse();
+        this.mockResponse.setItems(List.of(item));
     }
 
     @Test
-    void testInsertBook_CapitalizeFields() {
+    void insertBookFromIsbn_NewBook() {
         // Arrange
-        Book book = new Book("1234567890", "the great gatsby", "f. scott fitzgerald", "fiction");
-        BookDTO bookDTO = new BookDTO( "1234567890", "The Great Gatsby", "F. Scott Fitzgerald", "Fiction");
-        when(bookMapper.toEntity(bookDTO)).thenReturn(book);
+        String isbn = "1234567890";
+        BookDTO bookDTO = new BookDTO(isbn, "Frankenstein", "Mary Shelley", "Horror");
+        Book book = new Book(isbn, "Frankenstein", "Mary Shelley", "Horror");
+        setUpGoogleBooksResponse();
 
+        // Mock
+        // Simulate that the book does not exist in the repository
+        when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
+
+        // Simulate the GoogleBooksClient returning a book response
+        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockResponse);
+        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
+                .thenReturn(new Book(isbn, "Frankenstein", "Mary Shelley", "Horror"));
+        when(bookMapper.bookToDto(any(Book.class))).thenReturn(bookDTO);
         // Act
-        bookService.insertBook(bookDTO);
+        BookDTO result = bookService.insertBookFromIsbn(isbn);
 
         // Assert
+        assertEquals(bookDTO, result);
+        verify(bookRepository).existsByIsbn(isbn);
+        verify(bookMapper).bookToDto(book);
+
         ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
         verify(bookRepository).save(captor.capture());
         Book savedBook = captor.getValue();
-        assertEquals("The Great Gatsby", savedBook.getTitle());
-        assertEquals("F. Scott Fitzgerald", savedBook.getAuthor());
-        assertEquals("Fiction", savedBook.getGenre());
+        assertEquals("Frankenstein", savedBook.getTitle());
     }
 
     @Test
-    void testInsertBook_Failure() {
+    void insertBookFromIsbn_ExistingBook() {
         // Arrange
-        Book book = new Book("1234567890", "Dracula", "Bram Stoker", "Horror");
-        BookDTO bookDTO = new BookDTO( "1234567890", "Dracula", "Bram Stoker", "Horror");
+        String isbn = "1234567890";
 
         // Mock
-        when(bookMapper.toEntity(bookDTO)).thenReturn(book);
-        when(bookRepository.save(book)).thenThrow(new BookInsertException(book.getTitle()));
+        when(bookRepository.existsByIsbn(isbn)).thenReturn(true);
 
         // Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBook(bookDTO));
-        assertEquals("Failed to insert Dracula in Database", exception.getMessage());
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBookFromIsbn(isbn));
+        assertEquals("Book with ISBN 1234567890 already exists in Library", exception.getMessage());
+        verify(bookRepository).existsByIsbn(isbn);
+        // Assert
     }
+
+    @Test
+    void insertBookFromIsbn_BookNotFound() {
+        // Arrange
+        String isbn = "1234567890";
+
+        // Mock
+        when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
+        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(null);
+
+        // Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBookFromIsbn(isbn));
+        assertEquals("Book with ISBN 1234567890 not found in Google Books API", exception.getMessage());
+        verify(bookRepository).existsByIsbn(isbn);
+    }
+
+   @Test
+   void insertBookFromIsbn_DatabaseError(){
+        // Arrange
+        String isbn = "1234567890";
+        BookDTO bookDTO = new BookDTO(isbn, "Frankenstein", "Mary Shelley", "Horror");
+        setUpGoogleBooksResponse();
+        // Mock
+        when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
+       when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockResponse);
+        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
+                .thenReturn(new Book(isbn, "Frankenstein", "Mary Shelley", "Horror"));
+
+        // Simulate a database error
+        doThrow(new DataAccessException("Database error") {}).when(bookRepository).save(any(Book.class));
+
+        // Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBookFromIsbn(isbn));
+        assertEquals("Failed to insert Frankenstein in Database", exception.getMessage());
+   }
+
 
     @Test
     void updateBook() {
@@ -95,14 +151,14 @@ class BookServiceTest {
 
         // Mock
         when(bookRepository.findByIsbn(isbn)).thenReturn(existingBook);
-        when(bookMapper.toEntity(updatedBookDTO)).thenReturn(newBook);
+        when(bookMapper.DTOtoBook(updatedBookDTO)).thenReturn(newBook);
 
         // Act
         bookService.updateBook(isbn, updatedBookDTO);
 
         // Assert
         verify(bookRepository).findByIsbn(isbn);
-        verify(bookMapper).toEntity(updatedBookDTO);
+        verify(bookMapper).DTOtoBook(updatedBookDTO);
 
         ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
         verify(bookRepository).save(captor.capture());
@@ -122,14 +178,14 @@ class BookServiceTest {
 
         // Mock
         when(bookRepository.findByIsbn(isbn)).thenReturn(existingBook);
-        when(bookMapper.toEntity(updatedBookDTO)).thenReturn(newBook);
+        when(bookMapper.DTOtoBook(updatedBookDTO)).thenReturn(newBook);
 
         // Act
         bookService.updateBook(isbn, updatedBookDTO);
 
         // Assert
         verify(bookRepository).findByIsbn(isbn);
-        verify(bookMapper).toEntity(updatedBookDTO);
+        verify(bookMapper).DTOtoBook(updatedBookDTO);
 
         ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
         verify(bookRepository).save(captor.capture());
@@ -161,7 +217,7 @@ class BookServiceTest {
 
         // Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.updateBook(isbn, updatedBookDTO));
-        assertEquals("Book with ISBN 1234567890 not found in database", exception.getMessage());
+        assertEquals("Book with ISBN 1234567890 not found in Library", exception.getMessage());
     }
 
     @Test
@@ -173,7 +229,7 @@ class BookServiceTest {
 
         // Mock
         when(bookRepository.findByIsbn(isbn)).thenReturn(book);
-        when(bookMapper.toDto(book)).thenReturn(bookDTO);
+        when(bookMapper.bookToDto(book)).thenReturn(bookDTO);
 
         // Act
         BookDTO result = bookService.getBookByIsbn(isbn);
@@ -181,7 +237,7 @@ class BookServiceTest {
         // Assert
         assertEquals(bookDTO, result);
         verify(bookRepository).findByIsbn(isbn);
-        verify(bookMapper).toDto(book);
+        verify(bookMapper).bookToDto(book);
     }
 
     @Test
@@ -198,7 +254,7 @@ class BookServiceTest {
         // Assert
         assertNull(result);
         verify(bookRepository).findByIsbn(isbn);
-        verify(bookMapper).toDto(null);
+        verify(bookMapper).bookToDto(null);
     }
 
     @Test
@@ -210,7 +266,7 @@ class BookServiceTest {
 
         // Mock
         when(bookRepository.findAll()).thenReturn(books);
-        when(bookMapper.toDtoList(books)).thenReturn(List.of(
+        when(bookMapper.bookListToDtoList(books)).thenReturn(List.of(
                 new BookDTO("1234567890", "The Great Gatsby", "F. Scott Fitzgerald", "Fiction"),
                 new BookDTO("0987654321", "To Kill a Mockingbird", "Harper Lee", "Fiction")
         ));
@@ -231,7 +287,7 @@ class BookServiceTest {
 
         // Mock
         when(bookRepository.findByTitleIgnoreCase(title)).thenReturn(books);
-        when(bookMapper.toDtoList(books)).thenReturn(List.of(new BookDTO("1234567890", title, "F. Scott Fitzgerald", "Fiction")));
+        when(bookMapper.bookListToDtoList(books)).thenReturn(List.of(new BookDTO("1234567890", title, "F. Scott Fitzgerald", "Fiction")));
 
         // Act
         List<BookDTO> result = bookService.searchBooks(title, null, null);
@@ -251,7 +307,7 @@ class BookServiceTest {
 
         // Mock
         when(bookRepository.findByAuthorIgnoreCase(author)).thenReturn(books);
-        when(bookMapper.toDtoList(books)).thenReturn(List.of(new BookDTO("0987654321", "To Kill a Mockingbird", author, "Fiction")));
+        when(bookMapper.bookListToDtoList(books)).thenReturn(List.of(new BookDTO("0987654321", "To Kill a Mockingbird", author, "Fiction")));
 
         // Act
         List<BookDTO> result = bookService.searchBooks(null, author, null);
@@ -273,7 +329,7 @@ class BookServiceTest {
 
         // Mock
         when(bookRepository.findByGenreIgnoreCase(genre)).thenReturn(books);
-        when(bookMapper.toDtoList(books)).thenReturn(List.of(
+        when(bookMapper.bookListToDtoList(books)).thenReturn(List.of(
                 new BookDTO("1234567890", "The Great Gatsby", "F. Scott Fitzgerald", genre),
                 new BookDTO("0987654321", "To Kill a Mockingbird", "Harper Lee", genre)
         ));
@@ -315,7 +371,7 @@ class BookServiceTest {
 
         // Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.deleteBook(isbn));
-        assertEquals("Book with ISBN " + isbn + " not found in database", exception.getMessage());
+        assertEquals("Book with ISBN " + isbn + " not found in Library", exception.getMessage());
         verify(bookRepository).findByIsbn(isbn);
     }
 }

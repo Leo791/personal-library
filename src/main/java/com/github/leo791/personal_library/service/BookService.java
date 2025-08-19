@@ -30,8 +30,7 @@ public class BookService {
                        GoogleBooksClient googleBooksClient) {
         this.bookRepository = bookRepository;
         this.bookMapper = bookMapper;
-        String apiKey = System.getenv("GOOGLE_BOOKS_API_KEY");
-        this.googleBooksClient = new GoogleBooksClient(new RestTemplate(), apiKey);
+        this.googleBooksClient = googleBooksClient;
     }
 
     // ================= Insert / Update =================
@@ -51,7 +50,7 @@ public class BookService {
             // Fetch the book details from Google Books API
             GoogleBookResponse googleBook = googleBooksClient.fetchBookByIsbn(isbn);
             if (googleBook == null || GoogleBookResponse.getItems() == null || GoogleBookResponse.getItems().isEmpty()) {
-                throw new BookNotFoundException(isbn);
+                throw new BookNotFoundException(isbn, "Google Books API");
             }
 
             // Map the GoogleBookResponse to a Book entity
@@ -82,7 +81,7 @@ public class BookService {
         }
         Book existingBook = bookRepository.findByIsbn(isbn);
         if (existingBook == null) {
-            throw new BookNotFoundException(isbn);
+            throw new BookNotFoundException(isbn, "Library");
         }
         // Update the existing book entity with the new data where applicable
         BookUtils.updateBookFields(existingBook, bookMapper.DTOtoBook(newBook));
@@ -138,7 +137,7 @@ public class BookService {
     public void deleteBook(String isbn) {
         Book book = bookRepository.findByIsbn(isbn);
         if (book == null) {
-            throw new BookNotFoundException(isbn);
+            throw new BookNotFoundException(isbn, "Library");
         }
         bookRepository.deleteByIsbn(isbn);
     }
