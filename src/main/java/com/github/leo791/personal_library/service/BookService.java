@@ -1,14 +1,18 @@
 package com.github.leo791.personal_library.service;
 
+import com.github.leo791.personal_library.client.GoogleBooksClient;
+import com.github.leo791.personal_library.exception.BookExistsException;
 import com.github.leo791.personal_library.exception.BookInsertException;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
+import com.github.leo791.personal_library.model.entity.GoogleBookResponse;
 import com.github.leo791.personal_library.repository.BookRepository;
 import com.github.leo791.personal_library.exception.BookNotFoundException;
 import com.github.leo791.personal_library.util.BookUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 /**
@@ -20,10 +24,14 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
+    private final GoogleBooksClient googleBooksClient;
 
-    public BookService(BookRepository bookRepository, BookMapper bookMapper) {
+    public BookService(BookRepository bookRepository, BookMapper bookMapper,
+                       GoogleBooksClient googleBooksClient) {
         this.bookRepository = bookRepository;
         this.bookMapper = bookMapper;
+        String apiKey = System.getenv("GOOGLE_BOOKS_API_KEY");
+        this.googleBooksClient = new GoogleBooksClient(new RestTemplate(), apiKey);
     }
 
     // ================= Insert / Update =================
@@ -31,14 +39,31 @@ public class BookService {
     /**
      * Saves a book entity to the repository.
      *
-     * @param book the book entity to save
+     * @param isbn of the book  to save
      */
-    public void insertBook(BookDTO book) {
+    public BookDTO insertBookFromIsbn(String isbn) {
+        Book book = null;
         try {
-            Book bookEntity = bookMapper.toEntity(book);
-            // Capitalize string fields in the book entity
-            BookUtils.capitalizeStringFields(bookEntity);
-            bookRepository.save(bookEntity);
+            // Check if the book already exists in the repository
+            if (bookRepository.existsByIsbn(isbn)) {
+                throw new BookExistsException(isbn);
+            }
+            // Fetch the book details from Google Books API
+            GoogleBookResponse googleBook = googleBooksClient.fetchBookByIsbn(isbn);
+            if (googleBook == null || GoogleBookResponse.getItems() == null || GoogleBookResponse.getItems().isEmpty()) {
+                throw new BookNotFoundException(isbn);
+            }
+
+            // Map the GoogleBookResponse to a Book entity
+            book = bookMapper.fromGoogleResponseToBook(googleBook);
+
+            // Save the book entity
+            bookRepository.save(book);
+
+            // Return the saved book DTO
+            return  bookMapper.bookToDto(book);
+
+
         } catch (DataAccessException e) {
             throw new BookInsertException(book.getTitle());
         }
@@ -60,7 +85,7 @@ public class BookService {
             throw new BookNotFoundException(isbn);
         }
         // Update the existing book entity with the new data where applicable
-        BookUtils.updateBookFields(existingBook, bookMapper.toEntity(newBook));
+        BookUtils.updateBookFields(existingBook, bookMapper.DTOtoBook(newBook));
         // Capitalize string fields in the updated book entity
         BookUtils.capitalizeStringFields(existingBook);
 
@@ -77,7 +102,7 @@ public class BookService {
      */
     public BookDTO getBookByIsbn(String isbn) {
         Book book = bookRepository.findByIsbn(isbn);
-        return bookMapper.toDto(book);
+        return bookMapper.bookToDto(book);
     }
 
     /**
@@ -100,7 +125,7 @@ public class BookService {
         } else {
             books = bookRepository.findAll();
         }
-        return bookMapper.toDtoList(books);
+        return bookMapper.bookListToDtoList(books);
     }
 
     // ================= Delete =================

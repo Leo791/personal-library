@@ -43,6 +43,14 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Book findByIsbn(String isbn);
 
     /**
+     * Check if a book exists by its ISBN.
+     *
+     * @param isbn the ISBN of the book to check
+     @return true if the book exists, false otherwise
+     */
+    boolean existsByIsbn(String isbn);
+
+    /**
      * Deletes a book by its ISBN.
      *
      * @param isbn the ISBN of the book to delete
