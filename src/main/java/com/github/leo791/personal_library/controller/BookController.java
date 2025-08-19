@@ -1,5 +1,6 @@
 package com.github.leo791.personal_library.controller;
 
+import com.github.leo791.personal_library.exception.BookExistsException;
 import com.github.leo791.personal_library.exception.BookNotFoundException;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.dto.ErrorResponse;
@@ -27,13 +28,24 @@ public class BookController {
     /**
      * This method handles POST requests to add a new book.
      * It expects a JSON object in the request body, with the book's data.
-     * @param book the book object to be added
+     * @param isbn the book object to be added
      */
     @PostMapping
-    public ResponseEntity<Void> addNewBook(@RequestBody BookDTO book) {
-
-        bookService.insertBook(book);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<BookDTO> addNewBook(@RequestParam String isbn) {
+        try {
+            BookDTO createdBook = bookService.insertBookFromIsbn(isbn);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdBook);
+        } catch (Exception e) {
+            return switch (e) {
+                case IllegalArgumentException illegalArgumentException ->
+                        ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+                case BookNotFoundException bookNotFoundException ->
+                        ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+                case BookExistsException bookExistsException ->
+                        ResponseEntity.status(HttpStatus.CONFLICT).build();
+                default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            };
+        }
     }
 
     /**
