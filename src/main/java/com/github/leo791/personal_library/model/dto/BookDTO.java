@@ -1,5 +1,7 @@
 package com.github.leo791.personal_library.model.dto;
 
+import jakarta.validation.constraints.Size;
+
 /**
  * Data Transfer Object (DTO) for Book.
  * This class is used to transfer book data between different layers of the application.
@@ -11,9 +13,11 @@ public class BookDTO {
     private String author;
     private String genre;
     private String description;
+    @Size(max=2, message="Language must be a 2-letter code")
     private String language;
-    private int pageCount;
+    private Integer pageCount;
     private String publisher;
+    @Size(max=4, message="Published date must be in the format YYYY")
     private String publishedDate;
 
     public BookDTO() {

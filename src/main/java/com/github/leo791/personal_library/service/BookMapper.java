@@ -82,7 +82,8 @@ public Book fromGoogleResponseToBook(GoogleBookResponse googleBookResponse) {
     String description = BookUtils.cleanDescription(rawDescription);
 
     // Get the language, if available
-    String language = volumeInfo.getLanguage() != null ? volumeInfo.getLanguage() : "";
+    String rawLanguage = volumeInfo.getLanguage() != null ? volumeInfo.getLanguage() : "";
+    String language = rawLanguage.toUpperCase();
 
     // Get the page count, if available
     int pageCount = Math.max(volumeInfo.getPageCount(), 0);

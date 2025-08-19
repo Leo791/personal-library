@@ -12,7 +12,6 @@ import com.github.leo791.personal_library.util.BookUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 /**

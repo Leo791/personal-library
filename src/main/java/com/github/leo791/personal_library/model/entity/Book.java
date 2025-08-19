@@ -25,11 +25,13 @@ public class Book {
     private String author;
     private String genre;
     private String description;
+
+    @Size(max=2, message="Language must be a 2-letter code")
     private String language;
     private String publisher;
 
     @Column(name = "page_count")
-    private int pageCount;
+    private Integer pageCount;
 
     @Size(max=4, message="Published date must be in the format YYYY")
     @Column(name = "published_date", length = 4)
