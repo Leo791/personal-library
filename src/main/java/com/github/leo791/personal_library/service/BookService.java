@@ -42,6 +42,10 @@ public class BookService {
     public BookDTO insertBookFromIsbn(String isbn) {
         Book book = null;
         try {
+            // Validate the ISBN format
+            if(!BookUtils.isValidIsbn(isbn)) {
+                throw new IllegalArgumentException("Invalid ISBN format: " + isbn);
+            }
             // Check if the book already exists in the repository
             if (bookRepository.existsByIsbn(isbn)) {
                 throw new BookExistsException(isbn);

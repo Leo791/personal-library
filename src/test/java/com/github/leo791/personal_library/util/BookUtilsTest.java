@@ -42,4 +42,13 @@ class BookUtilsTest {
         assertEquals("F. Scott Fitzgerald", book.getAuthor(), "Author should be updated to full name version");
         assertEquals("Fiction", book.getGenre(), "Genre should remain unchanged");
     }
+
+    @Test
+    void testIsValidIsbn() {
+        assertTrue(BookUtils.isValidIsbn("978-3-16-148410-0"), "Valid ISBN should return true");
+        assertTrue(BookUtils.isValidIsbn("9783161484100"), "Valid ISBN13 without hyphens should return true");
+        assertTrue(BookUtils.isValidIsbn("1234567890"), "Valid ISBN10 should return true");
+        assertFalse(BookUtils.isValidIsbn("978-3-16-148410-X"), "Invalid ISBN with incorrect check digit should return false");
+        assertFalse(BookUtils.isValidIsbn("123456789"), "Invalid ISBN with less than 10 digits should return false");
+    }
 }

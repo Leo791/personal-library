@@ -4,7 +4,6 @@ import org.apache.commons.text.WordUtils;
 
 /**
  * Utility class for handling book-related operations.
- * This class provides methods to manipulate book entities, such as capitalizing string fields.
  */
 public class BookUtils{
 
@@ -58,5 +57,28 @@ public class BookUtils{
                 throw new RuntimeException("Failed to access field: " + field.getName(), e);
             }
         }
+    }
+
+    /**
+     * Checks if the given ISBN is valid.
+     * A valid ISBN is a non-null, non-empty string that matches the ISBN-10 or ISBN-13 format.
+     *
+     * @param isbn the ISBN to check
+     * @return true if the ISBN is valid, false otherwise
+     */
+    public static boolean isValidIsbn(String isbn) {
+        if (isbn == null || isbn.isEmpty()) {
+            return false; // ISBN cannot be null or empty
+        }
+        isbn = isbn.replaceAll("-", ""); // Remove any hyphens for validation
+        // Check for ISBN-10 format
+        if (isbn.length() == 10) {
+            return isbn.matches("\\d{9}[\\dX]"); // 9 digits followed by a digit or 'X'
+        }
+        // Check for ISBN-13 format
+        if (isbn.length() == 13) {
+            return isbn.matches("\\d{13}"); // 13 digits
+        }
+        return false; // Invalid length
     }
 }
