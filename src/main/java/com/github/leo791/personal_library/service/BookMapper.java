@@ -54,14 +54,19 @@ public Book fromGoogleResponseToBook(GoogleBookResponse googleBookResponse) {
     GoogleBookResponse.Item item = GoogleBookResponse.getItems().getFirst();
     GoogleBookResponse.VolumeInfo volumeInfo = item.getVolumeInfo();
 
-    // Get the ISBN_10 from industry identifiers, if available
-    String isbn = null;
-    if (volumeInfo.getIndustryIdentifiers() != null) {
-        isbn = volumeInfo.getIndustryIdentifiers().stream()
-                .filter(identifier -> "ISBN_10".equals(identifier.getType()))
-                .map(GoogleBookResponse.IndustryIdentifier::getIdentifier)
-                .findFirst()
-                .orElse(null);
+    // First try to find ISBN_13, then fallback to ISBN_10 if not found
+    String isbn = volumeInfo.getIndustryIdentifiers().stream()
+            .filter(identifier -> "ISBN_13".equals(identifier.getType()))
+            .map(GoogleBookResponse.IndustryIdentifier::getIdentifier)
+            .findFirst()
+            .orElseGet(() -> volumeInfo.getIndustryIdentifiers().stream()
+                    .filter(identifier -> "ISBN_10".equals(identifier.getType()))
+                    .map(GoogleBookResponse.IndustryIdentifier::getIdentifier)
+                    .findFirst()
+                    .orElse(null));
+
+    if (isbn == null) {
+        throw new IllegalArgumentException("No ISBN found in GoogleBookResponse for a search by ISBN.");
     }
 
     // Get the title

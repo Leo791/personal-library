@@ -19,6 +19,7 @@ public class Book {
     private Long id;
 
     @Column(unique = true, nullable = false)
+    @Size(max=13, min=10, message="ISBN must be either 10 or 13 characters")
     private String isbn;
 
     private String title;
@@ -78,10 +79,6 @@ public class Book {
 
     public String getIsbn() {
         return isbn;
-    }
-
-    public void setIsbn(String isbn) {
-        this.isbn = isbn;
     }
 
     public String getTitle() {

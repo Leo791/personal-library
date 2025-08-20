@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
  * It contains fields for ISBN, title, author, and genre.
  */
 public class BookDTO {
+    @Size(max=13, min=10, message="ISBN must be either 10 or 13 characters")
     private String isbn;
     private String title;
     private String author;
