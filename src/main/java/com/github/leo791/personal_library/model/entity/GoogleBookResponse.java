@@ -11,8 +11,17 @@ import java.util.List;
 
 
 public class GoogleBookResponse {
+    private static Integer totalItems;
     private static List<Item> items;
 
+
+    public static Integer getTotalItems() {
+        return totalItems;
+    }
+
+    public void setTotalItems(Integer totalItems) {
+        GoogleBookResponse.totalItems = totalItems;
+    }
 
     public static List<Item> getItems() {
         return items;
