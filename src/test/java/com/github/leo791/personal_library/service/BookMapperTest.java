@@ -152,6 +152,17 @@ class BookMapperTest {
         assertEquals(299, book.getPageCount());
         assertEquals("", book.getPublisher()); // Publisher is not set in mock
         assertEquals("", book.getPublishedDate()); // Published date is not set in mock
+    }
 
+    @Test
+    void fromGoogleResponseToBook_NoItems() {
+        GoogleBookResponse emptyResponse = new GoogleBookResponse();
+        emptyResponse.setTotalItems(0);
+        emptyResponse.setItems(List.of());
+
+        BookMapper bookMapper = new BookMapper();
+        var book = bookMapper.fromGoogleResponseToBook(emptyResponse);
+
+        assertNull(book, "Should return null if there are no items in the response");
     }
 }

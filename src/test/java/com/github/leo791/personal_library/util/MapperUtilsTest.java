@@ -190,6 +190,14 @@ class MapperUtilsTest {
     }
 
     @Test
+    void extractPublishedDate_NoYearFound() {
+        String publishedDate = "October 202";
+
+        String date = MapperUtils.extractPublishedDate(publishedDate);
+        assertEquals("", date, "Should return an empty string if no year is found in the published date");
+    }
+
+    @Test
     void testCleanDescription_RemoveTrailing(){
         String expectedDescription = "A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.";
 
