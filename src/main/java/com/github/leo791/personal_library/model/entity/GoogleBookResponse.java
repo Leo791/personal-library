@@ -8,8 +8,6 @@ import java.util.List;
  * The following link provides more information about the Google Books API response structure:
  * <a href="https://developers.google.com/books/docs/v1/reference/volumes#resource-representations">...</a>
  */
-
-
 public class GoogleBookResponse {
     private static Integer totalItems;
     private static List<Item> items;

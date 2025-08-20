@@ -5,6 +5,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Client for interacting with the Google Books API.
+ * This client fetches book information based on ISBN using the Google Books API.
+ */
 @Component
 public class GoogleBooksClient {
 

@@ -27,8 +27,9 @@ public class BookController {
 
     /**
      * This method handles POST requests to add a new book.
-     * It expects a JSON object in the request body, with the book's data.
-     * @param isbn the book object to be added
+     * It expects an ISBN as a request parameter.
+     * If the book is successfully added, it returns a 201 Created status with the book data in the response body.
+     * @param isbn the ISBN (string) of the book to be added
      */
     @PostMapping
     public ResponseEntity<BookDTO> addNewBook(@RequestParam String isbn) {
@@ -37,11 +38,11 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.CREATED).body(createdBook);
         } catch (Exception e) {
             return switch (e) {
-                case IllegalArgumentException illegalArgumentException ->
+                case IllegalArgumentException ignored ->
                         ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-                case BookNotFoundException bookNotFoundException ->
+                case BookNotFoundException ignored ->
                         ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-                case BookExistsException bookExistsException ->
+                case BookExistsException ignored ->
                         ResponseEntity.status(HttpStatus.CONFLICT).build();
                 default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             };
@@ -50,7 +51,9 @@ public class BookController {
 
     /**
      * This method handles PUT requests to update an existing book.
-     * It expects a JSON object in the request body, with the updated book's data.
+     * It expects a JSON object in the request body, with the data to update
+     * the book identified by the provided ISBN.
+     * If the book is successfully updated, it returns a 200 OK status.
      * @param isbn the isbn of the book to be updated
      * @param book the book object with updated data
      */
@@ -107,10 +110,10 @@ public class BookController {
     }
 
     // ================= Delete =================
+
     /**
      * This method handles DELETE requests to remove a book by its ISBN.
-     * It returns a 204 No Content status if the book was successfully deleted,
-     * or a 404 Not Found status if the book was not found.
+     * It returns a 204 No Content status if the book was successfully deleted
      * @param isbn the isbn of the book to be deleted
      */
     @DeleteMapping("/{isbn}")

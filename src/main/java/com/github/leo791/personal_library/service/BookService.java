@@ -35,9 +35,12 @@ public class BookService {
     // ================= Insert / Update =================
 
     /**
-     * Saves a book entity to the repository.
+     * Inserts a new book entity into the repository using its ISBN.
+     * If the book already exists, it throws a BookExistsException.
+     * If the ISBN is invalid or the book is not found in Google Books API, it throws an appropriate exception.
      *
-     * @param isbn of the book  to save
+     * @param isbn the ISBN of the book to insert
+     * @return the inserted BookDTO
      */
     public BookDTO insertBookFromIsbn(String isbn) {
         Book book = null;
@@ -66,17 +69,18 @@ public class BookService {
             // Return the saved book DTO
             return  bookMapper.bookToDto(book);
 
-
         } catch (DataAccessException e) {
             throw new BookInsertException(book.getTitle());
         }
     }
 
     /**
-     * Updates an existing book entity by its ISBN.
+     * Updates an existing book entity in the repository.
+     * If the ISBN is changed, it throws an IllegalArgumentException.
+     * If the book does not exist, it throws a BookNotFoundException.
      *
      * @param isbn the ISBN of the book to update
-     * @param newBook the book entity with updated data
+     * @param newBook the new BookDTO with updated data
      */
     @Transactional
     public void updateBook(String isbn, BookDTO newBook) {
@@ -89,6 +93,7 @@ public class BookService {
         }
         // Update the existing book entity with the new data where applicable
         BookUtils.updateBookFields(existingBook, bookMapper.DTOtoBook(newBook));
+
         // Capitalize string fields in the updated book entity
         BookUtils.capitalizeStringFields(existingBook);
 
@@ -115,7 +120,7 @@ public class BookService {
      * @param title the title of the book to search for (optional)
      * @param author the author of the book to search for (optional)
      * @param genre the genre of the book to search for (optional)
-     * @return an iterable of BookDTO objects that match the search criteria
+     * @return a list of BookDTO objects that match the search criteria
      */
     public List<BookDTO> searchBooks(String title, String author, String genre) {
         List<Book> books;

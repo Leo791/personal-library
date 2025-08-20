@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 /**
  * Data Transfer Object (DTO) for Book.
  * This class is used to transfer book data between different layers of the application.
- * It contains fields for ISBN, title, author, and genre.
+ * It contains fields for ISBN, title, author, genre, description, language, page count, publisher, and published date.
  */
 public class BookDTO {
     @Size(max=13, min=10, message="ISBN must be either 10 or 13 characters")
@@ -24,6 +24,19 @@ public class BookDTO {
     public BookDTO() {
     }
 
+    /**
+     * Constructs a new BookDTO with the specified parameters.
+     *
+     * @param isbn          the ISBN of the book
+     * @param title         the title of the book
+     * @param author        the author of the book
+     * @param genre         the genre of the book
+     * @param description   a brief description of the book
+     * @param language      the language of the book (2-letter code)
+     * @param pageCount     the number of pages in the book
+     * @param publisher     the publisher of the book
+     * @param publishedDate the published date of the book (YYYY format)
+     */
     public BookDTO(String isbn, String title, String author, String genre, String description, String language, Integer pageCount, String publisher, String publishedDate) {
 
         this.isbn = isbn;

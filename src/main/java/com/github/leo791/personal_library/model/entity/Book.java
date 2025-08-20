@@ -7,8 +7,8 @@ import java.util.Objects;
 
 /**
  * Represents a book entity in the personal library.
- * This class maps to a database table and contains fields for the book's ID, ISBN, title, author, and genre.
- * The ISBN is unique and cannot be null.
+ * This class maps to a database table and contains fields for the book's ID, ISBN, title, author, genre, description,
+ * language, publisher, page count, and published date.
  */
 @Entity
 @Table(name = "books")
@@ -47,14 +47,18 @@ public class Book {
      */
     protected Book() {
     }
-
     /**
-     * Constructs a new Book instance with the specified parameters.
+     * Constructs a new Book entity with the specified parameters.
      *
-     * @param isbn   the ISBN of the book, must be unique and not null
-     * @param title  the title of the book
-     * @param author the author of the book
-     * @param genre  the genre of the book
+     * @param isbn          the ISBN of the book
+     * @param title         the title of the book
+     * @param author        the author of the book
+     * @param genre         the genre of the book
+     * @param description   a brief description of the book
+     * @param language      the language of the book (2-letter code)
+     * @param pageCount     the number of pages in the book
+     * @param publisher     the publisher of the book
+     * @param publishedDate the year the book was published (YYYY format)
      */
     public Book(String isbn, String title, String author, String genre, String description, String language, Integer pageCount, String publisher, String publishedDate) {
         this.isbn = isbn;

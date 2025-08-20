@@ -14,12 +14,17 @@ import java.util.stream.Collectors;
 import static com.github.leo791.personal_library.util.MapperUtils.*;
 
 /**
- * Mapper class for converting between Book entities and DTOs.
+ * Mapper class for converting between Book entities, BookDTOs, and GoogleBookResponse.
  */
 @Component
 public class BookMapper {
 
-    // Entity to DTO conversion
+    /**
+     * Converts a Book entity to a BookDTO.
+     *
+     * @param book the Book entity to convert
+     * @return the converted BookDTO, or null if the input is null
+     */
     public BookDTO bookToDto(Book book) {
         if (book == null) {
             return null;
@@ -29,7 +34,12 @@ public class BookMapper {
                            book.getPublisher(), book.getPublishedDate());
     }
 
-    // DTO to Entity conversion
+    /**
+     * Converts a BookDTO to a Book entity.
+     *
+     * @param bookDTO the BookDTO to convert
+     * @return the converted Book entity, or null if the input is null
+     */
     public Book DTOtoBook(BookDTO bookDTO) {
         if(bookDTO == null) {
             return null;
@@ -39,7 +49,12 @@ public class BookMapper {
                         bookDTO.getPublisher(), bookDTO.getPublishedDate());
     }
 
-    // Convert a list of entities to a list of DTOs
+    /**
+     * Converts a list of Book entities to a list of BookDTOs.
+     *
+     * @param books the list of Book entities to convert
+     * @return the converted list of BookDTOs, or an empty list if the input is null or empty
+     */
     public List<BookDTO> bookListToDtoList(List<Book> books) {
         if (books == null || books.isEmpty()) {
             return Collections.emptyList();
@@ -49,42 +64,30 @@ public class BookMapper {
                 .collect(Collectors.toList());
     }
 
-public Book fromGoogleResponseToBook(GoogleBookResponse googleBookResponse) {
-    if (GoogleBookResponse.getTotalItems() == 0) {
-        return null;
+    /**
+     * Converts a GoogleBookResponse to a Book entity.
+     * Makes use of utility methods to extract relevant fields from the response.
+     *
+     * @param googleBookResponse the GoogleBookResponse to convert
+     * @return the converted Book entity, or null if the response has no items
+     */
+    public Book fromGoogleResponseToBook(GoogleBookResponse googleBookResponse) {
+        if (GoogleBookResponse.getTotalItems() == 0) {
+            return null;
+        }
+        GoogleBookResponse.Item item = GoogleBookResponse.getItems().getFirst();
+        GoogleBookResponse.VolumeInfo volumeInfo = item.getVolumeInfo();
+
+        String isbn = extractIsbn(volumeInfo.getIndustryIdentifiers());
+        String title = volumeInfo.getTitle();
+        String author = extractFirstAuthor(volumeInfo.getAuthors());
+        String genre = extractGenre(volumeInfo);
+        String description = cleanDescription(volumeInfo.getDescription());
+        String language = extractLanguage(volumeInfo.getLanguage());
+        Integer pageCount = Math.max(volumeInfo.getPageCount(), 0);
+        String publisher = volumeInfo.getPublisher() != null ? volumeInfo.getPublisher() : "";
+        String publishedDate = extractPublishedDate(volumeInfo.getPublishedDate());
+
+        return new Book(isbn, title, author, genre, description, language, pageCount, publisher, publishedDate);
     }
-    GoogleBookResponse.Item item = GoogleBookResponse.getItems().getFirst();
-    GoogleBookResponse.VolumeInfo volumeInfo = item.getVolumeInfo();
-
-    // Get the ISBN_13 from industry identifiers, if not available, use ISBN_10
-    String isbn = extractIsbn(volumeInfo.getIndustryIdentifiers());
-
-    // Get the title
-    String title = volumeInfo.getTitle();
-
-    // Get the first author, if available
-    String author = extractFirstAuthor(volumeInfo.getAuthors());
-
-    // Get the first genre out of categories, if available
-    String genre = extractGenre(volumeInfo);
-
-    // Get the description, if available
-    String description = cleanDescription(volumeInfo.getDescription());
-
-    // Get the language, if available
-    String language = extractLanguage(volumeInfo.getLanguage());
-
-    // Get the page count, if available
-    Integer pageCount = Math.max(volumeInfo.getPageCount(), 0);
-
-    // Get the publisher, if available
-    String publisher = volumeInfo.getPublisher() != null ? volumeInfo.getPublisher() : "";
-
-    // Get the published date, if available
-    String publishedDate = extractPublishedDate(volumeInfo.getPublishedDate());
-
-    return new Book(isbn, title, author, genre, description, language, pageCount, publisher, publishedDate);
-}
-
-
 }
