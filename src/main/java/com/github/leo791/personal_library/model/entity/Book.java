@@ -24,6 +24,8 @@ public class Book {
     private String title;
     private String author;
     private String genre;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Size(max=2, message="Language must be a 2-letter code")
