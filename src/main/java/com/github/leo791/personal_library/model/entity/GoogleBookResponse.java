@@ -11,8 +11,17 @@ import java.util.List;
 
 
 public class GoogleBookResponse {
+    private static Integer totalItems;
     private static List<Item> items;
 
+
+    public static Integer getTotalItems() {
+        return totalItems;
+    }
+
+    public void setTotalItems(Integer totalItems) {
+        GoogleBookResponse.totalItems = totalItems;
+    }
 
     public static List<Item> getItems() {
         return items;
@@ -38,6 +47,11 @@ public class GoogleBookResponse {
         private String type;
         private String identifier;
 
+        public IndustryIdentifier(String type, String identifier) {
+            this.type = type;
+            this.identifier = identifier;
+        }
+
         public String getType() {
             return type;
         }
@@ -57,6 +71,7 @@ public class GoogleBookResponse {
         private List<String> authors;
         private String publisher;
         private String publishedDate;
+        private String mainCategory;
         private List<String> categories;
         private String description;
         private String language;
@@ -94,6 +109,14 @@ public class GoogleBookResponse {
 
         public void setPublishedDate(String publishedDate) {
             this.publishedDate = publishedDate;
+        }
+
+        public String getMainCategory() {
+            return mainCategory;
+        }
+
+        public void setMainCategory(String mainCategory) {
+            this.mainCategory = mainCategory;
         }
 
         public List<String> getCategories() {

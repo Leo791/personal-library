@@ -67,10 +67,7 @@ class BookServiceTest {
 
     private void setUpGoogleBooksResponse() {
         // Arrange a googleBooksClient response
-        GoogleBookResponse.IndustryIdentifier isbn10 = new GoogleBookResponse.IndustryIdentifier();
-        isbn10.setType("ISBN_10");
-        isbn10.setIdentifier("1234567890");
-
+        GoogleBookResponse.IndustryIdentifier isbn10 = new GoogleBookResponse.IndustryIdentifier("ISBN_10", "1234567890");
         GoogleBookResponse.VolumeInfo volumeInfo = new GoogleBookResponse.VolumeInfo();
         volumeInfo.setTitle("Frankenstein");
         volumeInfo.setAuthors(List.of("Mary Shelley"));
@@ -80,7 +77,9 @@ class BookServiceTest {
         GoogleBookResponse.Item item = new GoogleBookResponse.Item();
         item.setVolumeInfo(volumeInfo);
 
+
         this.mockResponse = new GoogleBookResponse();
+        this.mockResponse.setTotalItems(1);
         this.mockResponse.setItems(List.of(item));
     }
 
@@ -125,19 +124,17 @@ class BookServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBookFromIsbn(isbn));
         assertEquals("Book with ISBN 1234567890 already exists in Library", exception.getMessage());
         verify(bookRepository).existsByIsbn(isbn);
-        // Assert
     }
 
     @Test
     void insertBookFromIsbn_BookNotFound() {
-        // Arrange
         String isbn = "1234567890";
+        GoogleBookResponse responseWithNullItems = new GoogleBookResponse();
+        responseWithNullItems.setTotalItems(0);;
 
-        // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
-        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(null);
+        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(responseWithNullItems);
 
-        // Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBookFromIsbn(isbn));
         assertEquals("Book with ISBN 1234567890 not found in Google Books API", exception.getMessage());
         verify(bookRepository).existsByIsbn(isbn);
@@ -162,6 +159,7 @@ class BookServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBookFromIsbn(isbn));
         assertEquals("Failed to insert Frankenstein in Database", exception.getMessage());
     }
+
 
 
     @Test

@@ -48,12 +48,13 @@ public class BookService {
             }
             // Fetch the book details from Google Books API
             GoogleBookResponse googleBook = googleBooksClient.fetchBookByIsbn(isbn);
-            if (googleBook == null || GoogleBookResponse.getItems() == null || GoogleBookResponse.getItems().isEmpty()) {
+            if (GoogleBookResponse.getTotalItems() == 0) {
                 throw new BookNotFoundException(isbn, "Google Books API");
             }
 
             // Map the GoogleBookResponse to a Book entity
             book = bookMapper.fromGoogleResponseToBook(googleBook);
+            BookUtils.capitalizeStringFields(book);
 
             // Save the book entity
             bookRepository.save(book);

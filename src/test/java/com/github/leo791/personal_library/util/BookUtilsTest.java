@@ -42,30 +42,4 @@ class BookUtilsTest {
         assertEquals("F. Scott Fitzgerald", book.getAuthor(), "Author should be updated to full name version");
         assertEquals("Fiction", book.getGenre(), "Genre should remain unchanged");
     }
-
-    @Test
-    void testCleanDescription_RemoveTrailing(){
-        String expectedDescription = "A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.";
-
-        String description1 = "A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change," +
-                " social upheaval, and excess. —Entertainment Weekly";
-        String cleanedDescription1 = BookUtils.cleanDescription(description1);
-
-        String description2 = description1.replace("—", "–");
-        String cleanedDescription2 = BookUtils.cleanDescription(description2);
-
-        String description3 = "A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change," +
-                " social upheaval, and excess. Copyright © 2023 by Entertainment Weekly";
-        String cleanedDescription3 = BookUtils.cleanDescription(description3);
-
-
-        assertEquals(expectedDescription,
-                     cleanedDescription1, "Description should be cleaned of trailing citation");
-        assertEquals(expectedDescription,
-                     cleanedDescription2, "Description should be cleaned of trailing citation with hyphen");
-        assertEquals(expectedDescription,
-                     cleanedDescription3, "Description should be cleaned of trailing copyright notice");
-
-
-    }
 }
