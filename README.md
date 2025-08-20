@@ -60,6 +60,7 @@ The project will be considered successful when:
 
 ### 6.1 Prerequisites
 - [Docker](https://docs.docker.com/get-docker/) installed
+- Get a [Google Api Key](https://console.cloud.google.com/apis/credentials)
 
 ### 6.2 Setup
 
@@ -69,6 +70,7 @@ The project will be considered successful when:
   POSTGRES_USER=your_username
   POSTGRES_PASSWORD=your_password
   POSTGRES_DB=db_name
+  GOOGLE_BOOKS_API_KEY=your_api_key
   ```
 2. Build and start the application with docker compose
 
