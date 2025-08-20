@@ -42,45 +42,4 @@ class BookUtilsTest {
         assertEquals("F. Scott Fitzgerald", book.getAuthor(), "Author should be updated to full name version");
         assertEquals("Fiction", book.getGenre(), "Genre should remain unchanged");
     }
-
-    @Test
-    void testCleanDescription_RemoveTrailing(){
-        String expectedDescription = "A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.";
-
-        String descriptionWithEmDash = "A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change," +
-                " social upheaval, and excess. —Entertainment Weekly";
-        String cleanedDescriptionWithEmDash = BookUtils.cleanDescription(descriptionWithEmDash);
-
-        String descriptionWithEnDash = descriptionWithEmDash.replace("—", "–");
-        String cleanedDescriptionWithEnDash = BookUtils.cleanDescription(descriptionWithEnDash);
-
-        String descriptionWithCopyright = "A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change," +
-                " social upheaval, and excess. Copyright © 2023 by Entertainment Weekly";
-        String cleanedDescriptionWithCopyright = BookUtils.cleanDescription(descriptionWithCopyright);
-
-        String descriptionWithBothDashes = BookUtils.cleanDescription("A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change," +
-                " social upheaval, and excess. —Entertainment–Weekly");
-        String cleanedDescriptionWithBothDashes = BookUtils.cleanDescription(descriptionWithBothDashes);
-
-
-        assertEquals(expectedDescription,
-                cleanedDescriptionWithEmDash, "Description should be cleaned of trailing citation");
-        assertEquals(expectedDescription,
-                     cleanedDescriptionWithEnDash, "Description should be cleaned of trailing citation with hyphen");
-        assertEquals(expectedDescription,
-                cleanedDescriptionWithCopyright, "Description should be cleaned of trailing copyright notice");
-        assertEquals(expectedDescription,
-                     cleanedDescriptionWithBothDashes, "Description should be cut on first hyphen or dash");
-
-    }
-
-    @Test
-    void testCleanDescription_EmptyOrNull() {
-        String emptyDescription = "   ";
-        String cleanedEmptyDescription = BookUtils.cleanDescription(emptyDescription);
-        assertEquals("", cleanedEmptyDescription, "Empty description should return an empty string");
-
-        String cleanedNullDescription = BookUtils.cleanDescription(null);
-        assertEquals("", cleanedNullDescription, "Null description should return an empty string");
-    }
 }

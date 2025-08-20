@@ -67,10 +67,7 @@ class BookServiceTest {
 
     private void setUpGoogleBooksResponse() {
         // Arrange a googleBooksClient response
-        GoogleBookResponse.IndustryIdentifier isbn10 = new GoogleBookResponse.IndustryIdentifier();
-        isbn10.setType("ISBN_10");
-        isbn10.setIdentifier("1234567890");
-
+        GoogleBookResponse.IndustryIdentifier isbn10 = new GoogleBookResponse.IndustryIdentifier("ISBN_10", "1234567890");
         GoogleBookResponse.VolumeInfo volumeInfo = new GoogleBookResponse.VolumeInfo();
         volumeInfo.setTitle("Frankenstein");
         volumeInfo.setAuthors(List.of("Mary Shelley"));

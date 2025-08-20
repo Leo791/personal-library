@@ -59,43 +59,4 @@ public class BookUtils{
             }
         }
     }
-
-
-    /**
-     * Cleans up a book description by removing trailing copyright notices,
-     * publisher disclaimers, or extraneous characters.
-     */
-    public static String cleanDescription(String description) {
-        if (description == null || description.isBlank()) {
-            return "";
-        }
-
-        // Normalize whitespace
-        String cleaned = description.trim().replaceAll("\\s+", " ");
-
-        // Cut off at "Copyright" (case-insensitive)
-        int copyrightIndex = cleaned.toLowerCase().indexOf("copyright");
-        if (copyrightIndex != -1) {
-            cleaned = cleaned.substring(0, copyrightIndex).trim();
-        }
-
-        // Cut off at em dash or en dash if present (– or —)
-        int dashIndex = cleaned.indexOf("–");  // en dash
-        int emDashIndex = cleaned.indexOf("—"); // em dash
-        int splitIndex = -1;
-
-        if (dashIndex != -1 && emDashIndex != -1) {
-            splitIndex = Math.min(dashIndex, emDashIndex);
-        } else {
-            splitIndex = Math.max(dashIndex, emDashIndex);
-        }
-
-        if (splitIndex != -1) {
-            cleaned = cleaned.substring(0, splitIndex).trim();
-        }
-
-        return cleaned;
-    }
-
-
 }

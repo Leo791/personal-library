@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.leo791.personal_library.util.MapperUtils.*;
+
 /**
  * Mapper class for converting between Book entities and DTOs.
  */
@@ -48,53 +50,38 @@ public class BookMapper {
     }
 
 public Book fromGoogleResponseToBook(GoogleBookResponse googleBookResponse) {
-    if (googleBookResponse == null || GoogleBookResponse.getItems() == null || GoogleBookResponse.getItems().isEmpty()) {
+    if (GoogleBookResponse.getTotalItems() == 0) {
         return null;
     }
     GoogleBookResponse.Item item = GoogleBookResponse.getItems().getFirst();
     GoogleBookResponse.VolumeInfo volumeInfo = item.getVolumeInfo();
 
-    // Get the ISBN_10 from industry identifiers, if available
-    String isbn = null;
-    if (volumeInfo.getIndustryIdentifiers() != null) {
-        isbn = volumeInfo.getIndustryIdentifiers().stream()
-                .filter(identifier -> "ISBN_10".equals(identifier.getType()))
-                .map(GoogleBookResponse.IndustryIdentifier::getIdentifier)
-                .findFirst()
-                .orElse(null);
-    }
+    // Get the ISBN_13 from industry identifiers, if not available, use ISBN_10
+    String isbn = extractIsbn(volumeInfo.getIndustryIdentifiers());
 
     // Get the title
     String title = volumeInfo.getTitle();
 
     // Get the first author, if available
-    String author = (volumeInfo.getAuthors() != null && !volumeInfo.getAuthors().isEmpty())
-            ? volumeInfo.getAuthors().getFirst()
-            : null;
+    String author = extractFirstAuthor(volumeInfo.getAuthors());
 
     // Get the first genre out of categories, if available
-    String genre = (volumeInfo.getCategories() != null && !volumeInfo.getCategories().isEmpty())
-            ? volumeInfo.getCategories().getFirst()
-            : null;
+    String genre = extractGenre(volumeInfo);
 
     // Get the description, if available
-    String rawDescription = volumeInfo.getDescription() != null ? volumeInfo.getDescription() : "";
-    String description = BookUtils.cleanDescription(rawDescription);
+    String description = cleanDescription(volumeInfo.getDescription());
 
     // Get the language, if available
-    String rawLanguage = volumeInfo.getLanguage() != null ? volumeInfo.getLanguage() : "";
-    // Language is expected to be in ISO 639-1 format. But they might be locale codes (e.g. pt-BT or en-GB). So we take the first two characters.
-    String language = rawLanguage.toUpperCase().substring(0, 2);
+    String language = extractLanguage(volumeInfo.getLanguage());
 
     // Get the page count, if available
-    int pageCount = Math.max(volumeInfo.getPageCount(), 0);
+    Integer pageCount = Math.max(volumeInfo.getPageCount(), 0);
 
     // Get the publisher, if available
     String publisher = volumeInfo.getPublisher() != null ? volumeInfo.getPublisher() : "";
 
     // Get the published date, if available
-    String rawPublishedDate = volumeInfo.getPublishedDate() != null ? volumeInfo.getPublishedDate() : "";
-    String publishedDate = rawPublishedDate.substring(0, 4);
+    String publishedDate = extractPublishedDate(volumeInfo.getPublishedDate());
 
     return new Book(isbn, title, author, genre, description, language, pageCount, publisher, publishedDate);
 }
