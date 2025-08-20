@@ -54,6 +54,7 @@ public class BookService {
 
             // Map the GoogleBookResponse to a Book entity
             book = bookMapper.fromGoogleResponseToBook(googleBook);
+            BookUtils.capitalizeStringFields(book);
 
             // Save the book entity
             bookRepository.save(book);
