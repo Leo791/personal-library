@@ -47,25 +47,40 @@ class BookUtilsTest {
     void testCleanDescription_RemoveTrailing(){
         String expectedDescription = "A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.";
 
-        String description1 = "A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change," +
+        String descriptionWithEmDash = "A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change," +
                 " social upheaval, and excess. —Entertainment Weekly";
-        String cleanedDescription1 = BookUtils.cleanDescription(description1);
+        String cleanedDescriptionWithEmDash = BookUtils.cleanDescription(descriptionWithEmDash);
 
-        String description2 = description1.replace("—", "–");
-        String cleanedDescription2 = BookUtils.cleanDescription(description2);
+        String descriptionWithEnDash = descriptionWithEmDash.replace("—", "–");
+        String cleanedDescriptionWithEnDash = BookUtils.cleanDescription(descriptionWithEnDash);
 
-        String description3 = "A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change," +
+        String descriptionWithCopyright = "A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change," +
                 " social upheaval, and excess. Copyright © 2023 by Entertainment Weekly";
-        String cleanedDescription3 = BookUtils.cleanDescription(description3);
+        String cleanedDescriptionWithCopyright = BookUtils.cleanDescription(descriptionWithCopyright);
+
+        String descriptionWithBothDashes = BookUtils.cleanDescription("A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change," +
+                " social upheaval, and excess. —Entertainment–Weekly");
+        String cleanedDescriptionWithBothDashes = BookUtils.cleanDescription(descriptionWithBothDashes);
 
 
         assertEquals(expectedDescription,
-                     cleanedDescription1, "Description should be cleaned of trailing citation");
+                cleanedDescriptionWithEmDash, "Description should be cleaned of trailing citation");
         assertEquals(expectedDescription,
-                     cleanedDescription2, "Description should be cleaned of trailing citation with hyphen");
+                     cleanedDescriptionWithEnDash, "Description should be cleaned of trailing citation with hyphen");
         assertEquals(expectedDescription,
-                     cleanedDescription3, "Description should be cleaned of trailing copyright notice");
+                cleanedDescriptionWithCopyright, "Description should be cleaned of trailing copyright notice");
+        assertEquals(expectedDescription,
+                     cleanedDescriptionWithBothDashes, "Description should be cut on first hyphen or dash");
 
+    }
 
+    @Test
+    void testCleanDescription_EmptyOrNull() {
+        String emptyDescription = "   ";
+        String cleanedEmptyDescription = BookUtils.cleanDescription(emptyDescription);
+        assertEquals("", cleanedEmptyDescription, "Empty description should return an empty string");
+
+        String cleanedNullDescription = BookUtils.cleanDescription(null);
+        assertEquals("", cleanedNullDescription, "Null description should return an empty string");
     }
 }

@@ -67,7 +67,7 @@ public class BookUtils{
      */
     public static String cleanDescription(String description) {
         if (description == null || description.isBlank()) {
-            return description;
+            return "";
         }
 
         // Normalize whitespace
