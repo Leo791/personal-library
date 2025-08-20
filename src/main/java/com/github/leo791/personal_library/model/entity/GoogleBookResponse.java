@@ -2,6 +2,14 @@ package com.github.leo791.personal_library.model.entity;
 
 import java.util.List;
 
+/**
+ * Represents the response from the Google Books API.
+ * This class contains a list of items, each representing a book with its details.
+ * The following link provides more information about the Google Books API response structure:
+ * <a href="https://developers.google.com/books/docs/v1/reference/volumes#resource-representations">...</a>
+ */
+
+
 public class GoogleBookResponse {
     private static List<Item> items;
 
@@ -52,7 +60,7 @@ public class GoogleBookResponse {
         private List<String> categories;
         private String description;
         private String language;
-        private int pageCount;
+        private Integer pageCount;
         private List<IndustryIdentifier> industryIdentifiers;
 
 
@@ -112,11 +120,11 @@ public class GoogleBookResponse {
             this.language = language;
         }
 
-        public int getPageCount() {
+        public Integer getPageCount() {
             return pageCount;
         }
 
-        public void setPageCount(int pageCount) {
+        public void setPageCount(Integer pageCount) {
             this.pageCount = pageCount;
         }
 

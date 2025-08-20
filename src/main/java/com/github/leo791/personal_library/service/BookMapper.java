@@ -83,7 +83,8 @@ public Book fromGoogleResponseToBook(GoogleBookResponse googleBookResponse) {
 
     // Get the language, if available
     String rawLanguage = volumeInfo.getLanguage() != null ? volumeInfo.getLanguage() : "";
-    String language = rawLanguage.toUpperCase();
+    // Language is expected to be in ISO 639-1 format. But they might be locale codes (e.g. pt-BT or en-GB). So we take the first two characters.
+    String language = rawLanguage.toUpperCase().substring(0, 2);
 
     // Get the page count, if available
     int pageCount = Math.max(volumeInfo.getPageCount(), 0);
