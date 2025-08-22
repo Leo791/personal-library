@@ -34,20 +34,8 @@ public class BookController {
      */
     @PostMapping
     public ResponseEntity<BookDTO> addNewBook(@RequestParam String isbn) {
-        try {
-            BookDTO createdBook = bookService.insertBookFromIsbn(isbn);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdBook);
-        } catch (Exception e) {
-            return switch (e) {
-                case IllegalArgumentException ignored ->
-                        ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-                case BookNotFoundException ignored ->
-                        ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-                case BookExistsException ignored ->
-                        ResponseEntity.status(HttpStatus.CONFLICT).build();
-                default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            };
-        }
+        BookDTO createdBook = bookService.insertBookFromIsbn(isbn);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdBook);
     }
 
     /**
@@ -59,17 +47,8 @@ public class BookController {
      */
     @PutMapping()
     public ResponseEntity<BookDTO> updateBook(@RequestBody BookDTO book) {
-        try {
-            BookDTO updatedBook = bookService.updateBook(book);
-            return ResponseEntity.ok().body(updatedBook);
-        } catch (Exception e) {
-            if (e instanceof IllegalArgumentException) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-            } else if (e instanceof BookNotFoundException) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        BookDTO updatedBook = bookService.updateBook(book);
+        return ResponseEntity.ok().body(updatedBook);
     }
 
 
@@ -84,9 +63,6 @@ public class BookController {
     @GetMapping("/{isbn}")
     public ResponseEntity<BookDTO> getBook(@PathVariable String isbn) {
         BookDTO book = bookService.getBookByIsbn(isbn);
-        if (book == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         return ResponseEntity.ok(book);
     }
 
@@ -118,13 +94,7 @@ public class BookController {
      */
     @DeleteMapping("/{isbn}")
     public ResponseEntity<Void> deleteBook(@PathVariable String isbn) {
-        try {
-            bookService.deleteBook(isbn);
-            return ResponseEntity.noContent().build();
-        } catch (BookNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        bookService.deleteBook(isbn);
+        return ResponseEntity.noContent().build();
     }
-
-
 }

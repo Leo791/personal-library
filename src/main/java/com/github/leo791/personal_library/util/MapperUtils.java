@@ -2,12 +2,16 @@ package com.github.leo791.personal_library.util;
 
 
 import com.github.leo791.personal_library.model.entity.GoogleBookResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MapperUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(MapperUtils.class);
 
     /**
      * Extracts the first author from a list of authors.
@@ -27,7 +31,7 @@ public class MapperUtils {
      * If none is found an error is thrown.
      *
      * @param industryIdentifiers List of industry identifiers
-     * @return The ISBN-13 or 10 or an empty string if not found
+     * @return The ISBN-13 or 10
      */
     public static String extractIsbn(List<GoogleBookResponse.IndustryIdentifier> industryIdentifiers) {
         if (industryIdentifiers == null || industryIdentifiers.isEmpty()) {
@@ -46,6 +50,7 @@ public class MapperUtils {
             }
         }
         // If neither is found, return an empty string
+        log.warn("No ISBN found in industry identifiers, relying on search ISBN");
         return "";
     }
 

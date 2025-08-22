@@ -5,7 +5,6 @@ import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.model.entity.GoogleBookResponse;
 import com.github.leo791.personal_library.repository.BookRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -157,7 +156,7 @@ class BookServiceTest {
 
         // Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBookFromIsbn(isbn));
-        assertEquals("Failed to insert Frankenstein in Database", exception.getMessage());
+        assertEquals("Database error", exception.getMessage());
     }
 
 
@@ -169,7 +168,7 @@ class BookServiceTest {
         Book newFrankenstein = new Book(isbn, "Frankenstein", "Mary Shelley", "Fiction",
                 "A novel about a scientist who creates a creature in an unorthodox experiment.",
                 "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
-        BookDTO updatedFrankensteinDTO = new BookDTO(null, "Frankenstein", "Mary Shelley", "Fiction",
+        BookDTO updatedFrankensteinDTO = new BookDTO(isbn, "Frankenstein", "Mary Shelley", "Fiction",
                 "A novel about a scientist who creates a creature in an unorthodox experiment.",
                 "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
 
@@ -282,13 +281,9 @@ class BookServiceTest {
         // Mock
         when(bookRepository.findByIsbn(isbn)).thenReturn(null);
 
-        // Act
-        BookDTO result = bookService.getBookByIsbn(isbn);
-
         // Assert
-        assertNull(result);
-        verify(bookRepository).findByIsbn(isbn);
-        verify(bookMapper).bookToDto(null);
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.updateBook(FrankesteinDTO));
+        assertEquals("Book with ISBN 1234567890 not found in Library", exception.getMessage());
     }
 
 
