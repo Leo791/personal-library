@@ -1,6 +1,11 @@
 package com.github.leo791.personal_library.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class IsbnUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(IsbnUtils.class);
 
     /**
      * Checks if the given ISBN is valid.
@@ -14,16 +19,22 @@ public class IsbnUtils {
             return false; // ISBN cannot be null or empty
         }
         isbn = isbn.replaceAll("-", ""); // Remove any hyphens for validation
-        // Get last digit for validation
-        int lastDigit = Character.getNumericValue(isbn.charAt(isbn.length() - 1));
+
+        // Get last digit for validation, 'X' is treated as 10 for ISBN-10
+        char lastChar = isbn.charAt(isbn.length() - 1);
+        int lastDigit = lastChar == 'X' ? 10 : Character.getNumericValue(lastChar);
 
         // Check for ISBN-10 format
         if (isbn.length() == 10) {
-            return lastDigit == calculateIsbn10CheckDigit(isbn);
+            int checkDigit = calculateIsbn10CheckDigit(isbn);
+            log.debug("ISBN-10 Check Digit: {}, Last Digit: {}", checkDigit, lastDigit);
+            return lastDigit == checkDigit;
         }
         // Check for ISBN-13 format
         if (isbn.length() == 13) {
-            return lastDigit == calculateIsbn13CheckDigit(isbn);
+            int checkDigit = calculateIsbn13CheckDigit(isbn);
+            log.debug("ISBN-13 Check Digit: {}, Last Digit: {}", checkDigit, lastDigit);
+            return lastDigit == checkDigit;
         }
         return false; // Invalid length
     }

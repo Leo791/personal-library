@@ -8,7 +8,7 @@ class IsbnUtilsTest {
 
     String validIsbn10 = "0441172717";
     String validIsbn13 = "9780441172719";
-
+    String validIsbn10WithX = "972-23-3445-X";
     String validIsbn10WithHyphens = "0-441-17271-7";
 
     @Test
@@ -16,6 +16,7 @@ class IsbnUtilsTest {
         assertTrue(IsbnUtils.isValidIsbn(validIsbn13), "Valid ISBN13 should return true");
         assertTrue(IsbnUtils.isValidIsbn(validIsbn10), "Valid ISBN10 return true");
         assertTrue(IsbnUtils.isValidIsbn(validIsbn10WithHyphens), "Valid ISBN10 with hyphens should return true");
+        assertTrue(IsbnUtils.isValidIsbn(validIsbn10WithX), "Valid ISBN10 with 'X' should return true");
 
         assertFalse(IsbnUtils.isValidIsbn("1234567890"), "Invalid ISBN10 should return false");
         assertFalse(IsbnUtils.isValidIsbn("9783161484101"), "Invalid ISBN13 should return false");
