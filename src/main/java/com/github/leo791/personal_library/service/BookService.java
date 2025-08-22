@@ -68,7 +68,7 @@ public class BookService {
 
         // Set the ISBN from the request if Google Books API does not provide it
         if (book.getIsbn().isBlank()) {
-            book.setIsbn(isbn);
+            book.setIsbn(isbn.replace("-", ""));
         }
 
         // Save the book entity
