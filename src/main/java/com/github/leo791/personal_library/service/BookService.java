@@ -9,6 +9,7 @@ import com.github.leo791.personal_library.model.entity.GoogleBookResponse;
 import com.github.leo791.personal_library.repository.BookRepository;
 import com.github.leo791.personal_library.exception.BookNotFoundException;
 import com.github.leo791.personal_library.util.BookUtils;
+import com.github.leo791.personal_library.util.IsbnUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -48,7 +49,7 @@ public class BookService {
     public BookDTO insertBookFromIsbn(String isbn) {
         Book book = null;
         // Validate the ISBN format
-        if(!BookUtils.isValidIsbn(isbn)) {
+        if(!IsbnUtils.isValidIsbn(isbn)) {
             throw new IllegalArgumentException("Invalid ISBN format: " + isbn + ". ISBN must be 10 or 13 digits long.");
         }
         // Check if the book already exists in the repository
