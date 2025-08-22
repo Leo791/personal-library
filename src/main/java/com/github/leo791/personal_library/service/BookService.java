@@ -50,7 +50,7 @@ public class BookService {
         Book book = null;
         // Validate the ISBN format
         if(!IsbnUtils.isValidIsbn(isbn)) {
-            throw new IllegalArgumentException("Invalid ISBN format: " + isbn + ". ISBN must be 10 or 13 digits long.");
+            throw new IllegalArgumentException("Invalid ISBN: " + isbn);
         }
         // Check if the book already exists in the repository
         if (bookRepository.existsByIsbn(isbn)) {
@@ -91,6 +91,10 @@ public class BookService {
         if(newBook.getIsbn() == null || newBook.getIsbn().isBlank()) {
             throw new IllegalArgumentException("ISBN must be provided in the update request.");
         }
+        // Check if ISBN is valid
+        if(!IsbnUtils.isValidIsbn(newBook.getIsbn())) {
+            throw new IllegalArgumentException("Invalid ISBN: " + newBook.getIsbn());
+        }
         // Check if book with the given ISBN exists
         String isbn = newBook.getIsbn();
         Book existingBook = bookRepository.findByIsbn(isbn);
@@ -117,6 +121,10 @@ public class BookService {
      * @return the book entity with the specified isbn, or null if not found
      */
     public BookDTO getBookByIsbn(String isbn) {
+        // Validate the ISBN format
+        if(!IsbnUtils.isValidIsbn(isbn)) {
+            throw new IllegalArgumentException("Invalid ISBN: " + isbn);
+        }
         Book book = bookRepository.findByIsbn(isbn);
         if (book == null) {
             throw new BookNotFoundException(isbn, "Library");
@@ -155,6 +163,10 @@ public class BookService {
      */
     @Transactional
     public void deleteBook(String isbn) {
+        // Validate the ISBN format
+        if(!IsbnUtils.isValidIsbn(isbn)) {
+            throw new IllegalArgumentException("Invalid ISBN: " + isbn);
+        }
         Book book = bookRepository.findByIsbn(isbn);
         if (book == null) {
             throw new BookNotFoundException(isbn, "Library");

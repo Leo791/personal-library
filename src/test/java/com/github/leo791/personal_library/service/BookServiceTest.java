@@ -27,12 +27,16 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
     private GoogleBookResponse mockResponse;
-
-    Book Frankestein = new Book("1234567890", "Frankenstein", "Mary Shelley", "Horror",
+    // This is a valid ISBN for testing purposes.
+    String isbn = "9780553212471";
+    // This is an invalid ISBN for testing purposes.
+    String invalidIsbn = "9783161484101";
+    
+    Book Frankestein = new Book(isbn, "Frankenstein", "Mary Shelley", "Horror",
             "A novel about a scientist who creates a creature in an unorthodox experiment.",
             "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
 
-    BookDTO FrankesteinDTO = new BookDTO("1234567890", "Frankenstein", "Mary Shelley", "Horror",
+    BookDTO FrankesteinDTO = new BookDTO(isbn, "Frankenstein", "Mary Shelley", "Horror",
             "A novel about a scientist who creates a creature in an unorthodox experiment.",
             "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
 
@@ -66,7 +70,7 @@ class BookServiceTest {
 
     private void setUpGoogleBooksResponse() {
         // Arrange a googleBooksClient response
-        GoogleBookResponse.IndustryIdentifier isbn10 = new GoogleBookResponse.IndustryIdentifier("ISBN_10", "1234567890");
+        GoogleBookResponse.IndustryIdentifier isbn10 = new GoogleBookResponse.IndustryIdentifier("ISBN_10", isbn);
         GoogleBookResponse.VolumeInfo volumeInfo = new GoogleBookResponse.VolumeInfo();
         volumeInfo.setTitle("Frankenstein");
         volumeInfo.setAuthors(List.of("Mary Shelley"));
@@ -85,7 +89,7 @@ class BookServiceTest {
     @Test
     void insertBookFromIsbn_NewBook() {
         // Arrange
-        String isbn = "1234567890";
+
         setUpGoogleBooksResponse();
 
         // Mock
@@ -114,20 +118,20 @@ class BookServiceTest {
     @Test
     void insertBookFromIsbn_ExistingBook() {
         // Arrange
-        String isbn = "1234567890";
+        String isbn = "9780441172719";
 
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(true);
 
         // Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBookFromIsbn(isbn));
-        assertEquals("Book with ISBN 1234567890 already exists in Library", exception.getMessage());
+        assertEquals("Book with ISBN 9780441172719 already exists in Library", exception.getMessage());
         verify(bookRepository).existsByIsbn(isbn);
     }
 
     @Test
     void insertBookFromIsbn_BookNotFound() {
-        String isbn = "1234567890";
+        String isbn = "9780441172719";
         GoogleBookResponse responseWithNullItems = new GoogleBookResponse();
         responseWithNullItems.setTotalItems(0);;
 
@@ -135,14 +139,14 @@ class BookServiceTest {
         when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(responseWithNullItems);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBookFromIsbn(isbn));
-        assertEquals("Book with ISBN 1234567890 not found in Google Books API", exception.getMessage());
+        assertEquals("Book with ISBN 9780441172719 not found in Google Books API", exception.getMessage());
         verify(bookRepository).existsByIsbn(isbn);
     }
 
     @Test
     void insertBookFromIsbn_DatabaseError() {
         // Arrange
-        String isbn = "1234567890";
+        String isbn = "9780441172719";
         setUpGoogleBooksResponse();
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
@@ -164,7 +168,6 @@ class BookServiceTest {
     @Test
     void updateBook() {
         // Arrange
-        String isbn = "1234567890";
         Book newFrankenstein = new Book(isbn, "Frankenstein", "Mary Shelley", "Fiction",
                 "A novel about a scientist who creates a creature in an unorthodox experiment.",
                 "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
@@ -194,7 +197,6 @@ class BookServiceTest {
     @Test
     void updateBook_NullValues() {
         // Arrange
-        String isbn = "1234567890";
         Book existingBook = new Book(isbn, "Frankenstein", "Bram Stoker", "Fiction",
                 "A novel about a scientist who creates a creature in an unorthodox experiment.",
                 "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
@@ -243,23 +245,31 @@ class BookServiceTest {
     }
 
     @Test
+    void updateBook_InvalidIsbn() {
+        // Arrange
+        BookDTO updatedBookDTO = new BookDTO(invalidIsbn, "Frankenstein", "Mary Shelley", "Horror",
+                "A novel about a scientist who creates a creature in an unorthodox experiment.",
+                "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
+
+        // Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> bookService.updateBook(updatedBookDTO));
+        assertEquals("Invalid ISBN: " + invalidIsbn, exception.getMessage());
+    }
+
+    @Test
     void updateBook_NotFound() {
         // Arrange
-        String isbn = "1234567890";
 
         // Mock
         when(bookRepository.findByIsbn(isbn)).thenReturn(null);
 
         // Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.updateBook(FrankesteinDTO));
-        assertEquals("Book with ISBN 1234567890 not found in Library", exception.getMessage());
+        assertEquals("Book with ISBN " + isbn + " not found in Library", exception.getMessage());
     }
 
     @Test
     void testGetBookByIsbn() {
-        // Arrange
-        String isbn = "1234567890";
-
         // Mock
         when(bookRepository.findByIsbn(isbn)).thenReturn(Frankestein);
         when(bookMapper.bookToDto(Frankestein)).thenReturn(FrankesteinDTO);
@@ -275,17 +285,22 @@ class BookServiceTest {
 
     @Test
     void testGetBookByIsbn_NotFound() {
-        // Arrange
-        String isbn = "1234567890";
 
         // Mock
         when(bookRepository.findByIsbn(isbn)).thenReturn(null);
 
         // Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.updateBook(FrankesteinDTO));
-        assertEquals("Book with ISBN 1234567890 not found in Library", exception.getMessage());
+        assertEquals("Book with ISBN " + isbn + " not found in Library", exception.getMessage());
     }
 
+    @Test
+    void testGetBookByIsbn_InvalidIsbn() {
+
+        // Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> bookService.getBookByIsbn(invalidIsbn));
+        assertEquals("Invalid ISBN: " + invalidIsbn, exception.getMessage());
+    }
 
     @Test
     void testSearchBooks_All() {
@@ -367,8 +382,6 @@ class BookServiceTest {
 
     @Test
     void testDeleteBook() {
-        // Arrange
-        String isbn = "1234567890";
 
         // Mock
         when(bookRepository.findByIsbn(isbn)).thenReturn(Frankestein);
@@ -383,8 +396,6 @@ class BookServiceTest {
 
     @Test
     void testDeleteBook_NotFound() {
-        // Arrange
-        String isbn = "1234567890";
 
         // Mock
         when(bookRepository.findByIsbn(isbn)).thenReturn(null);
@@ -393,5 +404,12 @@ class BookServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.deleteBook(isbn));
         assertEquals("Book with ISBN " + isbn + " not found in Library", exception.getMessage());
         verify(bookRepository).findByIsbn(isbn);
+    }
+
+    @Test
+    void testDeleteBook_InvalidIsbn() {
+        // Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> bookService.deleteBook(invalidIsbn));
+        assertEquals("Invalid ISBN: " + invalidIsbn, exception.getMessage());
     }
 }
