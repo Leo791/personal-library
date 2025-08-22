@@ -118,6 +118,15 @@ class MapperUtilsTest {
     }
 
     @Test
+    void extractGenre_WithAmpersand() {
+        GoogleBookResponse.VolumeInfo volumeInfo = new GoogleBookResponse.VolumeInfo();
+        volumeInfo.setMainCategory("Science & Technology");
+
+        String genre = MapperUtils.extractGenre(volumeInfo);
+        assertEquals("Science and Technology", genre, "Should return mainCategory with ampersand replaced by 'and'");
+    }
+
+    @Test
     void extractLanguage() {
         String languageCode = "en";
 

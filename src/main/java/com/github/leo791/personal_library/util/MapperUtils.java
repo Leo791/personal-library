@@ -59,16 +59,16 @@ public class MapperUtils {
      * @return The extracted genre or an empty string if not found
      */
     public static String extractGenre(GoogleBookResponse.VolumeInfo volumeInfo) {
+        String genre = "";
         // If mainCategory is available, return it
         if (volumeInfo.getMainCategory() != null && !volumeInfo.getMainCategory().isBlank()) {
-            return volumeInfo.getMainCategory();
+            genre = volumeInfo.getMainCategory();
         // If categories are available, return the first one
         } else if (volumeInfo.getCategories() != null && !volumeInfo.getCategories().isEmpty()) {
-            return volumeInfo.getCategories().getFirst();
-        // If no mainCategory or categories, return an empty string
-        } else {
-            return "";
+            genre = volumeInfo.getCategories().getFirst();
         }
+        // Replace "&" with "and" for better readability & searchability
+        return genre.replace("&", "and");
     }
 
     /**
