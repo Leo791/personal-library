@@ -155,6 +155,20 @@ class MapperUtilsTest {
     }
 
     @Test
+    void extractPageCount() {
+        Integer pageCount = 350;
+
+        Integer pages = MapperUtils.extractPageCount(pageCount);
+        assertEquals(350, pages, "Should return the page count if available");
+    }
+
+    @Test
+    void extractPageCount_Null() {
+        Integer pages = MapperUtils.extractPageCount(null);
+        assertEquals(0, pages, "Should return 0 if page count is null");
+    }
+
+    @Test
     void extractPublishedDate() {
         String publishedDate = "2023-10-01";
 

@@ -94,6 +94,18 @@ public class MapperUtils {
     }
 
     /**
+     * Extracts the page count from a given Integer.
+     * If the Integer is null or less than or equal to zero, returns 0.
+     *
+     * @param pageCount The page count to extract from
+     * @return The extracted page count, or 0 if input is null or less than or equal to zero
+     */
+
+    public static Integer  extractPageCount(Integer pageCount) {
+        return (pageCount != null && pageCount > 0) ? pageCount : 0;
+    }
+
+    /**
      * Extracts the published date from a given string.
      * If the string is null or empty, returns an empty string.
      * The published date is expected to be in ISO 8601 format (e.g., "2023-10-01").
