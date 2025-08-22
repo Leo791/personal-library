@@ -178,7 +178,7 @@ class BookServiceTest {
         when(bookMapper.DTOtoBook(updatedFrankensteinDTO)).thenReturn(newFrankenstein);
 
         // Act
-        bookService.updateBook(isbn, updatedFrankensteinDTO);
+        bookService.updateBook(updatedFrankensteinDTO);
 
         // Assert
         verify(bookRepository).findByIsbn(isbn);
@@ -205,7 +205,7 @@ class BookServiceTest {
         when(bookMapper.DTOtoBook(FrankesteinDTO)).thenReturn(Frankestein);
 
         // Act
-        bookService.updateBook(isbn, FrankesteinDTO);
+        bookService.updateBook(FrankesteinDTO);
 
         // Assert
         verify(bookRepository).findByIsbn(isbn);
@@ -220,16 +220,27 @@ class BookServiceTest {
     }
 
     @Test
-    void updateBook_IsbnChange() {
+    void updateBook_NullIsbn() {
         // Arrange
-        String isbn = "1234567890";
-        BookDTO updatedBookDTO = new BookDTO("0987654321", "Frankenstein", "Mary Shelley", "Horror",
+        BookDTO updatedBookDTO = new BookDTO(null, "Frankenstein", "Mary Shelley", "Horror",
                 "A novel about a scientist who creates a creature in an unorthodox experiment.",
                 "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
 
         // Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> bookService.updateBook(isbn, updatedBookDTO));
-        assertEquals("ISBN cannot be changed.", exception.getMessage());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> bookService.updateBook( updatedBookDTO));
+        assertEquals("ISBN must be provided in the update request.", exception.getMessage());
+    }
+
+    @Test
+    void updateBook_BlankIsbn() {
+        // Arrange
+        BookDTO updatedBookDTO = new BookDTO("", "Frankenstein", "Mary Shelley", "Horror",
+                "A novel about a scientist who creates a creature in an unorthodox experiment.",
+                "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
+
+        // Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> bookService.updateBook( updatedBookDTO));
+        assertEquals("ISBN must be provided in the update request.", exception.getMessage());
     }
 
     @Test
@@ -241,7 +252,7 @@ class BookServiceTest {
         when(bookRepository.findByIsbn(isbn)).thenReturn(null);
 
         // Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.updateBook(isbn, FrankesteinDTO));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.updateBook(FrankesteinDTO));
         assertEquals("Book with ISBN 1234567890 not found in Library", exception.getMessage());
     }
 

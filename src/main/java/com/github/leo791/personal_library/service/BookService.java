@@ -79,14 +79,16 @@ public class BookService {
      * If the ISBN is changed, it throws an IllegalArgumentException.
      * If the book does not exist, it throws a BookNotFoundException.
      *
-     * @param isbn the ISBN of the book to update
      * @param newBook the new BookDTO with updated data
      */
     @Transactional
-    public void updateBook(String isbn, BookDTO newBook) {
-        if (newBook.getIsbn() != null && !newBook.getIsbn().equals(isbn)) {
-            throw new IllegalArgumentException("ISBN cannot be changed.");
+    public BookDTO updateBook(BookDTO newBook) {
+        // Check if ISBN is provided throwing IllegalArgumentException if not
+        if(newBook.getIsbn() == null || newBook.getIsbn().isBlank()) {
+            throw new IllegalArgumentException("ISBN must be provided in the update request.");
         }
+        // Check if book with the given ISBN exists
+        String isbn = newBook.getIsbn();
         Book existingBook = bookRepository.findByIsbn(isbn);
         if (existingBook == null) {
             throw new BookNotFoundException(isbn, "Library");
@@ -98,6 +100,8 @@ public class BookService {
         BookUtils.capitalizeStringFields(existingBook);
 
         bookRepository.save(existingBook);
+
+        return bookMapper.bookToDto(existingBook);
     }
 
     // ================= Search =================

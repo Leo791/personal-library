@@ -4,6 +4,7 @@ import com.github.leo791.personal_library.exception.BookExistsException;
 import com.github.leo791.personal_library.exception.BookNotFoundException;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.dto.ErrorResponse;
+import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.service.BookService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,19 +55,18 @@ public class BookController {
      * It expects a JSON object in the request body, with the data to update
      * the book identified by the provided ISBN.
      * If the book is successfully updated, it returns a 200 OK status.
-     * @param isbn the isbn of the book to be updated
      * @param book the book object with updated data
      */
-    @PutMapping("/{isbn}")
-    public ResponseEntity<ErrorResponse> updateBook(@PathVariable String isbn, @RequestBody BookDTO book) {
+    @PutMapping()
+    public ResponseEntity<BookDTO> updateBook(@RequestBody BookDTO book) {
         try {
-            bookService.updateBook(isbn, book);
-            return ResponseEntity.ok().build();
+            BookDTO updatedBook = bookService.updateBook(book);
+            return ResponseEntity.ok().body(updatedBook);
         } catch (Exception e) {
             if (e instanceof IllegalArgumentException) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             } else if (e instanceof BookNotFoundException) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
