@@ -16,7 +16,7 @@ Users can enter a book’s **ISBN** to automatically retrieve its details from a
 ## 3. Functional Requirements
 
 ### 3.1 Book Entry
-- User provides a valid ISBN number via the application’s interface.
+- User provides a valid ISBN via the application’s interface.
 - The system retrieves book details (title, author, genre, publication date, publisher, description, language, page count) from a public API.
 - Retrieved details are stored in the PostgreSQL database.
 - Duplicate entries are prevented (based on ISBN).
@@ -79,3 +79,11 @@ The project will be considered successful when:
   docker compose up --build -d
   ```
 
+### 6.3 API Testing with Bruno
+
+This project includes a [Bruno](https://www.usebruno.com/) collection for testing the REST API.
+
+- Install Bruno
+- Import the collection from [the file](personal-library-bruno-collection.json).
+- Update the environment variables in Bruno to match your setup.
+- Use the provided requests to test the API endpoints.
