@@ -17,9 +17,10 @@ Users can enter a book’s **ISBN** to automatically retrieve its details from a
 
 ### 3.1 Book Entry
 - User provides a valid ISBN number via the application’s interface.
-- The system retrieves book details (title, author(s), genre, publication date, cover image, etc.) from a public API.
+- The system retrieves book details (title, author, genre, publication date, publisher, description, language, page count) from a public API:
 - Retrieved details are stored in the PostgreSQL database.
 - Duplicate entries are prevented (based on ISBN).
+- The description must always be stored in the same language as the book edition. If the description is provided in another language, the system will automatically translate it before saving.
 
 ### 3.2 Search & Filtering
 - User can search the database by:
@@ -46,7 +47,7 @@ Users can enter a book’s **ISBN** to automatically retrieve its details from a
 - **Backend:** Spring Boot (Java)
 - **Build Tool:** Maven
 - **Database:** PostgreSQL
-- **External API:** Open Library API or Google Books API
+- **External API:** Google Books API & LibreTranslate
 - **Deployment:** Docker support for portability
 
 ## 5. Success Criteria
