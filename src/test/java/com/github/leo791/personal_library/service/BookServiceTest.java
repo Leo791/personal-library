@@ -1,6 +1,7 @@
 package com.github.leo791.personal_library.service;
 
 import com.github.leo791.personal_library.client.GoogleBooksClient;
+import com.github.leo791.personal_library.client.LibreTranslateClient;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.model.entity.GoogleBookResponse;
@@ -34,27 +35,27 @@ class BookServiceTest {
     
     Book Frankestein = new Book(isbn, "Frankenstein", "Mary Shelley", "Horror",
             "A novel about a scientist who creates a creature in an unorthodox experiment.",
-            "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
+            "EN", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
 
     BookDTO FrankesteinDTO = new BookDTO(isbn, "Frankenstein", "Mary Shelley", "Horror",
             "A novel about a scientist who creates a creature in an unorthodox experiment.",
-            "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
+            "EN", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
 
     Book ToKillAMockingbird = new Book("0987654321", "To Kill a Mockingbird", "Harper Lee", "Fiction",
             "A novel about the serious issues of racism and injustice in the Deep South.",
-            "English", 281, "J.B. Lippincott & Co.", "1960");
+            "EN", 281, "J.B. Lippincott & Co.", "1960");
 
     BookDTO ToKillAMockingbirdDTO = new BookDTO("0987654321", "To Kill a Mockingbird", "Harper Lee", "Fiction",
             "A novel about the serious issues of racism and injustice in the Deep South.",
-            "English", 281, "J.B. Lippincott & Co.", "1960");
+            "EN", 281, "J.B. Lippincott & Co.", "1960");
 
     Book AnimalFarm = new Book("1122334455", "Animal Farm", "George Orwell", "Fiction",
             "A satirical allegory of the Russian Revolution and the rise of Stalinism.",
-            "English", 112, "Secker & Warburg", "1945");
+            "EN", 112, "Secker & Warburg", "1945");
 
     BookDTO AnimalFarmDTO = new BookDTO("1122334455", "Animal Farm", "George Orwell", "Fiction",
             "A satirical allegory of the Russian Revolution and the rise of Stalinism.",
-            "English", 112, "Secker & Warburg", "1945");
+            "EN", 112, "Secker & Warburg", "1945");
 
     @Mock
     private BookRepository bookRepository;
@@ -64,6 +65,9 @@ class BookServiceTest {
 
     @Mock
     private GoogleBooksClient googleBooksClient;
+
+    @Mock
+    private LibreTranslateClient libreTranslateClient;
 
     @InjectMocks
     private BookService bookService;
@@ -87,7 +91,7 @@ class BookServiceTest {
     }
 
     @Test
-    void insertBookFromIsbn_NewBook() {
+    void insertBookFromIsbn_NewBook() throws Exception {
         // Arrange
 
         setUpGoogleBooksResponse();
@@ -101,6 +105,9 @@ class BookServiceTest {
         when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
                 .thenReturn(Frankestein);
         when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
+        when(libreTranslateClient.detect(Frankestein.getDescription()))
+                .thenReturn("en");
+
         // Act
         BookDTO result = bookService.insertBookFromIsbn(isbn);
 
@@ -144,7 +151,7 @@ class BookServiceTest {
     }
 
     @Test
-    void insertBookFromIsbn_DatabaseError() {
+    void insertBookFromIsbn_DatabaseError() throws Exception {
         // Arrange
         String isbn = "9780441172719";
         setUpGoogleBooksResponse();
@@ -153,6 +160,8 @@ class BookServiceTest {
         when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockResponse);
         when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
                 .thenReturn(Frankestein);
+        when(libreTranslateClient.detect(Frankestein.getDescription()))
+                .thenReturn("en");
 
         // Simulate a database error
         doThrow(new DataAccessException("Database error") {
@@ -163,6 +172,57 @@ class BookServiceTest {
         assertEquals("Database error", exception.getMessage());
     }
 
+    @Test
+    void insertBookFromIsbn_ResponseHasNotIsbn() throws Exception {
+        // Arrange
+        String isbn = "9780441172719";
+        setUpGoogleBooksResponse();
+        // Make the mapper return a book without ISBN
+        Frankestein.setIsbn("");
+        FrankesteinDTO.setIsbn("9780441172719");
+
+        // Mock
+        when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
+        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockResponse);
+        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
+                .thenReturn(Frankestein);
+        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
+        when(libreTranslateClient.detect(Frankestein.getDescription()))
+                .thenReturn("en");
+        // Act
+        BookDTO result = bookService.insertBookFromIsbn(isbn);
+
+        // Assert
+        assertEquals(FrankesteinDTO, result);
+        assertEquals(isbn.replace("-", ""), result.getIsbn());
+    }
+
+    @Test
+    void insertBookFromIsbn_TranslationRequired() throws Exception {
+        // Arrange
+        String isbn = "9780441172719";
+        String spanishDescription = "Una novela sobre un científico que crea una criatura en un experimento poco ortodoxo.";
+        setUpGoogleBooksResponse();
+        Frankestein.setLanguage("es"); // Set book language to Spanish to trigger translation
+        FrankesteinDTO.setDescription(spanishDescription); // Spanish description is expected in result
+
+        // Mock
+        when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
+        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockResponse);
+        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
+                .thenReturn(Frankestein);
+        when(libreTranslateClient.detect(Frankestein.getDescription()))
+                .thenReturn("en");
+        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
+
+        // Act
+        BookDTO result = bookService.insertBookFromIsbn(isbn);
+
+        // Assert
+        assertEquals(FrankesteinDTO, result);
+        assertEquals("Una novela sobre un científico que crea una criatura en un experimento poco ortodoxo.", result.getDescription());
+    }
+
 
 
     @Test
@@ -170,10 +230,10 @@ class BookServiceTest {
         // Arrange
         Book newFrankenstein = new Book(isbn, "Frankenstein", "Mary Shelley", "Fiction",
                 "A novel about a scientist who creates a creature in an unorthodox experiment.",
-                "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
+                "EN", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
         BookDTO updatedFrankensteinDTO = new BookDTO(isbn, "Frankenstein", "Mary Shelley", "Fiction",
                 "A novel about a scientist who creates a creature in an unorthodox experiment.",
-                "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
+                "EN", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
 
         // Mock
         when(bookRepository.findByIsbn(isbn)).thenReturn(Frankestein);
@@ -199,7 +259,7 @@ class BookServiceTest {
         // Arrange
         Book existingBook = new Book(isbn, "Frankenstein", "Bram Stoker", "Fiction",
                 "A novel about a scientist who creates a creature in an unorthodox experiment.",
-                "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
+                "EN", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
 
         // Mock
         when(bookRepository.findByIsbn(isbn)).thenReturn(existingBook);
@@ -225,7 +285,7 @@ class BookServiceTest {
         // Arrange
         BookDTO updatedBookDTO = new BookDTO(null, "Frankenstein", "Mary Shelley", "Horror",
                 "A novel about a scientist who creates a creature in an unorthodox experiment.",
-                "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
+                "EN", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
 
         // Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> bookService.updateBook( updatedBookDTO));
@@ -237,7 +297,7 @@ class BookServiceTest {
         // Arrange
         BookDTO updatedBookDTO = new BookDTO("", "Frankenstein", "Mary Shelley", "Horror",
                 "A novel about a scientist who creates a creature in an unorthodox experiment.",
-                "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
+                "EN", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
 
         // Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> bookService.updateBook( updatedBookDTO));
@@ -249,7 +309,7 @@ class BookServiceTest {
         // Arrange
         BookDTO updatedBookDTO = new BookDTO(invalidIsbn, "Frankenstein", "Mary Shelley", "Horror",
                 "A novel about a scientist who creates a creature in an unorthodox experiment.",
-                "English", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
+                "EN", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
 
         // Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> bookService.updateBook(updatedBookDTO));

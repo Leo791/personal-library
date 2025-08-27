@@ -261,4 +261,22 @@ class MapperUtilsTest {
         assertEquals("", cleanedNullDescription, "Null description should return an empty string");
     }
 
+    @Test
+    void testCleanDescription_NormalizeWhitespaceAndQuotes() {
+        String descriptionWithExtraWhitespace = "  A novel set in the 1920s.   It explores themes of decadence, idealism,   resistance to change, social upheaval, and excess.   ";
+        String cleanedDescriptionWithExtraWhitespace = cleanDescription(descriptionWithExtraWhitespace);
+        assertEquals("A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.",
+                cleanedDescriptionWithExtraWhitespace, "Description should have normalized whitespace");
+
+        String descriptionWithQuotes = "\"A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.\"";
+        String cleanedDescriptionWithQuotes = cleanDescription(descriptionWithQuotes);
+        assertEquals("A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.",
+                cleanedDescriptionWithQuotes, "Description should have quotes removed");
+
+        String descriptionWithSmartQuotes = "“A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.”";
+        String cleanedDescriptionWithSmartQuotes = cleanDescription(descriptionWithSmartQuotes);
+        assertEquals("A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.",
+                cleanedDescriptionWithSmartQuotes, "Description should have smart quotes removed");
+    }
+
 }

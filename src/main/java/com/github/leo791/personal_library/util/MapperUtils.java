@@ -140,6 +140,12 @@ public class MapperUtils {
         // Normalize whitespace
         String cleaned = description.trim().replaceAll("\\s+", " ");
 
+        // Remove quotes around the description
+        if ((cleaned.startsWith("\"") && cleaned.endsWith("\"")) ||
+            (cleaned.startsWith("“") && cleaned.endsWith("”"))) {
+            cleaned = cleaned.substring(1, cleaned.length() - 1).trim();
+        }
+
         // Cut off at "Copyright" (case-insensitive)
         int copyrightIndex = cleaned.toLowerCase().indexOf("copyright");
         if (copyrightIndex != -1) {

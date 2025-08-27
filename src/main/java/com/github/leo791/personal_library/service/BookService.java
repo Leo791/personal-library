@@ -1,8 +1,8 @@
 package com.github.leo791.personal_library.service;
 
 import com.github.leo791.personal_library.client.GoogleBooksClient;
+import com.github.leo791.personal_library.client.LibreTranslateClient;
 import com.github.leo791.personal_library.exception.BookExistsException;
-import com.github.leo791.personal_library.exception.BookInsertException;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.model.entity.GoogleBookResponse;
@@ -10,8 +10,8 @@ import com.github.leo791.personal_library.repository.BookRepository;
 import com.github.leo791.personal_library.exception.BookNotFoundException;
 import com.github.leo791.personal_library.util.BookUtils;
 import com.github.leo791.personal_library.util.IsbnUtils;
+import com.github.leo791.personal_library.util.TranslationUtils;
 import jakarta.transaction.Transactional;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +27,15 @@ public class BookService {
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
     private final GoogleBooksClient googleBooksClient;
+    private final LibreTranslateClient libreTranslateClient;
     private static final Logger log = LoggerFactory.getLogger(BookService.class);
 
     public BookService(BookRepository bookRepository, BookMapper bookMapper,
-                       GoogleBooksClient googleBooksClient) {
+                       GoogleBooksClient googleBooksClient, LibreTranslateClient libreTranslateClient) {
         this.bookRepository = bookRepository;
         this.bookMapper = bookMapper;
         this.googleBooksClient = googleBooksClient;
+        this.libreTranslateClient = libreTranslateClient;
     }
 
     // ================= Insert / Update =================
@@ -65,6 +67,20 @@ public class BookService {
         // Map the GoogleBookResponse to a Book entity
         book = bookMapper.fromGoogleResponseToBook(googleBook);
         BookUtils.capitalizeStringFields(book);
+
+        // Check if description language matches the book language, if not translate it
+        String detectedLanguage = detectDescriptionLanguage(book.getDescription());
+        if (TranslationUtils.isTranslationRequired(detectedLanguage, book.getLanguage())) {
+            log.info("Translating description from {} to {}", detectedLanguage.toUpperCase(), book.getLanguage());
+            try {
+                String translatedDescription = libreTranslateClient.translate(
+                        book.getDescription(), detectedLanguage, book.getLanguage());
+                book.setDescription(translatedDescription);
+            } catch (Exception e) {
+                log.error("Translation failed for ISBN {}: {}", isbn, e.getMessage());
+                // Proceed with the original description if translation fails
+            }
+        }
 
         // Set the ISBN from the request if Google Books API does not provide it
         if (book.getIsbn().isBlank()) {
@@ -173,5 +189,16 @@ public class BookService {
         }
         bookRepository.deleteByIsbn(isbn);
     }
+
+    // ================= Private Methods =================
+
+   private String detectDescriptionLanguage(String description) {
+       try {
+           return libreTranslateClient.detect(description);
+       } catch (Exception e) {
+           log.error("Failed to detect language for description: {}", description, e);
+           return "unknown";
+       }
+   }
 
 }
