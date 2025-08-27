@@ -289,7 +289,6 @@ class MapperUtilsTest {
                 " social upheaval, and excess. —Entertainment–Weekly");
         String cleanedDescriptionWithBothDashes = cleanDescription(descriptionWithBothDashes);
 
-
         assertEquals(expectedDescription,
                 cleanedDescriptionWithEmDash, "Description should be cleaned of trailing citation");
         assertEquals(expectedDescription,
@@ -318,15 +317,35 @@ class MapperUtilsTest {
         assertEquals("A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.",
                 cleanedDescriptionWithExtraWhitespace, "Description should have normalized whitespace");
 
-        String descriptionWithQuotes = "\"A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.\"";
+        String descriptionWithQuotes = "\"A novel set in the 1920s\". It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.\"";
         String cleanedDescriptionWithQuotes = cleanDescription(descriptionWithQuotes);
         assertEquals("A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.",
                 cleanedDescriptionWithQuotes, "Description should have quotes removed");
 
-        String descriptionWithSmartQuotes = "“A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.”";
+        String descriptionWithSmartQuotes = "“A novel set in the 1920s”. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.";
         String cleanedDescriptionWithSmartQuotes = cleanDescription(descriptionWithSmartQuotes);
         assertEquals("A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.",
                 cleanedDescriptionWithSmartQuotes, "Description should have smart quotes removed");
     }
 
+    @Test
+    void testCleanDescription_FixEllipsis() {
+        String descriptionWithEllipsis1 = "A novel set in the 1920s... It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.";
+        String cleanedDescriptionWithEllipsis1 = cleanDescription(descriptionWithEllipsis1);
+        assertEquals("A novel set in the 1920s... It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.",
+                cleanedDescriptionWithEllipsis1, "Description should have ellipsis normalized");
+
+        String descriptionWithEllipsis2 = "A novel set in the 1920s.. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.";
+        String cleanedDescriptionWithEllipsis2 = cleanDescription(descriptionWithEllipsis2);
+        assertEquals("A novel set in the 1920s... It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.",
+                cleanedDescriptionWithEllipsis2, "Description should have ellipsis normalized");
+    }
+
+    @Test
+    void testCleanDescription_RemoveSpaceBeforePunctuation() {
+        String descriptionWithSpaceBeforePunctuation = "A novel set in the 1920s . It explores themes of decadence , idealism , resistance to change , social upheaval , and excess .";
+        String cleanedDescriptionWithSpaceBeforePunctuation = cleanDescription(descriptionWithSpaceBeforePunctuation);
+        assertEquals("A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.",
+                cleanedDescriptionWithSpaceBeforePunctuation, "Description should have spaces before punctuation removed");
+    }
 }

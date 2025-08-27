@@ -80,6 +80,8 @@ public class BookService {
                 log.error("Translation failed for ISBN {}: {}", isbn, e.getMessage());
                 // Proceed with the original description if translation fails
             }
+        } else {
+            log.info("No description translation required for book with ISBN {}", isbn);
         }
 
         // Set the ISBN from the request if Google Books API does not provide it

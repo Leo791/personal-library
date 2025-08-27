@@ -101,7 +101,7 @@ public class MapperUtils {
      * @return The extracted page count, or 0 if input is null or less than or equal to zero
      */
 
-    public static Integer  extractPageCount(Integer pageCount) {
+    public static Integer extractPageCount(Integer pageCount) {
         return (pageCount != null && pageCount > 0) ? pageCount : 0;
     }
 
@@ -151,17 +151,22 @@ public class MapperUtils {
         // Normalize whitespace
         String cleaned = description.trim().replaceAll("\\s+", " ");
 
-        // Remove quotes around the description
-        if ((cleaned.startsWith("\"") && cleaned.endsWith("\"")) ||
-            (cleaned.startsWith("“") && cleaned.endsWith("”"))) {
-            cleaned = cleaned.substring(1, cleaned.length() - 1).trim();
-        }
+        // Remove quotes in the description
+        cleaned = cleaned.replaceAll("\"", "").trim();
+        cleaned = cleaned.replaceAll("[“”]", "").trim();
 
         // Cut off at "Copyright" (case-insensitive)
         int copyrightIndex = cleaned.toLowerCase().indexOf("copyright");
         if (copyrightIndex != -1) {
             cleaned = cleaned.substring(0, copyrightIndex).trim();
         }
+
+        // Remove space before punctuation
+        cleaned = cleaned.replaceAll("\\s+([.,;:!?])", "$1").trim();
+
+        // Fix ellipsis
+        cleaned = cleaned.replaceAll("\\.\\s\\.\\s\\.", "...").trim();
+        cleaned = cleaned.replaceAll("(?<!\\.)\\.\\.(?!\\.)", "...").trim();
 
         // Cut off at em dash or en dash if present (– or —)
         int dashIndex = cleaned.indexOf("–");  // en dash
