@@ -85,7 +85,7 @@ public class BookMapper {
         String description = cleanDescription(volumeInfo.getDescription());
         String language = extractLanguage(volumeInfo.getLanguage());
         Integer pageCount = extractPageCount(volumeInfo.getPageCount());
-        String publisher = volumeInfo.getPublisher() != null ? volumeInfo.getPublisher() : "";
+        String publisher = extractPublisher(volumeInfo.getPublisher());
         String publishedDate = extractPublishedDate(volumeInfo.getPublishedDate());
 
         return new Book(isbn, title, author, genre, description, language, pageCount, publisher, publishedDate);

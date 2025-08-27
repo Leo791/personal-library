@@ -32,7 +32,8 @@ class BookServiceTest {
     String isbn = "9780553212471";
     // This is an invalid ISBN for testing purposes.
     String invalidIsbn = "9783161484101";
-    
+
+    // Sample book data for testing
     Book Frankestein = new Book(isbn, "Frankenstein", "Mary Shelley", "Horror",
             "A novel about a scientist who creates a creature in an unorthodox experiment.",
             "EN", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
@@ -90,6 +91,7 @@ class BookServiceTest {
         this.mockResponse.setItems(List.of(item));
     }
 
+    // ================ Insert Book From ISBN =================
     @Test
     void insertBookFromIsbn_NewBook() throws Exception {
         // Arrange
@@ -147,7 +149,7 @@ class BookServiceTest {
         assertEquals(isbn.replace("-", ""), result.getIsbn());
     }
 
-    // ================ Error Scenarios =================
+    // ================ Insert Book From ISBN - Error Scenarios =================
     @Test
     void insertBookFromIsbn_ExistingBook() {
         // Arrange
@@ -208,7 +210,7 @@ class BookServiceTest {
         assertEquals("Database error", exception.getMessage());
     }
 
-    // ================ Translation Tests =================
+    // ================ Insert Book From ISBN - Translation Tests =================
 
     @Test
     void insertBookFromIsbn_TranslationRequired() throws Exception {
@@ -290,6 +292,7 @@ class BookServiceTest {
         assertEquals("A novel about a scientist who creates a creature in an unorthodox experiment.", result.getDescription());
     }
 
+    // ================ Update Book =================
     @Test
     void updateBook() {
         // Arrange
@@ -393,6 +396,7 @@ class BookServiceTest {
         assertEquals("Book with ISBN " + isbn + " not found in Library", exception.getMessage());
     }
 
+    // ================ GetBookByIsbn ==================
     @Test
     void testGetBookByIsbn() {
         // Mock
@@ -415,7 +419,7 @@ class BookServiceTest {
         when(bookRepository.findByIsbn(isbn)).thenReturn(null);
 
         // Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.updateBook(FrankesteinDTO));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.getBookByIsbn(isbn));
         assertEquals("Book with ISBN " + isbn + " not found in Library", exception.getMessage());
     }
 
@@ -446,6 +450,7 @@ class BookServiceTest {
         verify(bookRepository).findAll();
     }
 
+    // ================ Search Books ==================
     @Test
     void testSearchBooks_ByTitle() {
         // Arrange
@@ -505,6 +510,7 @@ class BookServiceTest {
         verify(bookRepository).findByGenreIgnoreCase(genre);
     }
 
+    // ================ Delete Book ==================
     @Test
     void testDeleteBook() {
 

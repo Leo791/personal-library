@@ -13,6 +13,13 @@ class BookTest {
     private final Book book3 = new Book("0987654321", "Dune", "Frank Herbert", "Science Fiction",
             "A science fiction novel set in a distant future.", "English", 412, "Chilton Books", "1965");
 
+    @Test
+    void testToString() {
+        String expected = "Book{isbn='1234567890', title='The Hitchhiker's Guide to the Galaxy', author='Douglas Adams', " +
+                "genre='Fantasy', description='A science fiction comedy novel.', language='English', publisher='Pan Books', " +
+                "pageCount=224, publishedDate='1979'}";
+        assertEquals(expected, book1.toString(), "toString method should return the correct string representation");
+    }
 
     @Test
     void testEquals() {

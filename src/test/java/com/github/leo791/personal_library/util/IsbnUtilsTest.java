@@ -23,6 +23,9 @@ class IsbnUtilsTest {
 
         assertFalse(IsbnUtils.isValidIsbn("123456789"), "Invalid ISBN with less than 10 digits should return false");
         assertFalse(IsbnUtils.isValidIsbn("12345678901234"), "Invalid ISBN with more than 13 digits should return false");
+
+        assertFalse(IsbnUtils.isValidIsbn(""), "Empty string should return false");
+        assertFalse(IsbnUtils.isValidIsbn(null), "Null should return false");
     }
 
     @Test

@@ -62,7 +62,7 @@ class LibreTranslateClientTest {
         String mockJson = "{\"unexpectedField\":\"value\"}";
 
         when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
-                .thenReturn(ResponseEntity.ok(mockJson));
+                .thenReturn(ResponseEntity.badRequest().body(mockJson));
 
         Exception exception = assertThrows(Exception.class, () -> {
             libreTranslateClient.translate(text, sourceLang, targetLang);
@@ -106,7 +106,7 @@ class LibreTranslateClientTest {
         String mockJson = "{\"unexpectedField\":\"value\"}";
 
         when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
-                .thenReturn(ResponseEntity.ok(mockJson));
+                .thenReturn(ResponseEntity.badRequest().body(mockJson));
 
         Exception exception = assertThrows(Exception.class, () -> {
             libreTranslateClient.detect(text);

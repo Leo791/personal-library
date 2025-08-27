@@ -35,17 +35,12 @@ public class LibreTranslateClient {
         HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+        JsonNode jsonNode = objectMapper.readTree(response.getBody());
 
-        if (response.getStatusCode().is2xxSuccessful()) {
-            JsonNode jsonNode = objectMapper.readTree(response.getBody());
-            if (jsonNode.has("translatedText")) {
+        if (response.getStatusCode().is2xxSuccessful() && jsonNode.has("translatedText")) {
                 return jsonNode.get("translatedText").asText();
-            }
-        } else if (response.getStatusCode().is4xxClientError()) {
-            JsonNode jsonNode = objectMapper.readTree(response.getBody());
-            if (jsonNode.has("error")) {
+        } else if (response.getStatusCode().is4xxClientError() && jsonNode.has("error")) {
                 throw new Exception(jsonNode.get("error").asText());
-            }
         }
         throw new Exception("Unexpected response from LibreTranslate: " + response.getBody());
     }
@@ -59,17 +54,11 @@ public class LibreTranslateClient {
         HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
-
-        if (response.getStatusCode().is2xxSuccessful()) {
-            JsonNode jsonNode = objectMapper.readTree(response.getBody());
-            if (jsonNode.isArray() && !jsonNode.isEmpty() && jsonNode.get(0).has("language")) {
+        JsonNode jsonNode = objectMapper.readTree(response.getBody());
+        if (response.getStatusCode().is2xxSuccessful() && jsonNode.get(0).has("language")) {
                 return jsonNode.get(0).get("language").asText();
-            }
-        } else if (response.getStatusCode().is4xxClientError()) {
-            JsonNode jsonNode = objectMapper.readTree(response.getBody());
-            if (jsonNode.has("error")) {
-                throw new Exception(jsonNode.get("error").asText());
-            }
+        } else if (response.getStatusCode().is4xxClientError() && jsonNode.has("error")) {
+                 throw new Exception(jsonNode.get("error").asText());
         }
         throw new Exception("Unexpected response from LibreTranslate: " + response.getBody());
     }

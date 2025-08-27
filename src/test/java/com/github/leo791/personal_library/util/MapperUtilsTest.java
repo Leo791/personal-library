@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MapperUtilsTest {
 
+    // ========== extractFirstAuthor ==========
+
     @Test
     void testExtractFirstAuthor() {
         List<String> authors = List.of("Thomas H Cormen", "Charles E Leiserson", "Ronald L Rivest", "Clifford Stein");
@@ -34,6 +36,8 @@ class MapperUtilsTest {
         assertEquals("", firstAuthor, "First author should be an empty string for a null list");
     }
 
+    // ========== extractIsbn ==========
+
     @Test
     void testExtractIsbn() {
         List<GoogleBookResponse.IndustryIdentifier> industryIdentifiers = List.of(
@@ -53,6 +57,16 @@ class MapperUtilsTest {
 
         String isbn = MapperUtils.extractIsbn(industryIdentifiers);
         assertEquals("0134686098", isbn, "Should return ISBN_10 if ISBN_13 is not available");
+    }
+
+    @Test
+    void testExtractIsbn_NoValidIsbn() {
+        List<GoogleBookResponse.IndustryIdentifier> industryIdentifiers = List.of(
+                new GoogleBookResponse.IndustryIdentifier("OTHER", "1234567890")
+        );
+
+        String isbn = MapperUtils.extractIsbn(industryIdentifiers);
+        assertEquals("", isbn, "Should return an empty string if neither ISBN_13 nor ISBN_10 is available");
     }
 
     @Test
@@ -77,8 +91,9 @@ class MapperUtilsTest {
                 "Should throw an exception for a null list");
     }
 
+    // ========== extractGenre ==========
     @Test
-    void testExtractGenre_MainCategory() {
+    void testExtractGenre_MainCategoryExists() {
         GoogleBookResponse.VolumeInfo volumeInfo = new GoogleBookResponse.VolumeInfo();
         volumeInfo.setMainCategory("Science Fiction");
         volumeInfo.setCategories(List.of("Adventure", "Fantasy"));
@@ -88,7 +103,7 @@ class MapperUtilsTest {
     }
 
     @Test
-    void testExtractGenre_Categories() {
+    void testExtractGenre_MainCategoryIsNull_CategoriesExist() {
         GoogleBookResponse.VolumeInfo volumeInfo = new GoogleBookResponse.VolumeInfo();
         volumeInfo.setMainCategory(null);
         volumeInfo.setCategories(List.of("Adventure", "Fantasy"));
@@ -98,7 +113,17 @@ class MapperUtilsTest {
     }
 
     @Test
-    void testExtractGenre_EmptyCategories() {
+    void testExtractGenre_MainCategoryIsBlank_CategoriesExist() {
+        GoogleBookResponse.VolumeInfo volumeInfo = new GoogleBookResponse.VolumeInfo();
+        volumeInfo.setMainCategory("");
+        volumeInfo.setCategories(List.of("Adventure", "Fantasy"));
+
+        String genre = MapperUtils.extractGenre(volumeInfo);
+        assertEquals("Adventure", genre, "Should return first category if mainCategory is not available");
+    }
+
+    @Test
+    void testExtractGenre_MainCategoryIsNull_CategoriesIsEmpty() {
         GoogleBookResponse.VolumeInfo volumeInfo = new GoogleBookResponse.VolumeInfo();
         volumeInfo.setMainCategory(null);
         volumeInfo.setCategories(List.of());
@@ -108,7 +133,7 @@ class MapperUtilsTest {
     }
 
     @Test
-    void testExtractGenre_NullCategories() {
+    void testExtractGenre_MainCategoryIsNull_CategoriesIsNull() {
         GoogleBookResponse.VolumeInfo volumeInfo = new GoogleBookResponse.VolumeInfo();
         volumeInfo.setMainCategory(null);
         volumeInfo.setCategories(null);
@@ -118,7 +143,7 @@ class MapperUtilsTest {
     }
 
     @Test
-    void extractGenre_WithAmpersand() {
+    void testExtractGenre_WithAmpersand() {
         GoogleBookResponse.VolumeInfo volumeInfo = new GoogleBookResponse.VolumeInfo();
         volumeInfo.setMainCategory("Science & Technology");
 
@@ -126,6 +151,7 @@ class MapperUtilsTest {
         assertEquals("Science and Technology", genre, "Should return mainCategory with ampersand replaced by 'and'");
     }
 
+    // ========== extractLanguage ==========
     @Test
     void extractLanguage() {
         String languageCode = "en";
@@ -154,6 +180,7 @@ class MapperUtilsTest {
         assertEquals("PT", language, "Should return the language code in uppercase");
     }
 
+    // ========== extractPageCount ==========
     @Test
     void extractPageCount() {
         Integer pageCount = 350;
@@ -168,6 +195,28 @@ class MapperUtilsTest {
         assertEquals(0, pages, "Should return 0 if page count is null");
     }
 
+    @Test
+    void extractPageCount_Zero() {
+        Integer pages = MapperUtils.extractPageCount(0);
+        assertEquals(0, pages, "Should return 0 if page count is zero");
+    }
+
+    // ========== extractPublisher ==========
+    @Test
+    void extractPublisher(){
+        String publisher = "Penguin Random House";
+
+        String pub = MapperUtils.extractPublisher(publisher);
+        assertEquals("Penguin Random House", pub, "Should return the publisher if available");
+    }
+
+    @Test
+    void extractPublisher_Null() {
+        String pub = MapperUtils.extractPublisher(null);
+        assertEquals("", pub, "Should return an empty string if publisher is null");
+    }
+
+    // ========== extractPublishedDate ==========
     @Test
     void extractPublishedDate() {
         String publishedDate = "2023-10-01";
@@ -220,6 +269,7 @@ class MapperUtilsTest {
         assertEquals("", date, "Should return an empty string if no year is found in the published date");
     }
 
+    // ========== cleanDescription ==========
     @Test
     void testCleanDescription_RemoveTrailing(){
         String expectedDescription = "A novel set in the 1920s. It explores themes of decadence, idealism, resistance to change, social upheaval, and excess.";

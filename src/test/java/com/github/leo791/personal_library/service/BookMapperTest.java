@@ -137,6 +137,15 @@ class BookMapperTest {
     }
 
     @Test
+    void bookListToDtoList_Null() {
+        BookMapper bookMapper = new BookMapper();
+        var bookDTOList = bookMapper.bookListToDtoList(null);
+
+        assertNotNull(bookDTOList);
+        assertTrue(bookDTOList.isEmpty());
+    }
+
+    @Test
     void fromGoogleResponseToBook() {
         setUpGoogleBooksResponse();
         BookMapper bookMapper = new BookMapper();

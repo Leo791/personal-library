@@ -106,6 +106,17 @@ public class MapperUtils {
     }
 
     /**
+     * Extracts the publisher from a given string.
+     * If the string is null, returns an empty string.
+     *
+     * @param publisher The publisher string to extract from
+     * @return The extracted publisher, or an empty string if input is null
+     */
+    public static String extractPublisher(String publisher) {
+        return (publisher != null) ? publisher : "";
+    }
+
+    /**
      * Extracts the published date from a given string.
      * If the string is null or empty, returns an empty string.
      * The published date is expected to be in ISO 8601 format (e.g., "2023-10-01").
