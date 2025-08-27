@@ -123,6 +123,32 @@ class BookServiceTest {
     }
 
     @Test
+    void insertBookFromIsbn_ResponseHasNoIsbn() throws Exception {
+        // Arrange
+        String isbn = "9780441172719";
+        setUpGoogleBooksResponse();
+        // Make the mapper return a book without ISBN
+        Frankestein.setIsbn("");
+        FrankesteinDTO.setIsbn("9780441172719");
+
+        // Mock
+        when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
+        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockResponse);
+        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
+                .thenReturn(Frankestein);
+        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
+        when(libreTranslateClient.detect(Frankestein.getDescription()))
+                .thenReturn("en");
+        // Act
+        BookDTO result = bookService.insertBookFromIsbn(isbn);
+
+        // Assert
+        assertEquals(FrankesteinDTO, result);
+        assertEquals(isbn.replace("-", ""), result.getIsbn());
+    }
+
+    // ================ Error Scenarios =================
+    @Test
     void insertBookFromIsbn_ExistingBook() {
         // Arrange
         String isbn = "9780441172719";
@@ -134,6 +160,16 @@ class BookServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBookFromIsbn(isbn));
         assertEquals("Book with ISBN 9780441172719 already exists in Library", exception.getMessage());
         verify(bookRepository).existsByIsbn(isbn);
+    }
+
+    @Test
+    void insertBookFromIsbn_InvalidIsbn() {
+        // Arrange
+        String invalidIsbn = "9783161484101";
+
+        // Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> bookService.insertBookFromIsbn(invalidIsbn));
+        assertEquals("Invalid ISBN: " + invalidIsbn, exception.getMessage());
     }
 
     @Test
@@ -172,30 +208,7 @@ class BookServiceTest {
         assertEquals("Database error", exception.getMessage());
     }
 
-    @Test
-    void insertBookFromIsbn_ResponseHasNotIsbn() throws Exception {
-        // Arrange
-        String isbn = "9780441172719";
-        setUpGoogleBooksResponse();
-        // Make the mapper return a book without ISBN
-        Frankestein.setIsbn("");
-        FrankesteinDTO.setIsbn("9780441172719");
-
-        // Mock
-        when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
-        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockResponse);
-        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
-                .thenReturn(Frankestein);
-        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
-        when(libreTranslateClient.detect(Frankestein.getDescription()))
-                .thenReturn("en");
-        // Act
-        BookDTO result = bookService.insertBookFromIsbn(isbn);
-
-        // Assert
-        assertEquals(FrankesteinDTO, result);
-        assertEquals(isbn.replace("-", ""), result.getIsbn());
-    }
+    // ================ Translation Tests =================
 
     @Test
     void insertBookFromIsbn_TranslationRequired() throws Exception {
@@ -223,7 +236,59 @@ class BookServiceTest {
         assertEquals("Una novela sobre un científico que crea una criatura en un experimento poco ortodoxo.", result.getDescription());
     }
 
+    @Test
+    void insertBookFromIsbn_DetectionFails() throws Exception {
+        // Arrange
+        String isbn = "9780441172719";
+        setUpGoogleBooksResponse();
+        Frankestein.setLanguage("es"); // Set book language to Spanish to trigger translation
+        FrankesteinDTO.setDescription(Frankestein.getDescription()); // Original description is expected in result
 
+        // Mock
+        when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
+        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockResponse);
+        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
+                .thenReturn(Frankestein);
+        // Simulate detection failure
+        when(libreTranslateClient.detect(Frankestein.getDescription()))
+                .thenThrow(new RuntimeException("Detection service error"));
+        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
+
+        // Act
+        BookDTO result = bookService.insertBookFromIsbn(isbn);
+
+        // Assert
+        assertEquals(FrankesteinDTO, result);
+        assertEquals("A novel about a scientist who creates a creature in an unorthodox experiment.", result.getDescription());
+    }
+
+    @Test
+    void insertBookFromIsbn_TranslationFails() throws Exception {
+        // Arrange
+        String isbn = "9780441172719";
+        setUpGoogleBooksResponse();
+        Frankestein.setLanguage("es"); // Set book language to Spanish to trigger translation
+        FrankesteinDTO.setDescription(Frankestein.getDescription()); // Original description is expected in result
+
+        // Mock
+        when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
+        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockResponse);
+        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
+                .thenReturn(Frankestein);
+        when(libreTranslateClient.detect(Frankestein.getDescription()))
+                .thenReturn("en");
+        // Simulate translation failure
+        when(libreTranslateClient.translate(anyString(), anyString(), anyString()))
+                .thenThrow(new RuntimeException("Translation service error"));
+        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
+
+        // Act
+        BookDTO result = bookService.insertBookFromIsbn(isbn);
+
+        // Assert
+        assertEquals(FrankesteinDTO, result);
+        assertEquals("A novel about a scientist who creates a creature in an unorthodox experiment.", result.getDescription());
+    }
 
     @Test
     void updateBook() {
