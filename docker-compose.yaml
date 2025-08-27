@@ -23,12 +23,24 @@ services:
     env_file:
       - .env
     ports:
-        - "8080:8080"
+        - "8081:8080"
     networks:
         - library-network
 
+  libretranslate:
+    image: libretranslate/libretranslate:v1.7.2
+    container_name: libretranslate
+    restart: always
+    ports:
+      - "5000:5000"
+    networks:
+      - library-network
+    volumes:
+        - libretranslate_data:/app/translate/models
+
 volumes:
   library_data:
+  libretranslate_data:
 
 networks:
   library-network:
