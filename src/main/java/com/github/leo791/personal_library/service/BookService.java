@@ -162,11 +162,11 @@ public class BookService {
     public List<BookDTO> searchBooks(String title, String author, String genre) {
         List<Book> books;
         if (title != null) {
-            books = bookRepository.findByTitleIgnoreCase(title);
+            books = bookRepository.findByTitleContainingIgnoreCase(title);
         } else if (author != null) {
-            books = bookRepository.findByAuthorIgnoreCase(author);
+            books = bookRepository.findByAuthorContainingIgnoreCase(author);
         } else if (genre != null) {
-            books = bookRepository.findByGenreIgnoreCase(genre);
+            books = bookRepository.findByGenreContainingIgnoreCase(genre);
         } else {
             books = bookRepository.findAll();
         }

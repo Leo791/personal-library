@@ -16,7 +16,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      * @param title the title of the books to search for
      * @return the book entities with the specified title, or null if not found
      */
-    List<Book> findByTitleIgnoreCase(String title);
+    List<Book> findByTitleContainingIgnoreCase(String title);
 
     /**
      * Finds books by their author.
@@ -24,7 +24,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      * @param author the author of the books to search for
      * @return the book entities with the specified author, or null if not found
      */
-    List<Book> findByAuthorIgnoreCase(String author);
+    List<Book> findByAuthorContainingIgnoreCase(String author);
 
     /**
      * Finds books by their genre.
@@ -32,7 +32,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      * @param genre the genre of the books to search for
      * @return the book entities with the specified genre, or null if not found
      */
-    List<Book> findByGenreIgnoreCase(String genre);
+    List<Book> findByGenreContainingIgnoreCase(String genre);
 
     /**
      * Finds a book by its ISBN.

@@ -458,7 +458,7 @@ class BookServiceTest {
         List<Book> books = List.of(ToKillAMockingbird);
 
         // Mock
-        when(bookRepository.findByTitleIgnoreCase(title)).thenReturn(books);
+        when(bookRepository.findByTitleContainingIgnoreCase(title)).thenReturn(books);
         when(bookMapper.bookListToDtoList(books)).thenReturn(List.of(ToKillAMockingbirdDTO));
 
         // Act
@@ -467,7 +467,26 @@ class BookServiceTest {
         // Assert
         assertEquals(1, result.size());
         assertEquals(title, result.getFirst().getTitle());
-        verify(bookRepository).findByTitleIgnoreCase(title);
+        verify(bookRepository).findByTitleContainingIgnoreCase(title);
+    }
+
+    @Test
+    void testSearchBooks_ByTitle_Partial() {
+        // Arrange
+        String title = "Mockingbird";
+        List<Book> books = List.of(ToKillAMockingbird);
+
+        // Mock
+        when(bookRepository.findByTitleContainingIgnoreCase(title)).thenReturn(books);
+        when(bookMapper.bookListToDtoList(books)).thenReturn(List.of(ToKillAMockingbirdDTO));
+
+        // Act
+        List<BookDTO> result = bookService.searchBooks(title, null, null);
+
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals("To Kill a Mockingbird", result.getFirst().getTitle());
+        verify(bookRepository).findByTitleContainingIgnoreCase(title);
     }
 
     @Test
@@ -477,7 +496,7 @@ class BookServiceTest {
         List<Book> books = List.of(ToKillAMockingbird);
 
         // Mock
-        when(bookRepository.findByAuthorIgnoreCase(author)).thenReturn(books);
+        when(bookRepository.findByAuthorContainingIgnoreCase(author)).thenReturn(books);
         when(bookMapper.bookListToDtoList(books)).thenReturn(List.of(ToKillAMockingbirdDTO));
 
         // Act
@@ -486,7 +505,26 @@ class BookServiceTest {
         // Assert
         assertEquals(1, result.size());
         assertEquals(author, result.getFirst().getAuthor());
-        verify(bookRepository).findByAuthorIgnoreCase(author);
+        verify(bookRepository).findByAuthorContainingIgnoreCase(author);
+    }
+
+    @Test
+    void testSearchBooks_ByAuthor_Partial() {
+        // Arrange
+        String author = "Orwell";
+        List<Book> books = List.of(AnimalFarm);
+
+        // Mock
+        when(bookRepository.findByAuthorContainingIgnoreCase(author)).thenReturn(books);
+        when(bookMapper.bookListToDtoList(books)).thenReturn(List.of(AnimalFarmDTO));
+
+        // Act
+        List<BookDTO> result = bookService.searchBooks(null, author, null);
+
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals("George Orwell", result.getFirst().getAuthor());
+        verify(bookRepository).findByAuthorContainingIgnoreCase(author);
     }
 
     @Test
@@ -496,7 +534,7 @@ class BookServiceTest {
         List<Book> books = List.of(Frankestein, ToKillAMockingbird, AnimalFarm);
 
         // Mock
-        when(bookRepository.findByGenreIgnoreCase(genre)).thenReturn(books);
+        when(bookRepository.findByGenreContainingIgnoreCase(genre)).thenReturn(books);
         when(bookMapper.bookListToDtoList(books)).thenReturn(List.of(ToKillAMockingbirdDTO, AnimalFarmDTO
         ));
 
@@ -507,7 +545,28 @@ class BookServiceTest {
         assertEquals(2, result.size());
         assertEquals(genre, result.getFirst().getGenre());
         assertEquals(genre, result.get(1).getGenre());
-        verify(bookRepository).findByGenreIgnoreCase(genre);
+        verify(bookRepository).findByGenreContainingIgnoreCase(genre);
+    }
+
+    @Test
+    void testSearchBooks_ByGenre_Partial() {
+        // Arrange
+        String genre = "Fict";
+        List<Book> books = List.of(Frankestein, ToKillAMockingbird, AnimalFarm);
+
+        // Mock
+        when(bookRepository.findByGenreContainingIgnoreCase(genre)).thenReturn(books);
+        when(bookMapper.bookListToDtoList(books)).thenReturn(List.of(ToKillAMockingbirdDTO, AnimalFarmDTO
+        ));
+
+        // Act
+        List<BookDTO> result = bookService.searchBooks(null, null, genre);
+
+        // Assert
+        assertEquals(2, result.size());
+        assertEquals("Fiction", result.getFirst().getGenre());
+        assertEquals("Fiction", result.get(1).getGenre());
+        verify(bookRepository).findByGenreContainingIgnoreCase(genre);
     }
 
     // ================ Delete Book ==================
