@@ -3,16 +3,12 @@ package com.github.leo791.personal_library.service;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.model.entity.GoogleBookResponse;
-import com.github.leo791.personal_library.util.BookUtils;
-import org.springframework.beans.PropertyValues;
+import com.github.leo791.personal_library.util.GoogleBooksResponseMapperUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.github.leo791.personal_library.util.MapperUtils.*;
-
 /**
  * Mapper class for converting between Book entities, BookDTOs, and GoogleBookResponse.
  */
@@ -78,15 +74,15 @@ public class BookMapper {
         GoogleBookResponse.Item item = GoogleBookResponse.getItems().getFirst();
         GoogleBookResponse.VolumeInfo volumeInfo = item.getVolumeInfo();
 
-        String isbn = extractIsbn(volumeInfo.getIndustryIdentifiers());
+        String isbn = GoogleBooksResponseMapperUtils.extractIsbn(volumeInfo.getIndustryIdentifiers());
         String title = volumeInfo.getTitle();
-        String author = extractFirstAuthor(volumeInfo.getAuthors());
-        String genre = extractGenre(volumeInfo);
-        String description = cleanDescription(volumeInfo.getDescription());
-        String language = extractLanguage(volumeInfo.getLanguage());
-        Integer pageCount = extractPageCount(volumeInfo.getPageCount());
-        String publisher = extractPublisher(volumeInfo.getPublisher());
-        String publishedDate = extractPublishedDate(volumeInfo.getPublishedDate());
+        String author = GoogleBooksResponseMapperUtils.extractFirstAuthor(volumeInfo.getAuthors());
+        String genre = GoogleBooksResponseMapperUtils.extractGenre(volumeInfo);
+        String description = GoogleBooksResponseMapperUtils.cleanDescription(volumeInfo.getDescription());
+        String language = GoogleBooksResponseMapperUtils.extractLanguage(volumeInfo.getLanguage());
+        Integer pageCount = GoogleBooksResponseMapperUtils.extractPageCount(volumeInfo.getPageCount());
+        String publisher = GoogleBooksResponseMapperUtils.extractPublisher(volumeInfo.getPublisher());
+        String publishedDate = GoogleBooksResponseMapperUtils.extractPublishedDate(volumeInfo.getPublishedDate());
 
         return new Book(isbn, title, author, genre, description, language, pageCount, publisher, publishedDate);
     }

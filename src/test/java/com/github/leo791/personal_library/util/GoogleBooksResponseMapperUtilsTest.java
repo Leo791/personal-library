@@ -2,14 +2,13 @@ package com.github.leo791.personal_library.util;
 
 import com.github.leo791.personal_library.model.entity.GoogleBookResponse;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestClassOrder;
 
 import java.util.List;
 
-import static com.github.leo791.personal_library.util.MapperUtils.cleanDescription;
+import static com.github.leo791.personal_library.util.GoogleBooksResponseMapperUtils.cleanDescription;
 import static org.junit.jupiter.api.Assertions.*;
 
-class MapperUtilsTest {
+class GoogleBooksResponseMapperUtilsTest {
 
     // ========== extractFirstAuthor ==========
 
@@ -17,7 +16,7 @@ class MapperUtilsTest {
     void testExtractFirstAuthor() {
         List<String> authors = List.of("Thomas H Cormen", "Charles E Leiserson", "Ronald L Rivest", "Clifford Stein");
 
-        String firstAuthor = MapperUtils.extractFirstAuthor(authors);
+        String firstAuthor = GoogleBooksResponseMapperUtils.extractFirstAuthor(authors);
         assertEquals("Thomas H Cormen", firstAuthor, "First author should be 'Thomas H Cormen'");
     }
 
@@ -25,14 +24,14 @@ class MapperUtilsTest {
     void testExtractFirstAuthor_EmptyList() {
         List<String> authors = List.of();
 
-        String firstAuthor = MapperUtils.extractFirstAuthor(authors);
+        String firstAuthor = GoogleBooksResponseMapperUtils.extractFirstAuthor(authors);
         assertEquals("", firstAuthor, "First author should be an empty string for an empty list");
     }
 
     @Test
     void testExtractFirstAuthor_NullList() {
 
-        String firstAuthor = MapperUtils.extractFirstAuthor(null);
+        String firstAuthor = GoogleBooksResponseMapperUtils.extractFirstAuthor(null);
         assertEquals("", firstAuthor, "First author should be an empty string for a null list");
     }
 
@@ -45,7 +44,7 @@ class MapperUtilsTest {
                 new GoogleBookResponse.IndustryIdentifier("ISBN_10", "0134686098")
         );
 
-        String isbn = MapperUtils.extractIsbn(industryIdentifiers);
+        String isbn = GoogleBooksResponseMapperUtils.extractIsbn(industryIdentifiers);
         assertEquals("9780134686097", isbn, "Should return ISBN_13 if available");
     }
 
@@ -55,7 +54,7 @@ class MapperUtilsTest {
                 new GoogleBookResponse.IndustryIdentifier("ISBN_10", "0134686098")
         );
 
-        String isbn = MapperUtils.extractIsbn(industryIdentifiers);
+        String isbn = GoogleBooksResponseMapperUtils.extractIsbn(industryIdentifiers);
         assertEquals("0134686098", isbn, "Should return ISBN_10 if ISBN_13 is not available");
     }
 
@@ -65,7 +64,7 @@ class MapperUtilsTest {
                 new GoogleBookResponse.IndustryIdentifier("OTHER", "1234567890")
         );
 
-        String isbn = MapperUtils.extractIsbn(industryIdentifiers);
+        String isbn = GoogleBooksResponseMapperUtils.extractIsbn(industryIdentifiers);
         assertEquals("", isbn, "Should return an empty string if neither ISBN_13 nor ISBN_10 is available");
     }
 
@@ -74,7 +73,7 @@ class MapperUtilsTest {
         List<GoogleBookResponse.IndustryIdentifier> industryIdentifiers = List.of();
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            MapperUtils.extractIsbn(industryIdentifiers);
+            GoogleBooksResponseMapperUtils.extractIsbn(industryIdentifiers);
         });
 
         assertEquals("Industry identifiers list must not be null or empty", exception.getMessage(),
@@ -84,7 +83,7 @@ class MapperUtilsTest {
     @Test
     void testExtractIsbn_NullList() {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            MapperUtils.extractIsbn(null);
+            GoogleBooksResponseMapperUtils.extractIsbn(null);
         });
 
         assertEquals("Industry identifiers list must not be null or empty", exception.getMessage(),
@@ -98,7 +97,7 @@ class MapperUtilsTest {
         volumeInfo.setMainCategory("Science Fiction");
         volumeInfo.setCategories(List.of("Adventure", "Fantasy"));
 
-        String genre = MapperUtils.extractGenre(volumeInfo);
+        String genre = GoogleBooksResponseMapperUtils.extractGenre(volumeInfo);
         assertEquals("Science Fiction", genre, "Should return mainCategory if available");
     }
 
@@ -108,7 +107,7 @@ class MapperUtilsTest {
         volumeInfo.setMainCategory(null);
         volumeInfo.setCategories(List.of("Adventure", "Fantasy"));
 
-        String genre = MapperUtils.extractGenre(volumeInfo);
+        String genre = GoogleBooksResponseMapperUtils.extractGenre(volumeInfo);
         assertEquals("Adventure", genre, "Should return first category if mainCategory is not available");
     }
 
@@ -118,7 +117,7 @@ class MapperUtilsTest {
         volumeInfo.setMainCategory("");
         volumeInfo.setCategories(List.of("Adventure", "Fantasy"));
 
-        String genre = MapperUtils.extractGenre(volumeInfo);
+        String genre = GoogleBooksResponseMapperUtils.extractGenre(volumeInfo);
         assertEquals("Adventure", genre, "Should return first category if mainCategory is not available");
     }
 
@@ -128,7 +127,7 @@ class MapperUtilsTest {
         volumeInfo.setMainCategory(null);
         volumeInfo.setCategories(List.of());
 
-        String genre = MapperUtils.extractGenre(volumeInfo);
+        String genre = GoogleBooksResponseMapperUtils.extractGenre(volumeInfo);
         assertEquals("", genre, "Should return an empty string if both mainCategory and categories are not available");
     }
 
@@ -138,7 +137,7 @@ class MapperUtilsTest {
         volumeInfo.setMainCategory(null);
         volumeInfo.setCategories(null);
 
-        String genre = MapperUtils.extractGenre(volumeInfo);
+        String genre = GoogleBooksResponseMapperUtils.extractGenre(volumeInfo);
         assertEquals("", genre, "Should return an empty string if both mainCategory and categories are null");
     }
 
@@ -147,7 +146,7 @@ class MapperUtilsTest {
         GoogleBookResponse.VolumeInfo volumeInfo = new GoogleBookResponse.VolumeInfo();
         volumeInfo.setMainCategory("Science & Technology");
 
-        String genre = MapperUtils.extractGenre(volumeInfo);
+        String genre = GoogleBooksResponseMapperUtils.extractGenre(volumeInfo);
         assertEquals("Science and Technology", genre, "Should return mainCategory with ampersand replaced by 'and'");
     }
 
@@ -156,19 +155,19 @@ class MapperUtilsTest {
     void extractLanguage() {
         String languageCode = "en";
 
-        String language = MapperUtils.extractLanguage(languageCode);
+        String language = GoogleBooksResponseMapperUtils.extractLanguage(languageCode);
         assertEquals("EN", language, "Should return the language if available");
     }
 
     @Test
     void extractLanguage_Null() {
-        String language = MapperUtils.extractLanguage(null);
+        String language = GoogleBooksResponseMapperUtils.extractLanguage(null);
         assertEquals("", language, "Should return an empty string if language is null");
     }
 
     @Test
     void extractLanguage_Empty() {
-        String language = MapperUtils.extractLanguage("");
+        String language = GoogleBooksResponseMapperUtils.extractLanguage("");
         assertEquals("", language, "Should return an empty string if language is empty");
     }
 
@@ -176,7 +175,7 @@ class MapperUtilsTest {
     void extractLanguage_LocaleCode() {
         String languageCode = "pt-BR";
 
-        String language = MapperUtils.extractLanguage(languageCode);
+        String language = GoogleBooksResponseMapperUtils.extractLanguage(languageCode);
         assertEquals("PT", language, "Should return the language code in uppercase");
     }
 
@@ -185,19 +184,19 @@ class MapperUtilsTest {
     void extractPageCount() {
         Integer pageCount = 350;
 
-        Integer pages = MapperUtils.extractPageCount(pageCount);
+        Integer pages = GoogleBooksResponseMapperUtils.extractPageCount(pageCount);
         assertEquals(350, pages, "Should return the page count if available");
     }
 
     @Test
     void extractPageCount_Null() {
-        Integer pages = MapperUtils.extractPageCount(null);
+        Integer pages = GoogleBooksResponseMapperUtils.extractPageCount(null);
         assertEquals(0, pages, "Should return 0 if page count is null");
     }
 
     @Test
     void extractPageCount_Zero() {
-        Integer pages = MapperUtils.extractPageCount(0);
+        Integer pages = GoogleBooksResponseMapperUtils.extractPageCount(0);
         assertEquals(0, pages, "Should return 0 if page count is zero");
     }
 
@@ -206,13 +205,13 @@ class MapperUtilsTest {
     void extractPublisher(){
         String publisher = "Penguin Random House";
 
-        String pub = MapperUtils.extractPublisher(publisher);
+        String pub = GoogleBooksResponseMapperUtils.extractPublisher(publisher);
         assertEquals("Penguin Random House", pub, "Should return the publisher if available");
     }
 
     @Test
     void extractPublisher_Null() {
-        String pub = MapperUtils.extractPublisher(null);
+        String pub = GoogleBooksResponseMapperUtils.extractPublisher(null);
         assertEquals("", pub, "Should return an empty string if publisher is null");
     }
 
@@ -221,19 +220,19 @@ class MapperUtilsTest {
     void extractPublishedDate() {
         String publishedDate = "2023-10-01";
 
-        String date = MapperUtils.extractPublishedDate(publishedDate);
+        String date = GoogleBooksResponseMapperUtils.extractPublishedDate(publishedDate);
         assertEquals("2023", date, "Should return the published year if available");
     }
 
     @Test
     void extractPublishedDate_Null() {
-        String date = MapperUtils.extractPublishedDate(null);
+        String date = GoogleBooksResponseMapperUtils.extractPublishedDate(null);
         assertEquals("", date, "Should return an empty string if published date is null");
     }
 
     @Test
     void extractPublishedDate_Empty() {
-        String date = MapperUtils.extractPublishedDate("");
+        String date = GoogleBooksResponseMapperUtils.extractPublishedDate("");
         assertEquals("", date, "Should return an empty string if published date is empty");
     }
 
@@ -241,7 +240,7 @@ class MapperUtilsTest {
     void extractPublishedDate_YearOnly() {
         String publishedDate = "2023";
 
-        String date = MapperUtils.extractPublishedDate(publishedDate);
+        String date = GoogleBooksResponseMapperUtils.extractPublishedDate(publishedDate);
         assertEquals("2023", date, "Should return the year if the published date is just a year");
     }
 
@@ -249,7 +248,7 @@ class MapperUtilsTest {
     void extractPublishedDate_YearAtEnd() {
         String publishedDate = "10-2023";
 
-        String date = MapperUtils.extractPublishedDate(publishedDate);
+        String date = GoogleBooksResponseMapperUtils.extractPublishedDate(publishedDate);
         assertEquals("2023", date, "Should return the year if the published date is in YYYY-MM format");
     }
 
@@ -257,7 +256,7 @@ class MapperUtilsTest {
     void extractPublishedDate_YearAtStart() {
         String publishedDate = "2023/10";
 
-        String date = MapperUtils.extractPublishedDate(publishedDate);
+        String date = GoogleBooksResponseMapperUtils.extractPublishedDate(publishedDate);
         assertEquals("2023", date, "Should return the year if the published date is in YYYY/MM format");
     }
 
@@ -265,7 +264,7 @@ class MapperUtilsTest {
     void extractPublishedDate_NoYearFound() {
         String publishedDate = "October 202";
 
-        String date = MapperUtils.extractPublishedDate(publishedDate);
+        String date = GoogleBooksResponseMapperUtils.extractPublishedDate(publishedDate);
         assertEquals("", date, "Should return an empty string if no year is found in the published date");
     }
 

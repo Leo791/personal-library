@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MapperUtils {
+public class GoogleBooksResponseMapperUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(MapperUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(GoogleBooksResponseMapperUtils.class);
 
     /**
      * Extracts the first author from a list of authors.
