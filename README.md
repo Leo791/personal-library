@@ -2,9 +2,7 @@
 
 ## 1. Project Overview
 The **Personal Library Organizer** is a web application designed to help users catalog, search, and manage their personal book collections.  
-Users can enter a book’s **ISBN** to automatically retrieve its details from a public book information API (e.g., Open Library or Google Books API) and store it in a **PostgreSQL** database. The application allows easy searching and filtering of the collection by **author**, **title** or **genre**.
-
----
+Users can enter a book’s **ISBN** to automatically retrieve its details from a public book information API (Google Books API) and store it in a **PostgreSQL** database. The application allows easy searching and filtering of the collection by **author**, **title** or **genre**.
 
 ## 2. Objectives
 - Provide a **simple and intuitive interface** for managing personal book collections.
@@ -16,18 +14,19 @@ Users can enter a book’s **ISBN** to automatically retrieve its details from a
 ## 3. Functional Requirements
 
 ### 3.1 Book Entry
-- User provides a valid ISBN via the application’s interface.
+- User provides a valid ISBN (validated by check digit) via the application’s interface.
 - The system retrieves book details (title, author, genre, publication date, publisher, description, language, page count) from a public API.
 - Retrieved details are stored in the PostgreSQL database.
 - Duplicate entries are prevented (based on ISBN).
-- The description must always be stored in the same language as the book edition. If the description is provided in another language, the system will automatically translate it before saving.
+- The description must always be stored in the same language as the book edition. If the description is provided in another language, the system will translate it before saving (leveraging LibreTranslate API).
 
 ### 3.2 Search & Filtering
 - User can search the database by:
-    - **Title** (full match)
-    - **Author** (full match)
+    - **Title**
+    - **Author**
     - **Genre**
-- Search results should be displayed in a list with key book details.
+    - **ISBN**
+- Search results are displayed in a list with key book details.
 
 ### 3.3 Data Management
 - User can view the entire collection in a list format.
