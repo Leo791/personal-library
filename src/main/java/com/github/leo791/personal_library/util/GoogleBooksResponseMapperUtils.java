@@ -94,18 +94,6 @@ public class GoogleBooksResponseMapperUtils {
     }
 
     /**
-     * Extracts the page count from a given Integer.
-     * If the Integer is null or less than or equal to zero, returns 0.
-     *
-     * @param pageCount The page count to extract from
-     * @return The extracted page count, or 0 if input is null or less than or equal to zero
-     */
-
-    public static Integer extractPageCount(Integer pageCount) {
-        return (pageCount != null && pageCount > 0) ? pageCount : 0;
-    }
-
-    /**
      * Extracts the publisher from a given string.
      * If the string is null, returns an empty string.
      *
@@ -114,29 +102,6 @@ public class GoogleBooksResponseMapperUtils {
      */
     public static String extractPublisher(String publisher) {
         return (publisher != null) ? publisher : "";
-    }
-
-    /**
-     * Extracts the published date from a given string.
-     * If the string is null or empty, returns an empty string.
-     * The published date is expected to be in ISO 8601 format (e.g., "2023-10-01").
-     * We will return just the year (e.g., "2023").
-     *
-     * @param publishedDate The published date string to extract from
-     * @return The extracted year as a string, or an empty string if input is null or empty
-     */
-    public static String extractPublishedDate(String publishedDate) {
-        if (publishedDate == null || publishedDate.isBlank()) {
-            return "";
-        }
-        Pattern pattern = Pattern.compile("\\b(\\d{4})\\b");
-        Matcher matcher = pattern.matcher(publishedDate);
-
-        if(matcher.find()) {
-            return matcher.group();
-        }
-        return "";
-
     }
 
     /**

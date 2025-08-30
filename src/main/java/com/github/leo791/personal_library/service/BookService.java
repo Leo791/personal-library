@@ -2,14 +2,17 @@ package com.github.leo791.personal_library.service;
 
 import com.github.leo791.personal_library.client.GoogleBooksClient;
 import com.github.leo791.personal_library.client.LibreTranslateClient;
+import com.github.leo791.personal_library.client.OpenLibraryClient;
 import com.github.leo791.personal_library.exception.BookExistsException;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.model.entity.GoogleBookResponse;
+import com.github.leo791.personal_library.model.entity.OpenLibraryBookResponse;
 import com.github.leo791.personal_library.repository.BookRepository;
 import com.github.leo791.personal_library.exception.BookNotFoundException;
 import com.github.leo791.personal_library.util.BookUtils;
 import com.github.leo791.personal_library.util.IsbnUtils;
+import com.github.leo791.personal_library.util.OpenLibraryResponseMapperUtils;
 import com.github.leo791.personal_library.util.TranslationUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -28,14 +31,17 @@ public class BookService {
     private final BookMapper bookMapper;
     private final GoogleBooksClient googleBooksClient;
     private final LibreTranslateClient libreTranslateClient;
+    private final OpenLibraryClient openLibraryClient;
     private static final Logger log = LoggerFactory.getLogger(BookService.class);
 
     public BookService(BookRepository bookRepository, BookMapper bookMapper,
-                       GoogleBooksClient googleBooksClient, LibreTranslateClient libreTranslateClient) {
+                       GoogleBooksClient googleBooksClient, LibreTranslateClient libreTranslateClient,
+                       OpenLibraryClient openLibraryClient) {
         this.bookRepository = bookRepository;
         this.bookMapper = bookMapper;
         this.googleBooksClient = googleBooksClient;
         this.libreTranslateClient = libreTranslateClient;
+        this.openLibraryClient = openLibraryClient;
     }
 
     // ================= Insert / Update =================
@@ -48,7 +54,7 @@ public class BookService {
      * @param isbn the ISBN of the book to insert
      * @return the inserted BookDTO
      */
-    public BookDTO insertBookFromIsbn(String isbn) {
+    public BookDTO insertBookFromIsbn(String isbn) throws Exception {
         Book book = null;
         // Validate the ISBN format
         if(!IsbnUtils.isValidIsbn(isbn)) {
@@ -58,15 +64,21 @@ public class BookService {
         if (bookRepository.existsByIsbn(isbn)) {
             throw new BookExistsException(isbn);
         }
-        // Fetch the book details from Google Books API
+        // Try to fetch the book from Google Books API
         GoogleBookResponse googleBook = googleBooksClient.fetchBookByIsbn(isbn);
-        if (GoogleBookResponse.getTotalItems() == 0) {
-            throw new BookNotFoundException(isbn, "Google Books API");
+        // If book is found in Google Books API, map it to a Book entity
+        if (GoogleBookResponse.getTotalItems() != 0) {
+            log.info("Book with ISBN {} found in Google Books API", isbn);
+            book = bookMapper.fromGoogleResponseToBook(googleBook);
+            BookUtils.capitalizeStringFields(book);
+            // If book is not found in Google Books API, try Open Library API
+        } else {
+            log.warn("Book with ISBN {} not found in Google Books API. Trying Open Library API", isbn);
+            OpenLibraryBookResponse openLibraryBook = searchBookOnOpenLibrary(isbn);
+            String author = getAuthorFromOpenLibraryBook(openLibraryBook.getAuthors());
+            book = bookMapper.fromOpenLibraryResponseToBook(openLibraryBook, author);
+            BookUtils.capitalizeStringFields(book);
         }
-
-        // Map the GoogleBookResponse to a Book entity
-        book = bookMapper.fromGoogleResponseToBook(googleBook);
-        BookUtils.capitalizeStringFields(book);
 
         // Check if description language matches the book language, if not translate it
         String detectedLanguage = detectDescriptionLanguage(book.getDescription());
@@ -195,6 +207,10 @@ public class BookService {
     // ================= Private Methods =================
 
    private String detectDescriptionLanguage(String description) {
+         if (description == null || description.isBlank()) {
+              log.warn("Description is empty or null, cannot detect language.");
+              return "unknown";
+         }
        try {
            return libreTranslateClient.detect(description);
        } catch (Exception e) {
@@ -203,4 +219,24 @@ public class BookService {
        }
    }
 
+   private OpenLibraryBookResponse searchBookOnOpenLibrary(String isbn) {
+       try {
+           OpenLibraryBookResponse openLibraryBook = openLibraryClient.fetchBookByIsbn(isbn);
+           log.info("Book with ISBN {} found in Open Library API", isbn);
+           return openLibraryBook;
+       } catch (Exception e) {
+           log.error("Error fetching book with ISBN {} from Open Library API: {}", isbn, e.getMessage());
+           throw new BookNotFoundException(isbn, "Google Books or Open Library APIs");
+       }
+   }
+
+    private String getAuthorFromOpenLibraryBook(List<OpenLibraryBookResponse.AuthorKey> authors) throws Exception {
+        String author = OpenLibraryResponseMapperUtils.extractFirstAuthor(authors);
+        if (author.isBlank()) {
+            log.warn("Author is not provided by Open Library API");
+            return "";
+        } else {
+            return openLibraryClient.fetchAuthorByKey(author);
+        }
+    }
 }

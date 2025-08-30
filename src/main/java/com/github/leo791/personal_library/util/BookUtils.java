@@ -29,6 +29,9 @@ public class BookUtils{
                     } else if ("description".equals(field.getName())) {
                         // Do not capitalize description, leave it as is
                         continue;
+                    } else if ("author".equals(field.getName())) {
+                        // Capitalize each part of the author's name
+                            field.set(book, capitalizeAuthorName(value));
                     } else {
                             field.set(book, WordUtils.capitalizeFully(value));
                     }
@@ -37,6 +40,25 @@ public class BookUtils{
                 }
             }
         }
+    }
+
+    public static String capitalizeAuthorName(String name) {
+        String[] parts = name.split(" ");
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i].matches("([a-zA-Z]\\.)+")) {
+                // Capitalize each initial before a dot
+                StringBuilder sb = new StringBuilder();
+                for (String initial : parts[i].split("\\.")) {
+                    if (!initial.isEmpty()) {
+                        sb.append(initial.toUpperCase()).append(".");
+                    }
+                }
+                parts[i] = sb.toString();
+            } else {
+                parts[i] = WordUtils.capitalizeFully(parts[i]);
+            }
+        }
+        return String.join(" ", parts);
     }
 
     /**

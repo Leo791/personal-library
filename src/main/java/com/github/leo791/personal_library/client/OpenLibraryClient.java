@@ -6,10 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leo791.personal_library.model.entity.OpenLibraryBookResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+@Component
 public class OpenLibraryClient {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OpenLibraryClient.class);
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
@@ -20,14 +23,19 @@ public class OpenLibraryClient {
 
 
     public OpenLibraryBookResponse fetchBookByIsbn(String isbn) {
-        String url = "https://openlibrary.org/isbn/" + isbn;
-        return restTemplate.getForObject(url, OpenLibraryBookResponse.class);
+        String url = "https://openlibrary.org/isbn/" + isbn + ".json";
+        try {
+            return restTemplate.getForObject(url, OpenLibraryBookResponse.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching book with ISBN " + isbn + ": " + e.getMessage(), e);
+        }
     }
 
     public String fetchAuthorByKey(String authorKey) throws Exception {
         String url = "https://openlibrary.org" + authorKey + ".json";
 
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        log.info("Author response: {}", response.getBody());
         JsonNode jsonNode = objectMapper.readTree(response.getBody());
 
         if (response.getStatusCode().is2xxSuccessful() && jsonNode.has("name")) {

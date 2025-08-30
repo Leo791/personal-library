@@ -179,27 +179,6 @@ class GoogleBooksResponseMapperUtilsTest {
         assertEquals("PT", language, "Should return the language code in uppercase");
     }
 
-    // ========== extractPageCount ==========
-    @Test
-    void extractPageCount() {
-        Integer pageCount = 350;
-
-        Integer pages = GoogleBooksResponseMapperUtils.extractPageCount(pageCount);
-        assertEquals(350, pages, "Should return the page count if available");
-    }
-
-    @Test
-    void extractPageCount_Null() {
-        Integer pages = GoogleBooksResponseMapperUtils.extractPageCount(null);
-        assertEquals(0, pages, "Should return 0 if page count is null");
-    }
-
-    @Test
-    void extractPageCount_Zero() {
-        Integer pages = GoogleBooksResponseMapperUtils.extractPageCount(0);
-        assertEquals(0, pages, "Should return 0 if page count is zero");
-    }
-
     // ========== extractPublisher ==========
     @Test
     void extractPublisher(){
@@ -213,59 +192,6 @@ class GoogleBooksResponseMapperUtilsTest {
     void extractPublisher_Null() {
         String pub = GoogleBooksResponseMapperUtils.extractPublisher(null);
         assertEquals("", pub, "Should return an empty string if publisher is null");
-    }
-
-    // ========== extractPublishedDate ==========
-    @Test
-    void extractPublishedDate() {
-        String publishedDate = "2023-10-01";
-
-        String date = GoogleBooksResponseMapperUtils.extractPublishedDate(publishedDate);
-        assertEquals("2023", date, "Should return the published year if available");
-    }
-
-    @Test
-    void extractPublishedDate_Null() {
-        String date = GoogleBooksResponseMapperUtils.extractPublishedDate(null);
-        assertEquals("", date, "Should return an empty string if published date is null");
-    }
-
-    @Test
-    void extractPublishedDate_Empty() {
-        String date = GoogleBooksResponseMapperUtils.extractPublishedDate("");
-        assertEquals("", date, "Should return an empty string if published date is empty");
-    }
-
-    @Test
-    void extractPublishedDate_YearOnly() {
-        String publishedDate = "2023";
-
-        String date = GoogleBooksResponseMapperUtils.extractPublishedDate(publishedDate);
-        assertEquals("2023", date, "Should return the year if the published date is just a year");
-    }
-
-    @Test
-    void extractPublishedDate_YearAtEnd() {
-        String publishedDate = "10-2023";
-
-        String date = GoogleBooksResponseMapperUtils.extractPublishedDate(publishedDate);
-        assertEquals("2023", date, "Should return the year if the published date is in YYYY-MM format");
-    }
-
-    @Test
-    void extractPublishedDate_YearAtStart() {
-        String publishedDate = "2023/10";
-
-        String date = GoogleBooksResponseMapperUtils.extractPublishedDate(publishedDate);
-        assertEquals("2023", date, "Should return the year if the published date is in YYYY/MM format");
-    }
-
-    @Test
-    void extractPublishedDate_NoYearFound() {
-        String publishedDate = "October 202";
-
-        String date = GoogleBooksResponseMapperUtils.extractPublishedDate(publishedDate);
-        assertEquals("", date, "Should return an empty string if no year is found in the published date");
     }
 
     // ========== cleanDescription ==========

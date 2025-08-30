@@ -2,9 +2,11 @@ package com.github.leo791.personal_library.service;
 
 import com.github.leo791.personal_library.client.GoogleBooksClient;
 import com.github.leo791.personal_library.client.LibreTranslateClient;
+import com.github.leo791.personal_library.client.OpenLibraryClient;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.model.entity.GoogleBookResponse;
+import com.github.leo791.personal_library.model.entity.OpenLibraryBookResponse;
 import com.github.leo791.personal_library.repository.BookRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +29,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
-    private GoogleBookResponse mockResponse;
+    private GoogleBookResponse mockGoogleResponse;
+    private OpenLibraryBookResponse mockOpenLibraryResponse;
     // This is a valid ISBN for testing purposes.
     String isbn = "9780553212471";
     // This is an invalid ISBN for testing purposes.
@@ -69,6 +72,9 @@ class BookServiceTest {
 
     @Mock
     private LibreTranslateClient libreTranslateClient;
+    
+    @Mock
+    private OpenLibraryClient openLibraryClient;
 
     @InjectMocks
     private BookService bookService;
@@ -86,14 +92,28 @@ class BookServiceTest {
         item.setVolumeInfo(volumeInfo);
 
 
-        this.mockResponse = new GoogleBookResponse();
-        this.mockResponse.setTotalItems(1);
-        this.mockResponse.setItems(List.of(item));
+        this.mockGoogleResponse = new GoogleBookResponse();
+        this.mockGoogleResponse.setTotalItems(1);
+        this.mockGoogleResponse.setItems(List.of(item));
+    }
+    
+    private void setUpOpenLibraryResponse() {
+        // Arrange an openLibraryBookResponse response
+        this.mockOpenLibraryResponse = new OpenLibraryBookResponse();
+        this.mockOpenLibraryResponse.setTitle("Frankenstein");
+        this.mockOpenLibraryResponse.setNumberOfPages(299);
+        OpenLibraryBookResponse.AuthorKey authorKey = new OpenLibraryBookResponse.AuthorKey();
+        authorKey.setKey("/author/OL12345A");
+        this.mockOpenLibraryResponse.setAuthors(List.of(authorKey));
+        this.mockOpenLibraryResponse.setIsbn10(List.of("1234567890"));
+        this.mockOpenLibraryResponse.setLanguages(List.of(new OpenLibraryBookResponse.LanguageKey("/languages/eng")));
+        this.mockOpenLibraryResponse.setPublishers(List.of("Penguin Classics"));
+        this.mockOpenLibraryResponse.setPublishDate("1818");
     }
 
     // ================ Insert Book From ISBN =================
     @Test
-    void insertBookFromIsbn_NewBook() throws Exception {
+    void insertBookFromIsbn_BookExistsInGoogleApi() throws Exception {
         // Arrange
 
         setUpGoogleBooksResponse();
@@ -103,7 +123,7 @@ class BookServiceTest {
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
 
         // Simulate the GoogleBooksClient returning a book response
-        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockResponse);
+        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
         when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
                 .thenReturn(Frankestein);
         when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
@@ -123,6 +143,96 @@ class BookServiceTest {
         Book savedBook = captor.getValue();
         assertEquals("Frankenstein", savedBook.getTitle());
     }
+    
+    @Test
+    void insertBookFromIsbn_BookExistsInOpenApi() throws Exception {
+        // Arrange
+        String isbn = "9780441172719";
+        GoogleBookResponse googleBookResponse = new GoogleBookResponse();
+        googleBookResponse.setTotalItems(0);
+        setUpOpenLibraryResponse();
+
+        // Open Library response lacks description and genre, test handling of null
+        Frankestein.setDescription(null);
+        Frankestein.setGenre(null);
+        // Mock
+        when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
+        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(googleBookResponse);
+        when(openLibraryClient.fetchBookByIsbn(isbn)).thenReturn(mockOpenLibraryResponse);
+        when(openLibraryClient.fetchAuthorByKey("/author/OL12345A"))
+                .thenReturn("Mary Shelley");
+        when(bookMapper.fromOpenLibraryResponseToBook(mockOpenLibraryResponse, "Mary Shelley"))
+                .thenReturn(Frankestein);
+        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
+
+        BookDTO result = bookService.insertBookFromIsbn(isbn);
+
+        // Assert
+        assertEquals(FrankesteinDTO, result);
+        verify(bookRepository).existsByIsbn(isbn);
+        verify(bookMapper).bookToDto(Frankestein);
+        verify(libreTranslateClient, never()).detect(any());
+
+        ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
+        verify(bookRepository).save(captor.capture());
+        Book savedBook = captor.getValue();
+        assertEquals("Frankenstein", savedBook.getTitle());
+    }
+
+    @Test
+    void insertBookFromIsbn_BookExistsInOpenApi_WithoutAuthor() throws Exception {
+        // Arrange
+        String isbn = "9780441172719";
+        GoogleBookResponse googleBookResponse = new GoogleBookResponse();
+        googleBookResponse.setTotalItems(0);
+        setUpOpenLibraryResponse();
+        mockOpenLibraryResponse.setAuthors(List.of());
+
+        // Open Library response lacks description and genre, test handling of null
+        Frankestein.setDescription(null);
+        Frankestein.setGenre(null);
+        Frankestein.setAuthor(null);
+
+        // Mock
+        when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
+        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(googleBookResponse);
+        when(openLibraryClient.fetchBookByIsbn(isbn)).thenReturn(mockOpenLibraryResponse);
+
+        when(bookMapper.fromOpenLibraryResponseToBook(mockOpenLibraryResponse, ""))
+                .thenReturn(Frankestein);
+        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
+
+        BookDTO result = bookService.insertBookFromIsbn(isbn);
+
+        // Assert
+        assertEquals(FrankesteinDTO, result);
+        verify(bookRepository).existsByIsbn(isbn);
+        verify(bookMapper).bookToDto(Frankestein);
+        verify(libreTranslateClient, never()).detect(any());
+
+        ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
+        verify(bookRepository).save(captor.capture());
+        Book savedBook = captor.getValue();
+        assertEquals("Frankenstein", savedBook.getTitle());
+    }
+
+   @Test
+   void insertBookFromIsbn_GoogleAndOpenApisFail() {
+       // Arrange
+       String isbn = "9780441172719";
+       GoogleBookResponse googleBookResponse = new GoogleBookResponse();
+       googleBookResponse.setTotalItems(0);
+
+       // Mock
+       when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
+       when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(googleBookResponse);
+       when(openLibraryClient.fetchBookByIsbn(isbn)).thenThrow(new RuntimeException("Open Library API error"));
+
+       // Assert
+       RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBookFromIsbn(isbn));
+       assertEquals("Book with ISBN 9780441172719 not found in Google Books or Open Library APIs", exception.getMessage());
+       verify(bookRepository).existsByIsbn(isbn);
+   }
 
     @Test
     void insertBookFromIsbn_ResponseHasNoIsbn() throws Exception {
@@ -135,7 +245,7 @@ class BookServiceTest {
 
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
-        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockResponse);
+        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
         when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
                 .thenReturn(Frankestein);
         when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
@@ -175,27 +285,13 @@ class BookServiceTest {
     }
 
     @Test
-    void insertBookFromIsbn_BookNotFound() {
-        String isbn = "9780441172719";
-        GoogleBookResponse responseWithNullItems = new GoogleBookResponse();
-        responseWithNullItems.setTotalItems(0);;
-
-        when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
-        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(responseWithNullItems);
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBookFromIsbn(isbn));
-        assertEquals("Book with ISBN 9780441172719 not found in Google Books API", exception.getMessage());
-        verify(bookRepository).existsByIsbn(isbn);
-    }
-
-    @Test
     void insertBookFromIsbn_DatabaseError() throws Exception {
         // Arrange
         String isbn = "9780441172719";
         setUpGoogleBooksResponse();
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
-        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockResponse);
+        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
         when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
                 .thenReturn(Frankestein);
         when(libreTranslateClient.detect(Frankestein.getDescription()))
@@ -223,7 +319,7 @@ class BookServiceTest {
 
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
-        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockResponse);
+        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
         when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
                 .thenReturn(Frankestein);
         when(libreTranslateClient.detect(Frankestein.getDescription()))
@@ -248,7 +344,7 @@ class BookServiceTest {
 
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
-        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockResponse);
+        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
         when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
                 .thenReturn(Frankestein);
         // Simulate detection failure
@@ -274,7 +370,7 @@ class BookServiceTest {
 
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
-        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockResponse);
+        when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
         when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
                 .thenReturn(Frankestein);
         when(libreTranslateClient.detect(Frankestein.getDescription()))

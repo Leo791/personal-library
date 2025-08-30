@@ -33,7 +33,7 @@ public class BookController {
      * @param isbn the ISBN (string) of the book to be added
      */
     @PostMapping
-    public ResponseEntity<BookDTO> addNewBook(@RequestParam String isbn) {
+    public ResponseEntity<BookDTO> addNewBook(@RequestParam String isbn) throws Exception {
         BookDTO createdBook = bookService.insertBookFromIsbn(isbn);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdBook);
     }

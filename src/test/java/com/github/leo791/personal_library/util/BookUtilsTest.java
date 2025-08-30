@@ -42,4 +42,19 @@ class BookUtilsTest {
         assertEquals("F. Scott Fitzgerald", book.getAuthor(), "Author should be updated to full name version");
         assertEquals("Fiction", book.getGenre(), "Genre should remain unchanged");
     }
+
+    @Test
+    void testCapitalizeAuthorName(){
+        String author = "j.k. rowling";
+        String capitalizedAuthor = BookUtils.capitalizeAuthorName(author);
+        assertEquals("J.K. Rowling", capitalizedAuthor, "Author name should be properly capitalized");
+
+        String authorWithSpaces = "george r. r. martin  ";
+        String capitalizedAuthorWithSpaces = BookUtils.capitalizeAuthorName(authorWithSpaces);
+        assertEquals("George R. R. Martin", capitalizedAuthorWithSpaces, "Author name should be properly capitalized and trimmed");
+
+        String authorNormal = "agatha christie";
+        String capitalizedAuthorNormal = BookUtils.capitalizeAuthorName(authorNormal);
+        assertEquals("Agatha Christie", capitalizedAuthorNormal, "Author name should be capitalized");
+    }
 }

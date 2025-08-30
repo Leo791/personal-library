@@ -29,7 +29,7 @@ public class Book {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Size(max=2, message="Language must be a 2-letter code")
+    @Size(max=3, message="Language must be a 2 or 3 letter code")
     private String language;
     private String publisher;
 

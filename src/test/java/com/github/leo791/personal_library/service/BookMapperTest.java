@@ -3,6 +3,7 @@ package com.github.leo791.personal_library.service;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.model.entity.GoogleBookResponse;
+import com.github.leo791.personal_library.model.entity.OpenLibraryBookResponse;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class BookMapperTest {
 
     private GoogleBookResponse mockGoogleBookResponse;
+    private OpenLibraryBookResponse mockOpenLibraryBookResponse;
 
     Book HitchikerBook = new Book("978-3-16-148410-0", "The Hitchhiker's Guide to the Galaxy", "Douglas Adams", "Science Fiction",
             "A comedic science fiction series that follows the adventures of Arthur Dent, an unwitting human who is swept off Earth before its destruction.",
@@ -43,6 +45,21 @@ class BookMapperTest {
         this.mockGoogleBookResponse = new GoogleBookResponse();
         this.mockGoogleBookResponse.setTotalItems(1);
         this.mockGoogleBookResponse.setItems(List.of(item));
+    }
+
+    private void setUpOpenLibraryResponse() {
+        // Arrange an openLibraryBookResponse response
+        this.mockOpenLibraryBookResponse = new OpenLibraryBookResponse();
+        this.mockOpenLibraryBookResponse.setTitle("Frankenstein");
+        this.mockOpenLibraryBookResponse.setNumberOfPages(299);
+        OpenLibraryBookResponse.AuthorKey authorKey = new OpenLibraryBookResponse.AuthorKey();
+        authorKey.setKey("/author/OL12345A");
+        this.mockOpenLibraryBookResponse.setAuthors(List.of(authorKey));
+        this.mockOpenLibraryBookResponse.setIsbn10(List.of("1234567890"));
+        this.mockOpenLibraryBookResponse.setLanguages(List.of(new OpenLibraryBookResponse.LanguageKey("/languages/eng")));
+        this.mockOpenLibraryBookResponse.setPublishers(List.of("Penguin Classics"));
+        this.mockOpenLibraryBookResponse.setPublishDate("1818");
+
     }
 
     @Test
@@ -173,5 +190,31 @@ class BookMapperTest {
         var book = bookMapper.fromGoogleResponseToBook(emptyResponse);
 
         assertNull(book, "Should return null if there are no items in the response");
+    }
+
+    @Test
+    void fromOpenLibraryResponseToBook(){
+        setUpOpenLibraryResponse();
+        BookMapper bookMapper = new BookMapper();
+        var book = bookMapper.fromOpenLibraryResponseToBook(mockOpenLibraryBookResponse, "Mary Shelley");
+
+        assertNotNull(book);
+        assertEquals("1234567890", book.getIsbn());
+        assertEquals("Frankenstein", book.getTitle());
+        assertEquals("Mary Shelley", book.getAuthor());
+        assertEquals("", book.getGenre()); // Genre is not set in mock
+        assertEquals("", book.getDescription()); // Description is not set in mock
+        assertEquals("ENG", book.getLanguage());
+        assertEquals(299, book.getPageCount());
+        assertEquals("Penguin Classics", book.getPublisher());
+        assertEquals("1818", book.getPublishedDate());
+    }
+
+    @Test
+    void fromOpenLibraryResponseToBook_Null(){
+        BookMapper bookMapper = new BookMapper();
+        var book = bookMapper.fromOpenLibraryResponseToBook(null, "Some Author");
+
+        assertNull(book, "Should return null if the OpenLibraryBookResponse is null");
     }
 }
