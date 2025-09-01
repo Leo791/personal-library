@@ -1,10 +1,6 @@
 package com.github.leo791.personal_library.controller;
 
-import com.github.leo791.personal_library.exception.BookExistsException;
-import com.github.leo791.personal_library.exception.BookNotFoundException;
 import com.github.leo791.personal_library.model.dto.BookDTO;
-import com.github.leo791.personal_library.model.dto.ErrorResponse;
-import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.service.BookService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +34,20 @@ public class BookController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdBook);
     }
 
+
+    /**
+     * This method handles POST requests to manually create a new book.
+     * It expects a JSON object in the request body, with the data to create the book.
+     * If the book is successfully created, it returns a 201 Created status with the book data in the response body.
+     * @param book the book object to be created
+     */
+    @PostMapping("/manual")
+    public ResponseEntity<BookDTO> manualCreateBook(@RequestBody BookDTO book) {
+        BookDTO createdBook = bookService.manualCreateBook(book);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdBook);
+    }
+
+
     /**
      * This method handles PUT requests to update an existing book.
      * It expects a JSON object in the request body, with the data to update
@@ -50,7 +60,6 @@ public class BookController {
         BookDTO updatedBook = bookService.updateBook(book);
         return ResponseEntity.ok().body(updatedBook);
     }
-
 
     // ================= Search =================
 

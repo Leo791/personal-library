@@ -230,7 +230,7 @@ class BookServiceTest {
 
        // Assert
        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.insertBookFromIsbn(isbn));
-       assertEquals("Book with ISBN 9780441172719 not found in Google Books or Open Library APIs", exception.getMessage());
+       assertEquals("Book with ISBN 9780441172719 not found in external APIs", exception.getMessage());
        verify(bookRepository).existsByIsbn(isbn);
    }
 
