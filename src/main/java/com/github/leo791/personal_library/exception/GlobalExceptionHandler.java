@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 ex.getIsbn(),
                 "Look up the book on the library.",
-                Map.of("searchBook", "/api/v1/books/{isbn}" + ex.getIsbn())
+                Map.of("searchBook", "/api/v1/books/" + ex.getIsbn())
         );
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 ex.getIsbn(),
                 "Insert the book first.",
-                Map.of("insertBook", "/api/v1/books/{isbn}" + ex.getIsbn())
+                Map.of("insertBook", "/api/v1/books/" + ex.getIsbn())
 
         );
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
