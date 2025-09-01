@@ -37,11 +37,11 @@ class BookServiceTest {
     String invalidIsbn = "9783161484101";
 
     // Sample book data for testing
-    Book Frankestein = new Book(isbn, "Frankenstein", "Mary Shelley", "Horror",
+    Book Frankenstein = new Book(isbn, "Frankenstein", "Mary Shelley", "Horror",
             "A novel about a scientist who creates a creature in an unorthodox experiment.",
             "EN", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
 
-    BookDTO FrankesteinDTO = new BookDTO(isbn, "Frankenstein", "Mary Shelley", "Horror",
+    BookDTO FrankensteinDTO = new BookDTO(isbn, "Frankenstein", "Mary Shelley", "Horror",
             "A novel about a scientist who creates a creature in an unorthodox experiment.",
             "EN", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
 
@@ -125,18 +125,18 @@ class BookServiceTest {
         // Simulate the GoogleBooksClient returning a book response
         when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
         when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
-                .thenReturn(Frankestein);
-        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
-        when(libreTranslateClient.detect(Frankestein.getDescription()))
+                .thenReturn(Frankenstein);
+        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankensteinDTO);
+        when(libreTranslateClient.detect(Frankenstein.getDescription()))
                 .thenReturn("en");
 
         // Act
         BookDTO result = bookService.insertBookFromIsbn(isbn);
 
         // Assert
-        assertEquals(FrankesteinDTO, result);
+        assertEquals(FrankensteinDTO, result);
         verify(bookRepository).existsByIsbn(isbn);
-        verify(bookMapper).bookToDto(Frankestein);
+        verify(bookMapper).bookToDto(Frankenstein);
 
         ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
         verify(bookRepository).save(captor.capture());
@@ -153,8 +153,8 @@ class BookServiceTest {
         setUpOpenLibraryResponse();
 
         // Open Library response lacks description and genre, test handling of null
-        Frankestein.setDescription(null);
-        Frankestein.setGenre(null);
+        Frankenstein.setDescription(null);
+        Frankenstein.setGenre(null);
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
         when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(googleBookResponse);
@@ -162,15 +162,15 @@ class BookServiceTest {
         when(openLibraryClient.fetchAuthorByKey("/author/OL12345A"))
                 .thenReturn("Mary Shelley");
         when(bookMapper.fromOpenLibraryResponseToBook(mockOpenLibraryResponse, "Mary Shelley"))
-                .thenReturn(Frankestein);
-        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
+                .thenReturn(Frankenstein);
+        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankensteinDTO);
 
         BookDTO result = bookService.insertBookFromIsbn(isbn);
 
         // Assert
-        assertEquals(FrankesteinDTO, result);
+        assertEquals(FrankensteinDTO, result);
         verify(bookRepository).existsByIsbn(isbn);
-        verify(bookMapper).bookToDto(Frankestein);
+        verify(bookMapper).bookToDto(Frankenstein);
         verify(libreTranslateClient, never()).detect(any());
 
         ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
@@ -189,9 +189,9 @@ class BookServiceTest {
         mockOpenLibraryResponse.setAuthors(List.of());
 
         // Open Library response lacks description and genre, test handling of null
-        Frankestein.setDescription(null);
-        Frankestein.setGenre(null);
-        Frankestein.setAuthor(null);
+        Frankenstein.setDescription(null);
+        Frankenstein.setGenre(null);
+        Frankenstein.setAuthor(null);
 
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
@@ -199,15 +199,15 @@ class BookServiceTest {
         when(openLibraryClient.fetchBookByIsbn(isbn)).thenReturn(mockOpenLibraryResponse);
 
         when(bookMapper.fromOpenLibraryResponseToBook(mockOpenLibraryResponse, ""))
-                .thenReturn(Frankestein);
-        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
+                .thenReturn(Frankenstein);
+        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankensteinDTO);
 
         BookDTO result = bookService.insertBookFromIsbn(isbn);
 
         // Assert
-        assertEquals(FrankesteinDTO, result);
+        assertEquals(FrankensteinDTO, result);
         verify(bookRepository).existsByIsbn(isbn);
-        verify(bookMapper).bookToDto(Frankestein);
+        verify(bookMapper).bookToDto(Frankenstein);
         verify(libreTranslateClient, never()).detect(any());
 
         ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
@@ -240,22 +240,22 @@ class BookServiceTest {
         String isbn = "9780441172719";
         setUpGoogleBooksResponse();
         // Make the mapper return a book without ISBN
-        Frankestein.setIsbn("");
-        FrankesteinDTO.setIsbn("9780441172719");
+        Frankenstein.setIsbn("");
+        FrankensteinDTO.setIsbn("9780441172719");
 
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
         when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
         when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
-                .thenReturn(Frankestein);
-        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
-        when(libreTranslateClient.detect(Frankestein.getDescription()))
+                .thenReturn(Frankenstein);
+        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankensteinDTO);
+        when(libreTranslateClient.detect(Frankenstein.getDescription()))
                 .thenReturn("en");
         // Act
         BookDTO result = bookService.insertBookFromIsbn(isbn);
 
         // Assert
-        assertEquals(FrankesteinDTO, result);
+        assertEquals(FrankensteinDTO, result);
         assertEquals(isbn.replace("-", ""), result.getIsbn());
     }
 
@@ -293,8 +293,8 @@ class BookServiceTest {
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
         when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
         when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
-                .thenReturn(Frankestein);
-        when(libreTranslateClient.detect(Frankestein.getDescription()))
+                .thenReturn(Frankenstein);
+        when(libreTranslateClient.detect(Frankenstein.getDescription()))
                 .thenReturn("en");
 
         // Simulate a database error
@@ -314,23 +314,23 @@ class BookServiceTest {
         String isbn = "9780441172719";
         String spanishDescription = "Una novela sobre un científico que crea una criatura en un experimento poco ortodoxo.";
         setUpGoogleBooksResponse();
-        Frankestein.setLanguage("es"); // Set book language to Spanish to trigger translation
-        FrankesteinDTO.setDescription(spanishDescription); // Spanish description is expected in result
+        Frankenstein.setLanguage("es"); // Set book language to Spanish to trigger translation
+        FrankensteinDTO.setDescription(spanishDescription); // Spanish description is expected in result
 
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
         when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
         when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
-                .thenReturn(Frankestein);
-        when(libreTranslateClient.detect(Frankestein.getDescription()))
+                .thenReturn(Frankenstein);
+        when(libreTranslateClient.detect(Frankenstein.getDescription()))
                 .thenReturn("en");
-        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
+        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankensteinDTO);
 
         // Act
         BookDTO result = bookService.insertBookFromIsbn(isbn);
 
         // Assert
-        assertEquals(FrankesteinDTO, result);
+        assertEquals(FrankensteinDTO, result);
         assertEquals("Una novela sobre un científico que crea una criatura en un experimento poco ortodoxo.", result.getDescription());
     }
 
@@ -339,24 +339,24 @@ class BookServiceTest {
         // Arrange
         String isbn = "9780441172719";
         setUpGoogleBooksResponse();
-        Frankestein.setLanguage("es"); // Set book language to Spanish to trigger translation
-        FrankesteinDTO.setDescription(Frankestein.getDescription()); // Original description is expected in result
+        Frankenstein.setLanguage("es"); // Set book language to Spanish to trigger translation
+        FrankensteinDTO.setDescription(Frankenstein.getDescription()); // Original description is expected in result
 
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
         when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
         when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
-                .thenReturn(Frankestein);
+                .thenReturn(Frankenstein);
         // Simulate detection failure
-        when(libreTranslateClient.detect(Frankestein.getDescription()))
+        when(libreTranslateClient.detect(Frankenstein.getDescription()))
                 .thenThrow(new RuntimeException("Detection service error"));
-        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
+        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankensteinDTO);
 
         // Act
         BookDTO result = bookService.insertBookFromIsbn(isbn);
 
         // Assert
-        assertEquals(FrankesteinDTO, result);
+        assertEquals(FrankensteinDTO, result);
         assertEquals("A novel about a scientist who creates a creature in an unorthodox experiment.", result.getDescription());
     }
 
@@ -365,27 +365,99 @@ class BookServiceTest {
         // Arrange
         String isbn = "9780441172719";
         setUpGoogleBooksResponse();
-        Frankestein.setLanguage("es"); // Set book language to Spanish to trigger translation
-        FrankesteinDTO.setDescription(Frankestein.getDescription()); // Original description is expected in result
+        Frankenstein.setLanguage("es"); // Set book language to Spanish to trigger translation
+        FrankensteinDTO.setDescription(Frankenstein.getDescription()); // Original description is expected in result
 
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
         when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
         when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
-                .thenReturn(Frankestein);
-        when(libreTranslateClient.detect(Frankestein.getDescription()))
+                .thenReturn(Frankenstein);
+        when(libreTranslateClient.detect(Frankenstein.getDescription()))
                 .thenReturn("en");
         // Simulate translation failure
         when(libreTranslateClient.translate(anyString(), anyString(), anyString()))
                 .thenThrow(new RuntimeException("Translation service error"));
-        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankesteinDTO);
+        when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankensteinDTO);
 
         // Act
         BookDTO result = bookService.insertBookFromIsbn(isbn);
 
         // Assert
-        assertEquals(FrankesteinDTO, result);
+        assertEquals(FrankensteinDTO, result);
         assertEquals("A novel about a scientist who creates a creature in an unorthodox experiment.", result.getDescription());
+    }
+
+    // ================ Manual Create Book =================
+    @Test
+    void manualCreateBook() {
+        
+        // Mock
+        when(bookRepository.existsByIsbn(Frankenstein.getIsbn())).thenReturn(false);
+        when(bookMapper.DTOtoBook(FrankensteinDTO)).thenReturn(Frankenstein);
+        when(bookMapper.bookToDto(Frankenstein)).thenReturn(FrankensteinDTO);
+
+        // Act
+        BookDTO result = bookService.manualCreateBook(FrankensteinDTO);
+
+        // Assert
+        assertEquals(FrankensteinDTO, result);
+        verify(bookRepository).existsByIsbn(Frankenstein.getIsbn());
+        verify(bookMapper).DTOtoBook(FrankensteinDTO);
+        verify(bookMapper).bookToDto(Frankenstein);
+
+        ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
+        verify(bookRepository).save(captor.capture());
+        Book savedBook = captor.getValue();
+        assertEquals("Frankenstein", savedBook.getTitle());
+        assertEquals("Mary Shelley", savedBook.getAuthor());
+        assertEquals("Horror", savedBook.getGenre());
+        assertEquals("A novel about a scientist who creates a creature in an unorthodox experiment.", savedBook.getDescription());
+
+    }
+
+    @Test
+    void manualCreateBook_ExistingBook() {
+        // Mock
+        when(bookRepository.existsByIsbn(Frankenstein.getIsbn())).thenReturn(true);
+
+        // Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.manualCreateBook(FrankensteinDTO));
+        assertEquals("Book with ISBN " + Frankenstein.getIsbn() + " already exists in Library", exception.getMessage());
+        verify(bookRepository).existsByIsbn(Frankenstein.getIsbn());
+    }
+
+    @Test
+    void manualCreateBook_InvalidIsbn() {
+        // Arrange
+        BookDTO bookWithInvalidIsbn = new BookDTO(invalidIsbn, "Frankenstein", "Mary Shelley", "Horror",
+                "A novel about a scientist who creates a creature in an unorthodox experiment.",
+                "EN", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
+        // Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> bookService.manualCreateBook(bookWithInvalidIsbn));
+        assertEquals("Invalid ISBN: " + invalidIsbn, exception.getMessage());
+    }
+
+    @Test
+    void manualCreateBook_NullIsbn() {
+        // Arrange
+        BookDTO bookWithNullIsbn = new BookDTO(null, "Frankenstein", "Mary Shelley", "Horror",
+                "A novel about a scientist who creates a creature in an unorthodox experiment.",
+                "EN", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
+        // Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> bookService.manualCreateBook(bookWithNullIsbn));
+        assertEquals("ISBN must be provided in the manual create request.", exception.getMessage());
+    }
+
+    @Test
+    void manualCreateBook_BlankIsbn() {
+        // Arrange
+        BookDTO bookWithBlankIsbn = new BookDTO("", "Frankenstein", "Mary Shelley", "Horror",
+                "A novel about a scientist who creates a creature in an unorthodox experiment.",
+                "EN", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
+        // Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> bookService.manualCreateBook(bookWithBlankIsbn));
+        assertEquals("ISBN must be provided in the manual create request.", exception.getMessage());
     }
 
     // ================ Update Book =================
@@ -400,7 +472,7 @@ class BookServiceTest {
                 "EN", 280, "Lackington, Hughes, Harding, Mavor & Jones", "1818");
 
         // Mock
-        when(bookRepository.findByIsbn(isbn)).thenReturn(Frankestein);
+        when(bookRepository.findByIsbn(isbn)).thenReturn(Frankenstein);
         when(bookMapper.DTOtoBook(updatedFrankensteinDTO)).thenReturn(newFrankenstein);
 
         // Act
@@ -427,14 +499,14 @@ class BookServiceTest {
 
         // Mock
         when(bookRepository.findByIsbn(isbn)).thenReturn(existingBook);
-        when(bookMapper.DTOtoBook(FrankesteinDTO)).thenReturn(Frankestein);
+        when(bookMapper.DTOtoBook(FrankensteinDTO)).thenReturn(Frankenstein);
 
         // Act
-        bookService.updateBook(FrankesteinDTO);
+        bookService.updateBook(FrankensteinDTO);
 
         // Assert
         verify(bookRepository).findByIsbn(isbn);
-        verify(bookMapper).DTOtoBook(FrankesteinDTO);
+        verify(bookMapper).DTOtoBook(FrankensteinDTO);
 
         ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
         verify(bookRepository).save(captor.capture());
@@ -488,7 +560,7 @@ class BookServiceTest {
         when(bookRepository.findByIsbn(isbn)).thenReturn(null);
 
         // Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.updateBook(FrankesteinDTO));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookService.updateBook(FrankensteinDTO));
         assertEquals("Book with ISBN " + isbn + " not found in Library", exception.getMessage());
     }
 
@@ -496,16 +568,16 @@ class BookServiceTest {
     @Test
     void testGetBookByIsbn() {
         // Mock
-        when(bookRepository.findByIsbn(isbn)).thenReturn(Frankestein);
-        when(bookMapper.bookToDto(Frankestein)).thenReturn(FrankesteinDTO);
+        when(bookRepository.findByIsbn(isbn)).thenReturn(Frankenstein);
+        when(bookMapper.bookToDto(Frankenstein)).thenReturn(FrankensteinDTO);
 
         // Act
         BookDTO result = bookService.getBookByIsbn(isbn);
 
         // Assert
-        assertEquals(FrankesteinDTO, result);
+        assertEquals(FrankensteinDTO, result);
         verify(bookRepository).findByIsbn(isbn);
-        verify(bookMapper).bookToDto(Frankestein);
+        verify(bookMapper).bookToDto(Frankenstein);
     }
 
     @Test
@@ -530,12 +602,12 @@ class BookServiceTest {
     @Test
     void testSearchBooks_All() {
         // Arrange
-        List<Book> books = List.of(Frankestein, ToKillAMockingbird);
+        List<Book> books = List.of(Frankenstein, ToKillAMockingbird);
 
         // Mock
         when(bookRepository.findAll()).thenReturn(books);
         when(bookMapper.bookListToDtoList(books)).thenReturn(List.of(
-                FrankesteinDTO, ToKillAMockingbirdDTO
+                FrankensteinDTO, ToKillAMockingbirdDTO
 
         ));
         // Act
@@ -627,7 +699,7 @@ class BookServiceTest {
     void testSearchBooks_ByGenre() {
         // Arrange
         String genre = "Fiction";
-        List<Book> books = List.of(Frankestein, ToKillAMockingbird, AnimalFarm);
+        List<Book> books = List.of(Frankenstein, ToKillAMockingbird, AnimalFarm);
 
         // Mock
         when(bookRepository.findByGenreContainingIgnoreCase(genre)).thenReturn(books);
@@ -648,7 +720,7 @@ class BookServiceTest {
     void testSearchBooks_ByGenre_Partial() {
         // Arrange
         String genre = "Fict";
-        List<Book> books = List.of(Frankestein, ToKillAMockingbird, AnimalFarm);
+        List<Book> books = List.of(Frankenstein, ToKillAMockingbird, AnimalFarm);
 
         // Mock
         when(bookRepository.findByGenreContainingIgnoreCase(genre)).thenReturn(books);
@@ -670,7 +742,7 @@ class BookServiceTest {
     void testDeleteBook() {
 
         // Mock
-        when(bookRepository.findByIsbn(isbn)).thenReturn(Frankestein);
+        when(bookRepository.findByIsbn(isbn)).thenReturn(Frankenstein);
 
         // Act
         bookService.deleteBook(isbn);

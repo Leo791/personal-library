@@ -115,7 +115,7 @@ public class BookService {
      * If the book already exists, it throws a BookExistsException.
      * If the ISBN is invalid, it throws an IllegalArgumentException.
      *
-     * @param book
+     * @param book the bookDTO object to create
      * @return the created BookDTO
      */
     public BookDTO manualCreateBook(BookDTO book) {

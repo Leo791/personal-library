@@ -44,14 +44,16 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleBookNotFoundException() throws Exception {
-
         Mockito.when(bookService.getBookByIsbn(isbn))
-               .thenThrow(new DatabaseBookNotFoundException(isbn));
+                .thenThrow(new DatabaseBookNotFoundException(isbn));
 
-        mockMvc.perform(get("/api/v1/books/1234567890")
-                .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v1/books/" + isbn)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(content().json("{\"message\":\"Book with ISBN 1234567890 not found in Library\"}"));
+                .andExpect(jsonPath("$.error").value("Book with ISBN " + isbn + " not found in Library"))
+                .andExpect(jsonPath("$.isbn").value(isbn))
+                .andExpect(jsonPath("$.nextStep").value("Insert the book first."))
+                .andExpect(jsonPath("$.links.insertBook").value("/api/v1/books/" + isbn));
     }
 
     @Test
@@ -62,7 +64,10 @@ class GlobalExceptionHandlerTest {
         mockMvc.perform(post("/api/v1/books?isbn=" + isbn)
                 .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isConflict())
-               .andExpect(content().json("{\"message\":\"Book with ISBN " + isbn + " already exists in Library\"}"));
+                .andExpect(jsonPath("$.error").value("Book with ISBN " + isbn + " already exists in Library"))
+                .andExpect(jsonPath("$.isbn").value(isbn))
+                .andExpect(jsonPath("$.nextStep").value("Look up the book on the library."))
+                .andExpect(jsonPath("$.links.searchBook").value("/api/v1/books/" + isbn));
     }
 
     @Test
@@ -73,7 +78,8 @@ class GlobalExceptionHandlerTest {
         mockMvc.perform(get("/api/v1/books/1234567890")
                 .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isInternalServerError())
-               .andExpect(content().json("{\"message\":\"An unexpected error occurred.\"}"));
+                .andExpect(jsonPath("$.error").value("An unexpected error occurred"))
+                .andExpect(jsonPath("$.nextStep").value("Try again later or contact support."));
     }
 
     @Test
@@ -84,7 +90,8 @@ class GlobalExceptionHandlerTest {
         mockMvc.perform(post("/api/v1/books?isbn=invalid_isbn")
                 .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isBadRequest())
-               .andExpect(content().json("{\"message\":\"Invalid ISBN format: invalid_isbn\"}"));
+                .andExpect(jsonPath("$.error").value("Invalid argument"))
+                .andExpect(jsonPath("$.nextStep").value("Check the request parameters."));
     }
 
 
