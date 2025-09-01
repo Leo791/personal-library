@@ -4,12 +4,13 @@ import com.github.leo791.personal_library.client.GoogleBooksClient;
 import com.github.leo791.personal_library.client.LibreTranslateClient;
 import com.github.leo791.personal_library.client.OpenLibraryClient;
 import com.github.leo791.personal_library.exception.BookExistsException;
+import com.github.leo791.personal_library.exception.ExternalBookNotFoundException;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.model.entity.GoogleBookResponse;
 import com.github.leo791.personal_library.model.entity.OpenLibraryBookResponse;
 import com.github.leo791.personal_library.repository.BookRepository;
-import com.github.leo791.personal_library.exception.BookNotFoundException;
+import com.github.leo791.personal_library.exception.DatabaseBookNotFoundException;
 import com.github.leo791.personal_library.util.BookUtils;
 import com.github.leo791.personal_library.util.IsbnUtils;
 import com.github.leo791.personal_library.util.OpenLibraryResponseMapperUtils;
@@ -66,6 +67,7 @@ public class BookService {
         }
         // Try to fetch the book from Google Books API
         GoogleBookResponse googleBook = googleBooksClient.fetchBookByIsbn(isbn);
+
         // If book is found in Google Books API, map it to a Book entity
         if (GoogleBookResponse.getTotalItems() != 0) {
             log.info("Book with ISBN {} found in Google Books API", isbn);
@@ -109,6 +111,38 @@ public class BookService {
     }
 
     /**
+     * Manually creates a new book entity in the repository.
+     * If the book already exists, it throws a BookExistsException.
+     * If the ISBN is invalid, it throws an IllegalArgumentException.
+     *
+     * @param book
+     * @return the created BookDTO
+     */
+    public BookDTO manualCreateBook(BookDTO book) {
+        // Validate the ISBN format
+        if(book.getIsbn() == null || book.getIsbn().isBlank()) {
+            throw new IllegalArgumentException("ISBN must be provided in the manual create request.");
+        }
+        if(!IsbnUtils.isValidIsbn(book.getIsbn())) {
+            throw new IllegalArgumentException("Invalid ISBN: " + book.getIsbn());
+        }
+        // Check if the book already exists in the repository
+        if (bookRepository.existsByIsbn(book.getIsbn())) {
+            throw new BookExistsException(book.getIsbn());
+        }
+        // Map the BookDTO to a Book entity
+        Book newBook = bookMapper.DTOtoBook(book);
+
+        // Capitalize string fields in the new book entity
+        BookUtils.capitalizeStringFields(newBook);
+
+        // Save the new book entity
+        bookRepository.save(newBook);
+
+        return bookMapper.bookToDto(newBook);
+    }
+
+    /**
      * Updates an existing book entity in the repository.
      * If the ISBN is changed, it throws an IllegalArgumentException.
      * If the book does not exist, it throws a BookNotFoundException.
@@ -129,7 +163,7 @@ public class BookService {
         String isbn = newBook.getIsbn();
         Book existingBook = bookRepository.findByIsbn(isbn);
         if (existingBook == null) {
-            throw new BookNotFoundException(isbn, "Library");
+            throw new DatabaseBookNotFoundException(isbn);
         }
         // Update the existing book entity with the new data where applicable
         BookUtils.updateBookFields(existingBook, bookMapper.DTOtoBook(newBook));
@@ -157,7 +191,7 @@ public class BookService {
         }
         Book book = bookRepository.findByIsbn(isbn);
         if (book == null) {
-            throw new BookNotFoundException(isbn, "Library");
+            throw new DatabaseBookNotFoundException(isbn);
         }
         return bookMapper.bookToDto(book);
     }
@@ -199,7 +233,7 @@ public class BookService {
         }
         Book book = bookRepository.findByIsbn(isbn);
         if (book == null) {
-            throw new BookNotFoundException(isbn, "Library");
+            throw new DatabaseBookNotFoundException(isbn);
         }
         bookRepository.deleteByIsbn(isbn);
     }
@@ -226,7 +260,7 @@ public class BookService {
            return openLibraryBook;
        } catch (Exception e) {
            log.error("Error fetching book with ISBN {} from Open Library API: {}", isbn, e.getMessage());
-           throw new BookNotFoundException(isbn, "Google Books or Open Library APIs");
+           throw new ExternalBookNotFoundException(isbn);
        }
    }
 

@@ -46,7 +46,7 @@ class GlobalExceptionHandlerTest {
     void handleBookNotFoundException() throws Exception {
 
         Mockito.when(bookService.getBookByIsbn(isbn))
-               .thenThrow(new BookNotFoundException(isbn, "Library"));
+               .thenThrow(new DatabaseBookNotFoundException(isbn));
 
         mockMvc.perform(get("/api/v1/books/1234567890")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -86,4 +86,6 @@ class GlobalExceptionHandlerTest {
                .andExpect(status().isBadRequest())
                .andExpect(content().json("{\"message\":\"Invalid ISBN format: invalid_isbn\"}"));
     }
+
+
 }
