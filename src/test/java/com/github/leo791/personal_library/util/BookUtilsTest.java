@@ -56,5 +56,13 @@ class BookUtilsTest {
         String authorNormal = "agatha christie";
         String capitalizedAuthorNormal = BookUtils.capitalizeAuthorName(authorNormal);
         assertEquals("Agatha Christie", capitalizedAuthorNormal, "Author name should be capitalized");
+
+        String authorNameWithMc = "robert mcgregor";
+        String capitalizedAuthorWithMc = BookUtils.capitalizeAuthorName(authorNameWithMc);
+        assertEquals("Robert McGregor", capitalizedAuthorWithMc, "Author name with 'Mc' should be properly capitalized");
+
+        String authorNameWithMac = "ian macdonald";
+        String capitalizedAuthorWithMac = BookUtils.capitalizeAuthorName(authorNameWithMac);
+        assertEquals("Ian MacDonald", capitalizedAuthorWithMac, "Author name with 'Mac' should be properly capitalized");
     }
 }

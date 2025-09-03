@@ -42,24 +42,31 @@ public class BookUtils{
         }
     }
 
-    public static String capitalizeAuthorName(String name) {
-        String[] parts = name.split(" ");
-        for (int i = 0; i < parts.length; i++) {
-            if (parts[i].matches("([a-zA-Z]\\.)+")) {
-                // Capitalize each initial before a dot
-                StringBuilder sb = new StringBuilder();
-                for (String initial : parts[i].split("\\.")) {
-                    if (!initial.isEmpty()) {
-                        sb.append(initial.toUpperCase()).append(".");
-                    }
+public static String capitalizeAuthorName(String name) {
+    String[] parts = name.split(" ");
+    for (int i = 0; i < parts.length; i++) {
+        if (parts[i].matches("([a-zA-Z]\\.)+")) {
+            // Capitalize each initial before a dot
+            StringBuilder sb = new StringBuilder();
+            for (String initial : parts[i].split("\\.")) {
+                if (!initial.isEmpty()) {
+                    sb.append(initial.toUpperCase()).append(".");
                 }
-                parts[i] = sb.toString();
-            } else {
-                parts[i] = WordUtils.capitalizeFully(parts[i]);
             }
+            parts[i] = sb.toString();
+        } else {
+            String part = WordUtils.capitalizeFully(parts[i]);
+            // Handle Mc/Mac prefixes
+            if (part.matches("(?i)mc[a-z].*")) {
+                part = "Mc" + part.substring(2, 3).toUpperCase() + part.substring(3);
+            } else if (part.matches("(?i)mac[a-z].*")) {
+                part = "Mac" + part.substring(3, 4).toUpperCase() + part.substring(4);
+            }
+            parts[i] = part;
         }
-        return String.join(" ", parts);
     }
+    return String.join(" ", parts);
+}
 
     /**
      * Updates the fields of a book entity with the given data.
