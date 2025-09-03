@@ -46,7 +46,7 @@ Users can enter a book’s **ISBN** to automatically retrieve its details from a
 - **Backend:** Spring Boot (Java)
 - **Build Tool:** Maven
 - **Database:** PostgreSQL
-- **External API:** Google Books API & LibreTranslate
+- **External API:** Google Books API, Open Library API & LibreTranslate
 - **Deployment:** Docker support for portability
 
 ## 5. Success Criteria
