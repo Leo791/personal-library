@@ -62,7 +62,7 @@ public class BookService {
             throw new IllegalArgumentException("Invalid ISBN: " + isbn);
         }
         // Check if the book already exists in the repository
-        if (bookRepository.existsByIsbn(isbn)) {
+        if (bookRepository.existsByIsbn(isbn.replace("-",""))) {
             throw new BookExistsException(isbn);
         }
         // Try to fetch the book from Google Books API
