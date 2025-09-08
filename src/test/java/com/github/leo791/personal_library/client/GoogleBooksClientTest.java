@@ -24,7 +24,7 @@ class GoogleBooksClientTest {
     @Test
     void fetchBookByIsbn_ShouldReturnResponse() {
         String isbn = "1234567890";
-        googleBooksClient = new GoogleBooksClient(restTemplate, "mock-api-key");
+        googleBooksClient = new GoogleBooksClient(restTemplate,"mock-base-url", "mock-api-key");
         GoogleBookResponse mockResponse = new GoogleBookResponse();
 
         when(restTemplate.getForObject(anyString(),eq(GoogleBookResponse.class)))

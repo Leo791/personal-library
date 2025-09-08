@@ -13,15 +13,21 @@ import org.springframework.web.client.RestTemplate;
 public class GoogleBooksClient {
 
     private final RestTemplate restTemplate;
+    private final String baseUrl;
     private final String apiKey;
 
-    public GoogleBooksClient(RestTemplate restTemplate, @Value("${google.books.api.key}") String apiKey) {
+    public GoogleBooksClient(
+            RestTemplate restTemplate,
+            @Value("${google.books.api.base-url}") String baseUrl,
+            @Value("${google.books.api.key}") String apiKey
+    ) {
         this.restTemplate = restTemplate;
+        this.baseUrl = baseUrl;
         this.apiKey = apiKey;
     }
 
     public GoogleBookResponse fetchBookByIsbn(String isbn) {
-        String url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + isbn + "&key=" + apiKey;
+        String url = baseUrl + isbn + "&key=" + apiKey;
         return restTemplate.getForObject(url, GoogleBookResponse.class);
     }
 }
