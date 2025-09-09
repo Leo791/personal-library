@@ -1,5 +1,8 @@
 package com.github.leo791.personal_library.componentTests;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.repository.BookRepository;
@@ -7,6 +10,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import jakarta.validation.constraints.Size;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 public class InsertBookFromIsbnTest {
 
     private static final String isbn = "9780593311844"; // ISBN (for Great Gatsby)
+    private static final String notFoundIsbn = "9789722060172"; // ISBN not found in both APIs
     private static final String descriptionPt = "Para gerações de leitores fascinados, o misterioso milionário Jay Gatsby personificou todo o glamour e a decadência dos Loucos Anos Vinte. Para o narrador perplexo de F. Scott Fitzgerald, Nick Carraway, Gatsby parece ter surgido do nada, fugindo às perguntas sobre o seu passado obscuro e dando festas deslumbrantes na sua luxuosa mansão. Nick encontra algo ao mesmo tempo assustador e atraente na intensidade da ambição da sua nova vizinha, e o seu fascínio aumenta quando descobre que Gatsby é obcecado por um amor há muito perdido, Daisy Buchanan. Mas Daisy e o seu marido rico são pessoas cínicas e descuidadas e, à medida que o sonho de Gatsby colide com a realidade, Nick testemunha a violência e a tragédia resultantes. A notável permanência de O Grande Gatsby deve-se à frescura lírica da sua narrativa e à forma como ilumina o cerne vazio do brilhante sonho americano. Com uma nova introdução de John Grisham.";
     private static final String descriptionEn = "For generations of enthralled readers, the mysterious millionaire Jay Gatsby has come to embody all the glamour and decadence of the Roaring Twenties. To F. Scott Fitzgerald’s bemused narrator, Nick Carraway, Gatsby appears to have emerged out of nowhere, evading questions about his murky past and throwing dazzling parties at his luxurious mansion. Nick finds something both appalling and appealing in the intensity of his new neighbor’s ambition, and his fascination grows when he discovers that Gatsby is obsessed by a long-lost love, Daisy Buchanan. But Daisy and her wealthy husband are cynical and careless people, and as Gatsby’s dream collides with reality, Nick is witness to the violence and tragedy that result. The Great Gatsby's remarkable staying power is owed to the lyrical freshness of its storytelling and to the way it illuminates the hollow core of the glittering American dream. With a new introduction by John Grisham.";
     // Mock database
@@ -85,7 +90,7 @@ public class InsertBookFromIsbnTest {
         // Get the expected response
         String googleAPIResponse = null;
         try {
-            googleAPIResponse = Files.readString(Paths.get("src/test/resources/GoogleApiBookFound.json"));
+            googleAPIResponse = Files.readString(Paths.get("src/test/resources/GoogleApi_BookFound.json"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -148,7 +153,7 @@ public class InsertBookFromIsbnTest {
         // Get the expected response
         String googleAPIResponse = null;
         try {
-            googleAPIResponse = Files.readString(Paths.get("src/test/resources/GoogleApiBookFoundTranslationRequired.json"));
+            googleAPIResponse = Files.readString(Paths.get("src/test/resources/GoogleApi_BookFoundTranslationRequired.json"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -220,9 +225,9 @@ public class InsertBookFromIsbnTest {
         String openLibraryBookResponse = null;
         String openLibraryAuthorResponse = null;
         try {
-            googleAPIResponse = Files.readString(Paths.get("src/test/resources/GoogleApiBookNotFound.json"));
-            openLibraryBookResponse = Files.readString(Paths.get("src/test/resources/OpenLibraryBookFound.json"));
-            openLibraryAuthorResponse = Files.readString(Paths.get("src/test/resources/OpenLibraryAuthorFound.json"));
+            googleAPIResponse = Files.readString(Paths.get("src/test/resources/GoogleApi_BookNotFound.json"));
+            openLibraryBookResponse = Files.readString(Paths.get("src/test/resources/OpenLibrary_BookFound.json"));
+            openLibraryAuthorResponse = Files.readString(Paths.get("src/test/resources/OpenLibrary_AuthorFound.json"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -280,7 +285,88 @@ public class InsertBookFromIsbnTest {
                 () -> assertThat(savedBook.get().getLanguage()).isEqualTo(""),
                 () -> assertThat(savedBook.get().getPageCount()).isEqualTo(192),
                 () -> assertThat(savedBook.get().getPublisher()).isEqualTo("Vintage"));
+    }
 
+    @Test
+    void shouldReturnNotFound_whenBookNotFoundInBothAPIs() throws JsonProcessingException {
 
+        ObjectMapper mapper = new ObjectMapper();
+        // Get the expected responses
+        String googleAPIResponse = null;
+        JsonNode bookNotFoundResponse = null;
+        try {
+            googleAPIResponse = Files.readString(Paths.get("src/test/resources/GoogleApi_BookNotFound.json"));
+            bookNotFoundResponse = mapper.readTree(Files.readString(Paths.get("src/test/resources/ErrorResponse_BookNotFoundInApis.json")));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Mock the responses from Google API using WireMock
+        googleBooksMock.stubFor(WireMock.get(urlPathEqualTo("/books/v1/volumes"))
+                .withQueryParam("q", equalTo("isbn:" + notFoundIsbn))
+                .withQueryParam("key", equalTo("dummy-key"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(googleAPIResponse)));
+
+        // Mock the responses from OpenLibrary API using WireMock
+        openLibraryMock.stubFor(WireMock.get(urlPathEqualTo("/isbn/" + notFoundIsbn + ".json"))
+                .willReturn(aResponse()
+                        .withStatus(404)));
+
+        // Act
+        ResponseEntity<String> response = restTemplate.postForEntity("/api/v1/books?isbn=" + notFoundIsbn, null, String.class);
+
+        // Assert Response
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(mapper.readTree(response.getBody())).isEqualTo(bookNotFoundResponse);
+    }
+
+    @Test
+    void shouldReturnBadRequest_whenIsbnInvalid() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        String invalidIsbn = "12345"; // Invalid ISBN (too short)
+        // Get the expected response
+        JsonNode invalidIsbnResponse = null;
+        try {
+            invalidIsbnResponse = mapper.readTree(Files.readString(Paths.get("src/test/resources/ErrorResponse_InvalidISBN.json")));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Act
+        ResponseEntity<String> response = restTemplate.postForEntity("/api/v1/books?isbn=" + invalidIsbn, null, String.class);
+
+        // Assert Response
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(mapper.readTree(response.getBody())).isEqualTo(invalidIsbnResponse);
+
+    }
+
+    @Test
+    void shouldReturnConflict_whenBookAlreadyExistsInDatabase() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        // First, insert the book into the database
+        Book existingBook = new Book();
+        existingBook.setIsbn(isbn);
+        existingBook.setTitle("The Great Gatsby");
+        existingBook.setAuthor("F. Scott Fitzgerald");
+        bookRepository.save(existingBook);
+
+        // Get the expected response
+        JsonNode bookAlreadyExistsResponse = null;
+        try {
+            bookAlreadyExistsResponse = mapper.readTree(Files.readString(Paths.get("src/test/resources/ErrorResponse_BookExistsInLibrary.json")));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Act
+        ResponseEntity<String> response = restTemplate.postForEntity("/api/v1/books?isbn=" + isbn, null, String.class);
+
+        // Assert Response
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(mapper.readTree(response.getBody())).isEqualTo(bookAlreadyExistsResponse);
     }
 }

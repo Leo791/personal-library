@@ -1,0 +1,8 @@
+{
+  "error": "Book not found in external APIs",
+  "isbn": "9789722060172",
+  "nextStep": "Add the book manually.",
+  "links": {
+    "manualAdd": "/api/v1/books/manual"
+  }
+}

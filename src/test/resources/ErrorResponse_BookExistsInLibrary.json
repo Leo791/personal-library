@@ -1,0 +1,8 @@
+{
+  "error": "Book with ISBN 9780593311844 already exists in Library",
+  "isbn": "9780593311844",
+  "nextStep": "Look up the book on the library.",
+  "links": {
+    "searchBook": "/api/v1/books/9780593311844"
+  }
+}
