@@ -1,0 +1,61 @@
+{
+  "type": {
+    "key": "/type/edition"
+  },
+  "title": "The Great Gatsby",
+  "authors": [
+    {
+      "key": "/authors/OL27349A"
+    },
+    {
+      "key": "/authors/OL39329A"
+    }
+  ],
+  "publish_date": "Jan 05, 2021",
+  "source_records": [
+    "amazon:0593311841",
+    "bwb:9780593311844",
+    "promise:bwb_daily_pallets_2021-07-26"
+  ],
+  "number_of_pages": 192,
+  "publishers": [
+    "Vintage"
+  ],
+  "isbn_10": [
+    "0593311841"
+  ],
+  "isbn_13": [
+    "9780593311844"
+  ],
+  "physical_format": "paperback",
+  "notes": {
+    "type": "/type/text",
+    "value": "Source title: The Great Gatsby (Vintage Classics)"
+  },
+  "full_title": "The Great Gatsby",
+  "covers": [
+    10909708
+  ],
+  "works": [
+    {
+      "key": "/works/OL468431W"
+    }
+  ],
+  "key": "/books/OL32282716M",
+  "lc_classifications": [
+    "PS3511.I9G7 2021e"
+  ],
+  "local_id": [
+    "urn:bwbsku:O7-CJO-452"
+  ],
+  "latest_revision": 10,
+  "revision": 10,
+  "created": {
+    "type": "/type/datetime",
+    "value": "2021-05-01T19:35:21.857760"
+  },
+  "last_modified": {
+    "type": "/type/datetime",
+    "value": "2023-01-12T18:57:12.771533"
+  }
+}

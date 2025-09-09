@@ -27,7 +27,7 @@ public class GoogleBooksClient {
     }
 
     public GoogleBookResponse fetchBookByIsbn(String isbn) {
-        String url = baseUrl + isbn + "&key=" + apiKey;
+        String url = baseUrl + "/books/v1/volumes?q=isbn:" + isbn + "&key=" + apiKey;
         return restTemplate.getForObject(url, GoogleBookResponse.class);
     }
 }
