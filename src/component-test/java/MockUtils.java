@@ -1,6 +1,7 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leo791.personal_library.model.dto.BookDTO;
+import com.github.leo791.personal_library.model.entity.Book;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,5 +35,19 @@ public class MockUtils {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static Book createSampleBook() {
+        return new Book(
+                "9789722060172",
+                "The Little Prince",
+                "Antoine de Saint-Exupéry",
+                "Fiction",
+                "A poetic tale of a young prince who travels from planet to planet, learning about life, love, and human nature.",
+                "ENG",
+                96,
+                "Reynal & Hitchcock",
+                "1943"
+        );
     }
 }
