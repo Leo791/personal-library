@@ -37,6 +37,8 @@ public class InsertBookFromIsbnIT {
     private static final String isbn = "9780593311844"; // ISBN (for Great Gatsby)
     private static final String notFoundIsbn = "9789722060172"; // ISBN not found in both APIs
     private static final String descriptionEn = "For generations of enthralled readers, the mysterious millionaire Jay Gatsby has come to embody all the glamour and decadence of the Roaring Twenties. To F. Scott Fitzgerald’s bemused narrator, Nick Carraway, Gatsby appears to have emerged out of nowhere, evading questions about his murky past and throwing dazzling parties at his luxurious mansion. Nick finds something both appalling and appealing in the intensity of his new neighbor’s ambition, and his fascination grows when he discovers that Gatsby is obsessed by a long-lost love, Daisy Buchanan. But Daisy and her wealthy husband are cynical and careless people, and as Gatsby’s dream collides with reality, Nick is witness to the violence and tragedy that result. The Great Gatsby's remarkable staying power is owed to the lyrical freshness of its storytelling and to the way it illuminates the hollow core of the glittering American dream. With a new introduction by John Grisham.";
+    private static final String fileBasePath = "src/component-test/resources/";
+
     // Mock database
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
@@ -86,8 +88,6 @@ public class InsertBookFromIsbnIT {
 
     @Autowired
     private BookRepository bookRepository;
-    
-    private static final String fileBasePath = "src/component-test/resources/";
 
     @Test
     void shouldInsertBookFromIsbn_whenFoundInGoogleBooks_DescriptionTranslationNotRequired() {
