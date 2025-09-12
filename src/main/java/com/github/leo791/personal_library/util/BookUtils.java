@@ -1,5 +1,7 @@
 package com.github.leo791.personal_library.util;
 import java.lang.reflect.Field;
+import java.util.Arrays;
+
 import org.apache.commons.text.WordUtils;
 
 /**
@@ -43,26 +45,35 @@ public class BookUtils{
     }
 
 public static String capitalizeAuthorName(String name) {
+    String[] particles = {"de", "da", "di", "van", "von", "le", "la", "du", "del", "dos", "das"};
     String[] parts = name.split(" ");
     for (int i = 0; i < parts.length; i++) {
-        if (parts[i].matches("([a-zA-Z]\\.)+")) {
-            // Capitalize each initial before a dot
+        String part = parts[i];
+        if (part.matches("([a-zA-Z]\\.)+")) {
             StringBuilder sb = new StringBuilder();
-            for (String initial : parts[i].split("\\.")) {
+            for (String initial : part.split("\\.")) {
                 if (!initial.isEmpty()) {
                     sb.append(initial.toUpperCase()).append(".");
                 }
             }
             parts[i] = sb.toString();
         } else {
-            String part = WordUtils.capitalizeFully(parts[i]);
-            // Handle Mc/Mac prefixes
-            if (part.matches("(?i)mc[a-z].*")) {
-                part = "Mc" + part.substring(2, 3).toUpperCase() + part.substring(3);
-            } else if (part.matches("(?i)mac[a-z].*")) {
-                part = "Mac" + part.substring(3, 4).toUpperCase() + part.substring(4);
+            String[] hyphenParts = part.split("-");
+            for (int j = 0; j < hyphenParts.length; j++) {
+                String subPart = hyphenParts[j];
+                if (i > 0 && Arrays.asList(particles).contains(subPart.toLowerCase())) {
+                    hyphenParts[j] = subPart.toLowerCase();
+                } else {
+                    subPart = WordUtils.capitalizeFully(subPart);
+                    if (subPart.matches("(?i)mc[a-z].*")) {
+                        subPart = "Mc" + subPart.substring(2, 3).toUpperCase() + subPart.substring(3);
+                    } else if (subPart.matches("(?i)mac[a-z].*")) {
+                        subPart = "Mac" + subPart.substring(3, 4).toUpperCase() + subPart.substring(4);
+                    }
+                    hyphenParts[j] = subPart;
+                }
             }
-            parts[i] = part;
+            parts[i] = String.join("-", hyphenParts);
         }
     }
     return String.join(" ", parts);
