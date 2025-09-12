@@ -93,12 +93,7 @@ public class InsertBookFromIsbnIT {
     void shouldInsertBookFromIsbn_whenFoundInGoogleBooks_DescriptionTranslationNotRequired() {
 
         // Get the expected response
-        String googleAPIResponse = null;
-        try {
-            googleAPIResponse = Files.readString(Paths.get(fileBasePath + "GoogleApi_BookFound.json"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String googleAPIResponse = MockUtils.readStringFromFile(fileBasePath + "GoogleApi_BookFound.json");
 
         // Mock the responses from Google API using WireMock
         googleBooksMock.stubFor(WireMock.get(urlPathEqualTo("/books/v1/volumes"))
@@ -156,12 +151,7 @@ public class InsertBookFromIsbnIT {
     void shouldInsertBookFromIsbn_whenFoundInGoogleBooks_DescriptionTranslationRequired() {
 
         // Get the expected response
-        String googleAPIResponse = null;
-        try {
-            googleAPIResponse = Files.readString(Paths.get(fileBasePath + "GoogleApi_BookFoundTranslationRequired.json"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String googleAPIResponse = MockUtils.readStringFromFile(fileBasePath + "GoogleApi_BookFoundTranslationRequired.json");
 
         // Mock the responses from Google API using WireMock
         googleBooksMock.stubFor(WireMock.get(urlPathEqualTo("/books/v1/volumes"))
@@ -226,16 +216,9 @@ public class InsertBookFromIsbnIT {
     @Test
     void shouldInsertBookFromIsbn_whenNotFoundInGoogleBooks_FoundInOpenLibrary(){
         // Get the expected responses
-        String googleAPIResponse = null;
-        String openLibraryBookResponse = null;
-        String openLibraryAuthorResponse = null;
-        try {
-            googleAPIResponse = Files.readString(Paths.get(fileBasePath + "GoogleApi_BookNotFound.json"));
-            openLibraryBookResponse = Files.readString(Paths.get(fileBasePath + "OpenLibrary_BookFound.json"));
-            openLibraryAuthorResponse = Files.readString(Paths.get(fileBasePath + "OpenLibrary_AuthorFound.json"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String googleAPIResponse = MockUtils.readStringFromFile(fileBasePath + "GoogleApi_BookNotFound.json");
+        String openLibraryBookResponse = MockUtils.readStringFromFile(fileBasePath + "OpenLibrary_BookFound.json");
+        String openLibraryAuthorResponse = MockUtils.readStringFromFile(fileBasePath + "OpenLibrary_AuthorFound.json");
 
         // Mock the responses from Google API using WireMock
         googleBooksMock.stubFor(WireMock.get(urlPathEqualTo("/books/v1/volumes"))
@@ -297,14 +280,8 @@ public class InsertBookFromIsbnIT {
 
         ObjectMapper mapper = new ObjectMapper();
         // Get the expected responses
-        String googleAPIResponse = null;
-        JsonNode bookNotFoundResponse = null;
-        try {
-            googleAPIResponse = Files.readString(Paths.get(fileBasePath + "GoogleApi_BookNotFound.json"));
-            bookNotFoundResponse = mapper.readTree(Files.readString(Paths.get(fileBasePath + "ErrorResponse_BookNotFoundInApis.json")));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String googleAPIResponse = MockUtils.readStringFromFile(fileBasePath + "GoogleApi_BookNotFound.json");
+        JsonNode bookNotFoundResponse = MockUtils.readJsonNodeFromFile(fileBasePath + "ErrorResponse_BookNotFoundInApis.json");
 
         // Mock the responses from Google API using WireMock
         googleBooksMock.stubFor(WireMock.get(urlPathEqualTo("/books/v1/volumes"))
@@ -332,13 +309,9 @@ public class InsertBookFromIsbnIT {
     void shouldReturnBadRequest_whenIsbnInvalid() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         String invalidIsbn = "12345"; // Invalid ISBN (too short)
+
         // Get the expected response
-        JsonNode invalidIsbnResponse = null;
-        try {
-            invalidIsbnResponse = mapper.readTree(Files.readString(Paths.get(fileBasePath + "ErrorResponse_InvalidISBN.json")));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        JsonNode invalidIsbnResponse = MockUtils.readJsonNodeFromFile(fileBasePath + "ErrorResponse_InvalidIsbn.json");
 
         // Act
         ResponseEntity<String> response = restTemplate.postForEntity("/api/v1/books?isbn=" + invalidIsbn, null, String.class);
