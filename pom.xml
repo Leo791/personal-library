@@ -118,6 +118,7 @@
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
+                    <testSourceDirectory>src/test/java</testSourceDirectory>
                 </configuration>
             </plugin>
             <!-- Make sure Maven recognizes src/component-test/java as a test source directory -->
@@ -156,11 +157,11 @@
                 </executions>
                 <configuration>
                     <includes>
-                        <include>**/*.java</include>
+                        <include>**/*IT.java</include>
                     </includes>
+                    <testSourceDirectory>src/component-test/java</testSourceDirectory>
                 </configuration>
             </plugin>
         </plugins>
 	</build>
-
 </project>

@@ -29,7 +29,7 @@ public class BookController {
      * @param isbn the ISBN (string) of the book to be added
      */
     @PostMapping
-    public ResponseEntity<BookDTO> addNewBook(@RequestParam String isbn) throws Exception {
+    public ResponseEntity<BookDTO> insertBookFromIsbn(@RequestParam String isbn) throws Exception {
         BookDTO createdBook = bookService.insertBookFromIsbn(isbn);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdBook);
     }
@@ -42,7 +42,7 @@ public class BookController {
      * @param book the book object to be created
      */
     @PostMapping("/manual")
-    public ResponseEntity<BookDTO> manualCreateBook(@RequestBody BookDTO book) {
+    public ResponseEntity<BookDTO> insertBookManually(@RequestBody BookDTO book) {
         BookDTO createdBook = bookService.manualCreateBook(book);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdBook);
     }
