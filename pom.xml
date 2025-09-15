@@ -115,6 +115,9 @@
                 <version>3.2.5</version>
                 <configuration>
                     <!-- Run only tests in src/test/java -->
+                    <trimStackTrace>true</trimStackTrace>
+                    <printSummary>true</printSummary>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
@@ -156,6 +159,9 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <trimStackTrace>true</trimStackTrace>
+                    <printSummary>true</printSummary>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <includes>
                         <include>**/*IT.java</include>
                     </includes>
