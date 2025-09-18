@@ -20,9 +20,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -37,7 +34,8 @@ public class InsertBookFromIsbnIT {
     private static final String isbn = "9780593311844"; // ISBN (for Great Gatsby)
     private static final String notFoundIsbn = "9789722060172"; // ISBN not found in both APIs
     private static final String descriptionEn = "For generations of enthralled readers, the mysterious millionaire Jay Gatsby has come to embody all the glamour and decadence of the Roaring Twenties. To F. Scott Fitzgerald’s bemused narrator, Nick Carraway, Gatsby appears to have emerged out of nowhere, evading questions about his murky past and throwing dazzling parties at his luxurious mansion. Nick finds something both appalling and appealing in the intensity of his new neighbor’s ambition, and his fascination grows when he discovers that Gatsby is obsessed by a long-lost love, Daisy Buchanan. But Daisy and her wealthy husband are cynical and careless people, and as Gatsby’s dream collides with reality, Nick is witness to the violence and tragedy that result. The Great Gatsby's remarkable staying power is owed to the lyrical freshness of its storytelling and to the way it illuminates the hollow core of the glittering American dream. With a new introduction by John Grisham.";
-    private static final String fileBasePath = "src/component-test/resources/";
+    private static final String fileBasePath = "src/component-test/resources/InsertBookFromIsbnStubs/";
+    private static final String errorsBasePath = "src/component-test/resources/ErrorResponses/";
 
     // Mock database
     @Container
@@ -281,7 +279,7 @@ public class InsertBookFromIsbnIT {
         ObjectMapper mapper = new ObjectMapper();
         // Get the expected responses
         String googleAPIResponse = MockUtils.readStringFromFile(fileBasePath + "GoogleApi_BookNotFound.json");
-        JsonNode bookNotFoundResponse = MockUtils.readJsonNodeFromFile(fileBasePath + "ErrorResponse_BookNotFoundInApis.json");
+        JsonNode bookNotFoundResponse = MockUtils.readJsonNodeFromFile(errorsBasePath + "BookNotFoundInApis.json");
 
         // Mock the responses from Google API using WireMock
         googleBooksMock.stubFor(WireMock.get(urlPathEqualTo("/books/v1/volumes"))
@@ -311,7 +309,7 @@ public class InsertBookFromIsbnIT {
         String invalidIsbn = "12345"; // Invalid ISBN (too short)
 
         // Get the expected response
-        JsonNode invalidIsbnResponse = MockUtils.readJsonNodeFromFile(fileBasePath + "ErrorResponse_InvalidIsbn.json");
+        JsonNode invalidIsbnResponse = MockUtils.readJsonNodeFromFile(errorsBasePath + "InvalidIsbn.json");
 
         // Act
         ResponseEntity<String> response = restTemplate.postForEntity("/api/v1/books?isbn=" + invalidIsbn, null, String.class);
@@ -333,12 +331,7 @@ public class InsertBookFromIsbnIT {
         bookRepository.save(existingBook);
 
         // Get the expected response
-        JsonNode bookAlreadyExistsResponse = null;
-        try {
-            bookAlreadyExistsResponse = mapper.readTree(Files.readString(Paths.get(fileBasePath + "ErrorResponse_BookExistsInLibrary.json")));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        JsonNode bookAlreadyExistsResponse = MockUtils.readJsonNodeFromFile(errorsBasePath + "BookExistsInLibrary.json");
 
         // Act
         ResponseEntity<String> response = restTemplate.postForEntity("/api/v1/books?isbn=" + isbn, null, String.class);

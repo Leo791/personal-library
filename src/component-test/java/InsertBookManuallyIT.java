@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.repository.BookRepository;
@@ -24,7 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @Testcontainers
 public class InsertBookManuallyIT {
 
-    private static final String fileBasePath = "src/component-test/resources/";
+    private static final String fileBasePath = "src/component-test/resources/InsertBookManuallyStubs/";
+    private static final String errorsBasePath = "src/component-test/resources/ErrorResponses/";
+
     private static final String isbn = "9789722060172";
 
     @Autowired
@@ -62,7 +65,7 @@ public class InsertBookManuallyIT {
     void shouldInsertBookManually() {
 
        // Arrange
-       BookDTO requestAndResponse = MockUtils.readBookDTOFromJson(fileBasePath + "InsertBookManually_Success.json");
+       BookDTO requestAndResponse = MockUtils.readBookDTOFromJson(fileBasePath + "Success.json");
 
         // Act
         ResponseEntity<BookDTO> response = restTemplate.postForEntity("/api/v1/books/manual", requestAndResponse, BookDTO.class);
@@ -104,8 +107,7 @@ public class InsertBookManuallyIT {
     void shouldReturnBadRequest_WhenInsertingBookManually_WithMissingIsbn() {
 
         // Arrange
-        BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "InsertBookManually_MissingIsbn.json");
-
+        BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "MissingIsbn.json");
         // Act
         ResponseEntity<BookDTO> response = restTemplate.postForEntity("/api/v1/books/manual", request, BookDTO.class);
 
@@ -117,7 +119,7 @@ public class InsertBookManuallyIT {
     void shouldReturnBadRequest_WhenInsertingBookManually_WithInvalidIsbn() {
 
         // Arrange
-        BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "InsertBookManually_InvalidIsbn.json");
+        BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "InvalidIsbn.json");
 
         // Act
         ResponseEntity<BookDTO> response = restTemplate.postForEntity("/api/v1/books/manual", request, BookDTO.class);
@@ -130,7 +132,7 @@ public class InsertBookManuallyIT {
     void shouldReturnConflict_WhenInsertingBookManually_WhenBookExistsInDatabase()
     {
         // Arrange
-        BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "InsertBookManually_Success.json");
+        BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "Success.json");
         BookMapper mapper = new BookMapper();
         Book existingBook = mapper.DTOtoBook(request);
         bookRepository.save(existingBook);

@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.repository.BookRepository;
@@ -25,7 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @Testcontainers
 public class UpdateBookIT {
 
-    private static final String fileBasePath = "src/component-test/resources/";
+    private static final String fileBasePath = "src/component-test/resources/updateBookStubs/";
+    private static final String errorsBasePath = "src/component-test/resources/ErrorResponses/";
     private static final String isbn = "9789722060172";
 
     @Autowired
@@ -64,7 +66,7 @@ public class UpdateBookIT {
         // Act
         Book existingBook = MockUtils.createSampleBook();
         bookRepository.save(existingBook);
-        BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "UpdateBook_Success.json");
+        BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "Success.json");
 
         // Act
         ResponseEntity<BookDTO> response = restTemplate.exchange("/api/v1/books", HttpMethod.PUT, new HttpEntity<>(request), BookDTO.class);
@@ -104,37 +106,43 @@ public class UpdateBookIT {
     @Test
     void shouldReturnBadRequest_WhenUpdatingBook_WithMissingIsbn() {
         // Arrange
-        BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "UpdateBook_MissingIsbn.json");
+        BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "MissingIsbn.json");
+        JsonNode missingIsbnResponse = MockUtils.readJsonNodeFromFile(errorsBasePath + "MissingIsbn.json");
 
         // Act
         ResponseEntity<String> response = restTemplate.exchange("/api/v1/books", HttpMethod.PUT, new HttpEntity<>(request), String.class);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isEqualTo(missingIsbnResponse.toString());
     }
 
     @Test
     void shouldReturnBadRequest_WhenUpdatingBook_WithInvalidIsbn() {
         // Arrange
-        BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "UpdateBook_InvalidIsbn.json");
+        BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "InvalidIsbn.json");
+        JsonNode invalidIsbnResponse = MockUtils.readJsonNodeFromFile(errorsBasePath + "InvalidIsbn.json");
 
         // Act
         ResponseEntity<String> response = restTemplate.exchange("/api/v1/books", HttpMethod.PUT, new HttpEntity<>(request), String.class);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isEqualTo(invalidIsbnResponse.toString());
     }
 
     @Test
     void shouldReturnNotFound_WhenUpdatingBook_ThatDoesNotExist() {
         // Arrange
-        BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "UpdateBook_Success.json");
+        BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "Success.json");
+        JsonNode bookNotFoundResponse = MockUtils.readJsonNodeFromFile(errorsBasePath + "BookNotFoundInDatabase.json");
 
         // Act
         ResponseEntity<String> response = restTemplate.exchange("/api/v1/books", HttpMethod.PUT, new HttpEntity<>(request), String.class);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isEqualTo(bookNotFoundResponse.toString());
     }
 
 }

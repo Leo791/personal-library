@@ -114,7 +114,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
-                    <!-- Run only tests in src/test/java -->
+                    <!-- Run tests in src/test/java -->
                     <trimStackTrace>true</trimStackTrace>
                     <printSummary>true</printSummary>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
