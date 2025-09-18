@@ -70,7 +70,7 @@ public class BookController {
      * @return the book object if found, or a 404 Not Found status if not found
      */
     @GetMapping("/{isbn}")
-    public ResponseEntity<BookDTO> getBook(@PathVariable String isbn) {
+    public ResponseEntity<BookDTO> getBookByIsbn(@PathVariable String isbn) {
         BookDTO book = bookService.getBookByIsbn(isbn);
         return ResponseEntity.ok(book);
     }
