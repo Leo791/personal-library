@@ -108,11 +108,13 @@ public class InsertBookManuallyIT {
 
         // Arrange
         BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "MissingIsbn.json");
+        JsonNode expectedResponse = MockUtils.readJsonNodeFromFile(errorsBasePath + "MissingIsbn.json");
         // Act
         ResponseEntity<BookDTO> response = restTemplate.postForEntity("/api/v1/books/manual", request, BookDTO.class);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isEqualTo(expectedResponse);
     }
     
     @Test
@@ -120,27 +122,31 @@ public class InsertBookManuallyIT {
 
         // Arrange
         BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "InvalidIsbn.json");
+        JsonNode expectedResponse = MockUtils.readJsonNodeFromFile(errorsBasePath + "InvalidIsbn.json");
 
         // Act
-        ResponseEntity<BookDTO> response = restTemplate.postForEntity("/api/v1/books/manual", request, BookDTO.class);
+        ResponseEntity<String> response = restTemplate.postForEntity("/api/v1/books/manual", request, String.class);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isEqualTo(expectedResponse.toString());
     }
 
     @Test
     void shouldReturnConflict_WhenInsertingBookManually_WhenBookExistsInDatabase()
     {
         // Arrange
+        JsonNode expectedResponse = MockUtils.readJsonNodeFromFile(errorsBasePath + "BookExistsInLibrary.json");
         BookDTO request = MockUtils.readBookDTOFromJson(fileBasePath + "Success.json");
         BookMapper mapper = new BookMapper();
         Book existingBook = mapper.DTOtoBook(request);
         bookRepository.save(existingBook);
 
         // Act
-        ResponseEntity<BookDTO> response = restTemplate.postForEntity("/api/v1/books/manual", request, BookDTO.class);
+        ResponseEntity<String> response = restTemplate.postForEntity("/api/v1/books/manual", request, String.class);
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isEqualTo(expectedResponse.toString());
     }
 }

@@ -1,6 +1,5 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leo791.personal_library.model.dto.BookDTO;
 import com.github.leo791.personal_library.model.entity.Book;
 import com.github.leo791.personal_library.repository.BookRepository;
@@ -275,8 +274,6 @@ public class InsertBookFromIsbnIT {
 
     @Test
     void shouldReturnNotFound_whenBookNotFoundInBothAPIs() throws JsonProcessingException {
-
-        ObjectMapper mapper = new ObjectMapper();
         // Get the expected responses
         String googleAPIResponse = MockUtils.readStringFromFile(fileBasePath + "GoogleApi_BookNotFound.json");
         JsonNode bookNotFoundResponse = MockUtils.readJsonNodeFromFile(errorsBasePath + "BookNotFoundInApis.json");
@@ -300,12 +297,11 @@ public class InsertBookFromIsbnIT {
 
         // Assert Response
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(mapper.readTree(response.getBody())).isEqualTo(bookNotFoundResponse);
+        assertThat(response.getBody()).isEqualTo(bookNotFoundResponse.toString());
     }
 
     @Test
     void shouldReturnBadRequest_whenIsbnInvalid() throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
         String invalidIsbn = "12345"; // Invalid ISBN (too short)
 
         // Get the expected response
@@ -316,13 +312,12 @@ public class InsertBookFromIsbnIT {
 
         // Assert Response
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(mapper.readTree(response.getBody())).isEqualTo(invalidIsbnResponse);
+        assertThat(response.getBody()).isEqualTo(invalidIsbnResponse.toString());
 
     }
 
     @Test
     void shouldReturnConflict_whenBookAlreadyExistsInDatabase() throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
         // First, insert the book into the database
         Book existingBook = new Book();
         existingBook.setIsbn(isbn);
@@ -338,6 +333,6 @@ public class InsertBookFromIsbnIT {
 
         // Assert Response
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-        assertThat(mapper.readTree(response.getBody())).isEqualTo(bookAlreadyExistsResponse);
+        assertThat(response.getBody()).isEqualTo(bookAlreadyExistsResponse.toString());
     }
 }
