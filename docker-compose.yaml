@@ -16,7 +16,7 @@ services:
     depends_on:
       - postgres
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://library_postgres:5432/library_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://library_postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       GOOGLE_BOOKS_API_KEY: ${GOOGLE_BOOKS_API_KEY}
