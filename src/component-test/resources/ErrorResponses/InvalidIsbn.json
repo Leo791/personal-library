@@ -1,0 +1,6 @@
+{
+  "error": "Invalid argument",
+  "isbn": null,
+  "nextStep": "Check the request parameters.",
+  "links": null
+}

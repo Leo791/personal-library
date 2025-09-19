@@ -64,5 +64,13 @@ class BookUtilsTest {
         String authorNameWithMac = "ian macdonald";
         String capitalizedAuthorWithMac = BookUtils.capitalizeAuthorName(authorNameWithMac);
         assertEquals("Ian MacDonald", capitalizedAuthorWithMac, "Author name with 'Mac' should be properly capitalized");
+
+        String authorNameWithParticles = "ludwig van beethoven";
+        String capitalizedAuthorWithParticles = BookUtils.capitalizeAuthorName(authorNameWithParticles);
+        assertEquals("Ludwig van Beethoven", capitalizedAuthorWithParticles, "Author name with particles should be properly capitalized");
+
+        String authorNameWithHyphen = "jean-luc picard";
+        String capitalizedAuthorWithHyphen = BookUtils.capitalizeAuthorName(authorNameWithHyphen);
+        assertEquals("Jean-Luc Picard", capitalizedAuthorWithHyphen, "Hyphenated author name should be properly capitalized");
     }
 }

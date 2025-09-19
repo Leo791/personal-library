@@ -1,0 +1,8 @@
+{
+  "error":"Book with ISBN 9789722060172 not found in Library",
+  "isbn":"9789722060172",
+  "nextStep":"Insert the book first.",
+  "links":{
+    "insertBook":"/api/v1/books/9789722060172"
+  }
+}

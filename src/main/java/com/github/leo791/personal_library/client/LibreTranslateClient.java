@@ -2,6 +2,7 @@ package com.github.leo791.personal_library.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -15,17 +16,18 @@ import java.nio.charset.StandardCharsets;
 @Component
 public class LibreTranslateClient {
 
-    private static final String BASE_URL = "http://libretranslate:5000";
+    private final String baseUrl;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    public LibreTranslateClient(RestTemplate restTemplate) {
+    public LibreTranslateClient(RestTemplate restTemplate, @Value("${libretranslate.api.base-url}") String baseUrl) {
         this.restTemplate = restTemplate;
+        this.baseUrl = baseUrl;
         this.objectMapper = new ObjectMapper();
     }
 
     public String translate(String text, String sourceLang, String targetLang) throws Exception {
-        String url = BASE_URL + "/translate";
+        String url = baseUrl + "/translate";
         String body = "q=" + URLEncoder.encode(text, StandardCharsets.UTF_8) +
                       "&source=" + URLEncoder.encode(sourceLang, StandardCharsets.UTF_8) +
                       "&target=" + URLEncoder.encode(targetLang, StandardCharsets.UTF_8);
@@ -46,7 +48,7 @@ public class LibreTranslateClient {
     }
 
     public String detect(String text) throws Exception {
-        String url = BASE_URL + "/detect";
+        String url = baseUrl + "/detect";
         String body = "q=" + URLEncoder.encode(text, StandardCharsets.UTF_8);
 
         HttpHeaders headers = new HttpHeaders();

@@ -2,6 +2,7 @@ package com.github.leo791.personal_library.repository;
 
 import com.github.leo791.personal_library.model.entity.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -9,6 +10,7 @@ import java.util.List;
  * Repository interface for managing Book entities.
  * This interface extends JpaRepository to provide CRUD operations for Book entities.
  */
+@Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
     /**
      * Finds books by their title.

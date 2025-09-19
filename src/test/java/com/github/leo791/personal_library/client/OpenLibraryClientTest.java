@@ -26,7 +26,7 @@ class OpenLibraryClientTest {
     @Test
     void fetchBookByIsbn_ShouldReturnResponse() {
         String isbn = "1234567890";
-        openLibraryClient = new OpenLibraryClient(restTemplate);
+        openLibraryClient = new OpenLibraryClient(restTemplate, "mock-base-url");
         OpenLibraryBookResponse mockResponse = new OpenLibraryBookResponse();
 
         when(restTemplate.getForObject(anyString(),eq(OpenLibraryBookResponse.class)))
@@ -42,7 +42,7 @@ class OpenLibraryClientTest {
     void fetchAuthorByKey_ShouldReturnAuthorName() throws Exception {
         String authorKey = "/authors/OL12345A";
         String expectedAuthorName = "John Doe";
-        openLibraryClient = new OpenLibraryClient(restTemplate);
+        openLibraryClient = new OpenLibraryClient(restTemplate, "mock-base-url");
         String mockJsonResponse = "{\"name\": \"" + expectedAuthorName + "\"}";
 
         when(restTemplate.getForEntity(anyString(), eq(String.class)))

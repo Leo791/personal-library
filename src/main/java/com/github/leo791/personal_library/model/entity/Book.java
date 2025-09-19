@@ -45,7 +45,7 @@ public class Book {
      * Default constructor for JPA.
      * This constructor is required by JPA to create instances of the entity.
      */
-    protected Book() {
+    public Book() {
     }
     /**
      * Constructs a new Book entity with the specified parameters.

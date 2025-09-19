@@ -73,6 +73,22 @@ public class BookService {
             log.info("Book with ISBN {} found in Google Books API", isbn);
             book = bookMapper.fromGoogleResponseToBook(googleBook);
             BookUtils.capitalizeStringFields(book);
+
+            // Check if description language matches the book language, if not translate it
+            String detectedLanguage = detectDescriptionLanguage(book.getDescription());
+            if (TranslationUtils.isTranslationRequired(detectedLanguage, book.getLanguage())) {
+                log.info("Translating description from {} to {}", detectedLanguage.toUpperCase(), book.getLanguage());
+                try {
+                    String translatedDescription = libreTranslateClient.translate(
+                            book.getDescription(), detectedLanguage, book.getLanguage());
+                    book.setDescription(translatedDescription);
+                } catch (Exception e) {
+                    log.error("Translation failed for ISBN {}: {}", isbn, e.getMessage());
+                    // Proceed with the original description if translation fails
+                }
+            } else {
+                log.info("No description translation required for book with ISBN {}", isbn);
+            }
             // If book is not found in Google Books API, try Open Library API
         } else {
             log.warn("Book with ISBN {} not found in Google Books API. Trying Open Library API", isbn);
@@ -80,22 +96,6 @@ public class BookService {
             String author = getAuthorFromOpenLibraryBook(openLibraryBook.getAuthors());
             book = bookMapper.fromOpenLibraryResponseToBook(openLibraryBook, author);
             BookUtils.capitalizeStringFields(book);
-        }
-
-        // Check if description language matches the book language, if not translate it
-        String detectedLanguage = detectDescriptionLanguage(book.getDescription());
-        if (TranslationUtils.isTranslationRequired(detectedLanguage, book.getLanguage())) {
-            log.info("Translating description from {} to {}", detectedLanguage.toUpperCase(), book.getLanguage());
-            try {
-                String translatedDescription = libreTranslateClient.translate(
-                        book.getDescription(), detectedLanguage, book.getLanguage());
-                book.setDescription(translatedDescription);
-            } catch (Exception e) {
-                log.error("Translation failed for ISBN {}: {}", isbn, e.getMessage());
-                // Proceed with the original description if translation fails
-            }
-        } else {
-            log.info("No description translation required for book with ISBN {}", isbn);
         }
 
         // Set the ISBN from the request if Google Books API does not provide it
