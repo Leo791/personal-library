@@ -39,9 +39,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @Testcontainers
 public class SearchBookIT {
 
-    private static final String errorsBasePath = "src/component-test/resources/ErrorResponses/";
-    private static final String isbn = "9789722060172";
-
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -72,7 +69,6 @@ public class SearchBookIT {
     void setUpLibrary(){
         List<Book> library = MockUtils.createSampleLibrary();
         bookRepository.saveAll(library);
-        System.out.println("Library is: " + bookRepository.findAll());
     }
 
     @AfterEach
