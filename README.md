@@ -2,13 +2,13 @@
 
 ## 1. Project Overview
 The **Personal Library Organizer** is a web application designed to help users catalog, search, and manage their personal book collections.  
-Users can enter a book’s **ISBN** to automatically retrieve its details from a public book information API (Google Books API) and store it in a **PostgreSQL** database. The application allows easy searching and filtering of the collection by **author**, **title** or **genre**.
+Users can enter a book’s **ISBN** to automatically retrieve its details from a public book information API and store it in a **PostgreSQL** database. The application allows easy searching and filtering of the collection by **author**, **title** or **genre**.
 
 ## 2. Objectives
 - Provide a **simple and intuitive interface** for managing personal book collections.
 - Automate the process of retrieving and storing book details using ISBN numbers.
 - Enable **fast and accurate searching** of the library collection.
-- Demonstrate integration of **Spring Boot**, **Maven**, and **PostgreSQL** in a full-stack application.
+- Demonstrate integration of **Spring Boot**, **Maven**, and **PostgreSQL** in an application.
 - Serve as a **portfolio project** showcasing REST API integration, database management, and search functionality.
 
 ## 3. Functional Requirements
@@ -78,11 +78,41 @@ The project will be considered successful when:
   docker compose up --build -d
   ```
 
-### 6.3 API Testing with Bruno
+### 6.3 Using the API with Bruno
 
-This project includes a [Bruno](https://www.usebruno.com/) collection for testing the REST API.
+This project includes a [Bruno](https://www.usebruno.com/) collection for using the REST API.
 
 - Install Bruno
 - Import the collection from [the file](personal-library-bruno-collection.json).
 - Update the environment variables in Bruno to match your setup.
-- Use the provided requests to test the API endpoints.
+- Use the provided requests use the API.
+
+## 7. Testing
+
+This project includes a layered testing setup to balance speed, reliability, and realism.
+
+### 🔹 Technologies
+- **JUnit 5** – testing framework for writing and running tests.
+- **Spring Boot Test** – provides utilities like `@SpringBootTest`, `TestRestTemplate`, and test slicing.
+- **Testcontainers** – spins up real dependencies (PostgreSQL) inside lightweight Docker containers during tests.
+- **WireMock** – mocks external HTTP APIs (Google Books, Open Library, LibreTranslate) so tests can run reliably without internet access.
+
+### 🔹 Test Types
+- **Unit Tests**
+  Test individual classes in isolation using mocks (e.g. service logic, mappers).
+
+- **Integration Tests** 
+  Test the interaction between multiple components of the application.  
+  - Uses **Testcontainers** for a real PostgreSQL instance.  
+  - Uses **WireMock** to stub external APIs.  
+
+### 🔹 Running Tests
+- Run **unit tests only**:
+  ```bash
+  mvn test
+  ```
+- Run **unit + integration tests**:
+  ```bash
+  mvn verify
+  ```
+
