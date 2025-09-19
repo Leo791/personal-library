@@ -21,6 +21,15 @@ import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+/**
+ * Integration Test for inserting a book manually.
+ * Uses Testcontainers to spin up a temporary PostgreSQL database.
+ * Tests the /api/v1/books/manual endpoint for various scenarios:
+ * - Successfully inserting a book manually.
+ * - Handling the case where the ISBN is missing.
+ * - Handling invalid ISBN input.
+ * - Handling the case where the book already exists in the database.
+ */
 @SpringBootTest(classes = com.github.leo791.personal_library.PersonalLibraryApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 public class InsertBookManuallyIT {

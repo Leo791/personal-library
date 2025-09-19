@@ -18,14 +18,21 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+/**
+ * Integration Test for retrieving a book by its ISBN.
+ * Uses Testcontainers to spin up a temporary PostgreSQL database.
+ * Tests the /api/v1/books/{isbn} endpoint for various scenarios:
+ * - Successfully retrieving an existing book.
+ * - Handling the case where the book does not exist.
+ * - Handling invalid ISBN input.
+ * The test library is created using MockUtils.createSampleBook() and contains:
+ * - "The Little Prince" by Antoine de Saint-Exupéry (ISBN: 9789722060172)
+ */
 @SpringBootTest(classes = com.github.leo791.personal_library.PersonalLibraryApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 public class GetBookByIsbnIT {
 
-    private static final String fileBasePath = "src/component-test/resources/GetBookStubs/";
     private static final String errorsBasePath = "src/component-test/resources/ErrorResponses/";
-    private static final String descriptionEn = "For generations of enthralled readers, the mysterious millionaire Jay Gatsby has come to embody all the glamour and decadence of the Roaring Twenties. To F. Scott Fitzgerald’s bemused narrator, Nick Carraway, Gatsby appears to have emerged out of nowhere, evading questions about his murky past and throwing dazzling parties at his luxurious mansion. Nick finds something both appalling and appealing in the intensity of his new neighbor’s ambition, and his fascination grows when he discovers that Gatsby is obsessed by a long-lost love, Daisy Buchanan. But Daisy and her wealthy husband are cynical and careless people, and as Gatsby’s dream collides with reality, Nick is witness to the violence and tragedy that result. The Great Gatsby's remarkable staying power is owed to the lyrical freshness of its storytelling and to the way it illuminates the hollow core of the glittering American dream. With a new introduction by John Grisham.";
-
     private static final String isbn = "9789722060172";
 
     @Autowired

@@ -26,6 +26,18 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+/**
+ * Integration Test for inserting a book by its ISBN from external APIs.
+ * Uses Testcontainers to spin up a temporary PostgreSQL database.
+ * Uses WireMock to mock external API calls to Google Books, OpenLibrary, and LibreTranslate.
+ * Tests the /api/v1/books endpoint for various scenarios:
+ * - Successfully inserting a book found in Google Books (with and without description translation).
+ * - Successfully inserting a book found in OpenLibrary when not found in Google Books.
+ * - Handling the case where the book is not found in both APIs.
+ * - Handling invalid ISBN input.
+ * - Handling the case where the book already exists in the database.
+ * The test uses predefined JSON responses stored in the resources directory to simulate API responses.
+ */
 @SpringBootTest(classes = com.github.leo791.personal_library.PersonalLibraryApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 public class InsertBookFromIsbnIT {

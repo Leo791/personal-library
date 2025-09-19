@@ -22,6 +22,17 @@ import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+/**
+ * Integration Test for updating a book's details.
+ * Uses Testcontainers to spin up a temporary PostgreSQL database.
+ * Tests the /api/v1/books endpoint for various scenarios:
+ * - Successfully updating an existing book.
+ * - Handling the case where the ISBN is missing.
+ * - Handling invalid ISBN input.
+ * - Handling the case where the book does not exist in the database.
+ * The test library is created using MockUtils.createSampleBook() and contains:
+ * - "The Little Prince" by Antoine de Saint-Exupéry (ISBN: 9789722060172)
+ */
 @SpringBootTest(classes = com.github.leo791.personal_library.PersonalLibraryApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 public class UpdateBookIT {
