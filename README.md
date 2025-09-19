@@ -2,13 +2,13 @@
 
 ## 1. Project Overview
 The **Personal Library Organizer** is a web application designed to help users catalog, search, and manage their personal book collections.  
-Users can enter a book’s **ISBN** to automatically retrieve its details from a public book information API (Google Books API) and store it in a **PostgreSQL** database. The application allows easy searching and filtering of the collection by **author**, **title** or **genre**.
+Users can enter a book’s **ISBN** to automatically retrieve its details from a public book information API and store it in a **PostgreSQL** database. The application allows easy searching and filtering of the collection by **author**, **title** or **genre**.
 
 ## 2. Objectives
 - Provide a **simple and intuitive interface** for managing personal book collections.
 - Automate the process of retrieving and storing book details using ISBN numbers.
 - Enable **fast and accurate searching** of the library collection.
-- Demonstrate integration of **Spring Boot**, **Maven**, and **PostgreSQL** in a full-stack application.
+- Demonstrate integration of **Spring Boot**, **Maven**, and **PostgreSQL** in an application.
 - Serve as a **portfolio project** showcasing REST API integration, database management, and search functionality.
 
 ## 3. Functional Requirements
