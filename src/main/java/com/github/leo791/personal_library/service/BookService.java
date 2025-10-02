@@ -71,7 +71,7 @@ public class BookService {
         // If book is found in Google Books API, map it to a Book entity
         if (GoogleBookResponse.getTotalItems() != 0) {
             log.info("Book with ISBN {} found in Google Books API", isbn);
-            book = bookMapper.fromGoogleResponseToBook(googleBook);
+            book = bookMapper.fromGoogleResponseToBook(googleBook, isbn);
             BookUtils.capitalizeStringFields(book);
 
             // Check if description language matches the book language, if not translate it
@@ -94,14 +94,12 @@ public class BookService {
             log.warn("Book with ISBN {} not found in Google Books API. Trying Open Library API", isbn);
             OpenLibraryBookResponse openLibraryBook = searchBookOnOpenLibrary(isbn);
             String author = getAuthorFromOpenLibraryBook(openLibraryBook.getAuthors());
-            book = bookMapper.fromOpenLibraryResponseToBook(openLibraryBook, author);
+            book = bookMapper.fromOpenLibraryResponseToBook(openLibraryBook, author, isbn);
             BookUtils.capitalizeStringFields(book);
         }
 
-        // Set the ISBN from the request if Google Books API does not provide it
-        if (book.getIsbn().isBlank()) {
-            book.setIsbn(isbn.replace("-", ""));
-        }
+        // Set the ISBN from the request so has to always use the provided one, this prevents saving isbn13 when isbn10 is provided and vice-versa
+        // book.setIsbn(isbn.replace("-", ""));
 
         // Save the book entity
         bookRepository.save(book);
