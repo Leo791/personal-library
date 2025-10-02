@@ -42,7 +42,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @Testcontainers
 public class InsertBookFromIsbnIT {
 
-    private static final String isbn = "9780593311844"; // ISBN (for Great Gatsby)
+    private static final String isbn = "9780593311844"; // ISBN13 for Great Gatsby
+    private static final String isbn10 = "0593311841"; // ISBN10 for Great Gatsby
     private static final String notFoundIsbn = "9789722060172"; // ISBN not found in both APIs
     private static final String descriptionEn = "For generations of enthralled readers, the mysterious millionaire Jay Gatsby has come to embody all the glamour and decadence of the Roaring Twenties. To F. Scott Fitzgerald’s bemused narrator, Nick Carraway, Gatsby appears to have emerged out of nowhere, evading questions about his murky past and throwing dazzling parties at his luxurious mansion. Nick finds something both appalling and appealing in the intensity of his new neighbor’s ambition, and his fascination grows when he discovers that Gatsby is obsessed by a long-lost love, Daisy Buchanan. But Daisy and her wealthy husband are cynical and careless people, and as Gatsby’s dream collides with reality, Nick is witness to the violence and tragedy that result. The Great Gatsby's remarkable staying power is owed to the lyrical freshness of its storytelling and to the way it illuminates the hollow core of the glittering American dream. With a new introduction by John Grisham.";
     private static final String fileBasePath = "src/component-test/resources/InsertBookFromIsbnStubs/";
@@ -99,7 +100,7 @@ public class InsertBookFromIsbnIT {
     private BookRepository bookRepository;
 
     @Test
-    void shouldInsertBookFromIsbn_whenFoundInGoogleBooks_DescriptionTranslationNotRequired() {
+    void shouldInsertBookFromIsbn_whenFoundInGoogleBooks_Isbn13WasProvided_NoTranslationRequired() {
 
         // Get the expected response
         String googleAPIResponse = MockUtils.readStringFromFile(fileBasePath + "GoogleApi_BookFound.json");
@@ -157,7 +158,65 @@ public class InsertBookFromIsbnIT {
     }
 
     @Test
-    void shouldInsertBookFromIsbn_whenFoundInGoogleBooks_DescriptionTranslationRequired() {
+    void shouldInsertBookFromIsbn_whenFoundInGoogleBooks_Isbn10WasProvided_NoTranslationRequired() {
+
+        // Get the expected response
+        String googleAPIResponse = MockUtils.readStringFromFile(fileBasePath + "GoogleApi_BookFound.json");
+
+        // Mock the responses from Google API using WireMock
+        googleBooksMock.stubFor(WireMock.get(urlPathEqualTo("/books/v1/volumes"))
+                .withQueryParam("q", equalTo("isbn:" + isbn10))
+                .withQueryParam("key", equalTo("dummy-key"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(googleAPIResponse)));
+
+        // Mock the response from LibreTranslate API using WireMock
+        libreTranslateMock.stubFor(WireMock.post(urlPathEqualTo("/detect"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("[{\"language\":\"en\",\"confidence\":1}]")));
+
+        // Act
+        ResponseEntity<BookDTO> response = restTemplate.postForEntity("/api/v1/books?isbn=" + isbn10, null, BookDTO.class);
+
+        BookDTO bookResponse = response.getBody();
+
+        // Assert Response
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(bookResponse).isNotNull();
+        assertAll(
+                () -> assertThat(bookResponse.getIsbn()).isEqualTo(isbn10),
+                () -> assertThat(bookResponse.getTitle()).isEqualTo("The Great Gatsby"),
+                () -> assertThat(bookResponse.getAuthor()).isEqualTo("F. Scott Fitzgerald"),
+                () -> assertThat(bookResponse.getGenre()).isEqualTo("Fiction"),
+                () -> assertThat(bookResponse.getPublishedDate()).isEqualTo("2021"),
+                () -> assertThat(bookResponse.getDescription()).isEqualTo(descriptionEn),
+                () -> assertThat(bookResponse.getLanguage()).isEqualTo("EN"),
+                () -> assertThat(bookResponse.getPageCount()).isEqualTo(194),
+                () -> assertThat(bookResponse.getPublisher()).isEqualTo("Vintage")
+        );
+
+        // Assert Database state
+        Optional<Book> savedBook = Optional.ofNullable(bookRepository.findByIsbn(isbn10));
+        assertThat(savedBook).isPresent();
+        assertAll(
+                () -> assertThat(savedBook.get().getIsbn()).isEqualTo(isbn10),
+                () -> assertThat(savedBook.get().getTitle()).isEqualTo("The Great Gatsby"),
+                () -> assertThat(savedBook.get().getAuthor()).isEqualTo("F. Scott Fitzgerald"),
+                () -> assertThat(savedBook.get().getGenre()).isEqualTo("Fiction"),
+                () -> assertThat(savedBook.get().getPublishedDate()).isEqualTo("2021"),
+                () -> assertThat(savedBook.get().getDescription()).isEqualTo(descriptionEn),
+                () -> assertThat(savedBook.get().getLanguage()).isEqualTo("EN"),
+                () -> assertThat(savedBook.get().getPageCount()).isEqualTo(194),
+                () -> assertThat(savedBook.get().getPublisher()).isEqualTo("Vintage")
+        );
+    }
+
+    @Test
+    void shouldInsertBookFromIsbn_whenFoundInGoogleBooks_Isbn13WasProvided_DescriptionTranslationRequired() {
 
         // Get the expected response
         String googleAPIResponse = MockUtils.readStringFromFile(fileBasePath + "GoogleApi_BookFoundTranslationRequired.json");
@@ -222,8 +281,10 @@ public class InsertBookFromIsbnIT {
         );
     }
 
+
+
     @Test
-    void shouldInsertBookFromIsbn_whenNotFoundInGoogleBooks_FoundInOpenLibrary(){
+    void shouldInsertBookFromIsbn_whenNotFoundInGoogleBooks_FoundInOpenLibrary_Isbn13WasProvided(){
         // Get the expected responses
         String googleAPIResponse = MockUtils.readStringFromFile(fileBasePath + "GoogleApi_BookNotFound.json");
         String openLibraryBookResponse = MockUtils.readStringFromFile(fileBasePath + "OpenLibrary_BookFound.json");
@@ -274,6 +335,68 @@ public class InsertBookFromIsbnIT {
         assertThat(savedBook).isPresent();
         assertAll(
                 () -> assertThat(savedBook.get().getIsbn()).isEqualTo(isbn),
+                () -> assertThat(savedBook.get().getTitle()).isEqualTo("The Great Gatsby"),
+                () -> assertThat(savedBook.get().getAuthor()).isEqualTo("F. Scott Fitzgerald"),
+                () -> assertThat(savedBook.get().getGenre()).isEmpty(),
+                () -> assertThat(savedBook.get().getPublishedDate()).isEqualTo("2021"),
+                () -> assertThat(savedBook.get().getDescription()).isEmpty(),
+                () -> assertThat(savedBook.get().getLanguage()).isEqualTo(""),
+                () -> assertThat(savedBook.get().getPageCount()).isEqualTo(192),
+                () -> assertThat(savedBook.get().getPublisher()).isEqualTo("Vintage"));
+    }
+
+    @Test
+    void shouldInsertBookFromIsbn_whenNotFoundInGoogleBooks_FoundInOpenLibrary_Isbn10Provided(){
+        // Get the expected responses
+        String googleAPIResponse = MockUtils.readStringFromFile(fileBasePath + "GoogleApi_BookNotFound.json");
+        String openLibraryBookResponse = MockUtils.readStringFromFile(fileBasePath + "OpenLibrary_BookFound.json");
+        String openLibraryAuthorResponse = MockUtils.readStringFromFile(fileBasePath + "OpenLibrary_AuthorFound.json");
+
+        // Mock the responses from Google API using WireMock
+        googleBooksMock.stubFor(WireMock.get(urlPathEqualTo("/books/v1/volumes"))
+                .withQueryParam("q", equalTo("isbn:" + isbn10))
+                .withQueryParam("key", equalTo("dummy-key"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(googleAPIResponse)));
+
+        // Mock the responses from OpenLibrary API using WireMock
+        openLibraryMock.stubFor(WireMock.get(urlPathEqualTo("/isbn/" + isbn10 + ".json"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(openLibraryBookResponse)));
+
+        openLibraryMock.stubFor(WireMock.get(urlPathEqualTo("/authors/OL27349A.json"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(openLibraryAuthorResponse)));
+
+        // Act
+        ResponseEntity<BookDTO> response = restTemplate.postForEntity("/api/v1/books?isbn=" + isbn10, null, BookDTO.class);
+        BookDTO bookResponse = response.getBody();
+
+        // Assert Response
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(bookResponse).isNotNull();
+        assertAll(
+                () -> assertThat(bookResponse.getIsbn()).isEqualTo(isbn10),
+                () -> assertThat(bookResponse.getTitle()).isEqualTo("The Great Gatsby"),
+                () -> assertThat(bookResponse.getAuthor()).isEqualTo("F. Scott Fitzgerald"),
+                () -> assertThat(bookResponse.getGenre()).isEmpty(),
+                () -> assertThat(bookResponse.getPublishedDate()).isEqualTo("2021"),
+                () -> assertThat(bookResponse.getDescription()).isEmpty(),
+                () -> assertThat(bookResponse.getLanguage()).isEqualTo(""),
+                () -> assertThat(bookResponse.getPageCount()).isEqualTo(192),
+                () -> assertThat(bookResponse.getPublisher()).isEqualTo("Vintage"));
+
+        // Assert Database state
+        Optional<Book> savedBook = Optional.ofNullable(bookRepository.findByIsbn(isbn10));
+        assertThat(savedBook).isPresent();
+        assertAll(
+                () -> assertThat(savedBook.get().getIsbn()).isEqualTo(isbn10),
                 () -> assertThat(savedBook.get().getTitle()).isEqualTo("The Great Gatsby"),
                 () -> assertThat(savedBook.get().getAuthor()).isEqualTo("F. Scott Fitzgerald"),
                 () -> assertThat(savedBook.get().getGenre()).isEmpty(),
