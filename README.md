@@ -1,4 +1,4 @@
-# Business Requirements – Personal Library Organizer
+# Personal Library Organizer
 
 ## 1. Project Overview
 The **Personal Library Organizer** is a web application designed to help users catalog, search, and manage their personal book collections.  
