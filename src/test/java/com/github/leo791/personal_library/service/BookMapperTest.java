@@ -166,7 +166,7 @@ class BookMapperTest {
     void fromGoogleResponseToBook() {
         setUpGoogleBooksResponse();
         BookMapper bookMapper = new BookMapper();
-        var book = bookMapper.fromGoogleResponseToBook(mockGoogleBookResponse);
+        var book = bookMapper.fromGoogleResponseToBook(mockGoogleBookResponse, "1234567890");
 
         assertNotNull(book);
         assertEquals("1234567890", book.getIsbn());
@@ -187,7 +187,7 @@ class BookMapperTest {
         emptyResponse.setItems(List.of());
 
         BookMapper bookMapper = new BookMapper();
-        var book = bookMapper.fromGoogleResponseToBook(emptyResponse);
+        var book = bookMapper.fromGoogleResponseToBook(emptyResponse, "1234567890");
 
         assertNull(book, "Should return null if there are no items in the response");
     }
@@ -196,7 +196,7 @@ class BookMapperTest {
     void fromOpenLibraryResponseToBook(){
         setUpOpenLibraryResponse();
         BookMapper bookMapper = new BookMapper();
-        var book = bookMapper.fromOpenLibraryResponseToBook(mockOpenLibraryBookResponse, "Mary Shelley");
+        var book = bookMapper.fromOpenLibraryResponseToBook(mockOpenLibraryBookResponse, "Mary Shelley", "1234567890");
 
         assertNotNull(book);
         assertEquals("1234567890", book.getIsbn());
@@ -213,7 +213,7 @@ class BookMapperTest {
     @Test
     void fromOpenLibraryResponseToBook_Null(){
         BookMapper bookMapper = new BookMapper();
-        var book = bookMapper.fromOpenLibraryResponseToBook(null, "Some Author");
+        var book = bookMapper.fromOpenLibraryResponseToBook(null, "Some Author", "1234567890");
 
         assertNull(book, "Should return null if the OpenLibraryBookResponse is null");
     }

@@ -27,34 +27,6 @@ public class GoogleBooksResponseMapperUtils {
     }
 
     /**
-     * Extracts the ISBN-13 or 10 from a list of industry identifiers.
-     * If none is found an error is thrown.
-     *
-     * @param industryIdentifiers List of industry identifiers
-     * @return The ISBN-13 or 10
-     */
-    public static String extractIsbn(List<GoogleBookResponse.IndustryIdentifier> industryIdentifiers) {
-        if (industryIdentifiers == null || industryIdentifiers.isEmpty()) {
-            throw new IllegalArgumentException("Industry identifiers list must not be null or empty");
-        }
-        // Look for ISBN_13 first
-        for (GoogleBookResponse.IndustryIdentifier identifier : industryIdentifiers) {
-            if ("ISBN_13".equals(identifier.getType())) {
-                return identifier.getIdentifier();
-            }
-        }
-        // If not found, look for ISBN_10
-        for (GoogleBookResponse.IndustryIdentifier identifier : industryIdentifiers) {
-            if ("ISBN_10".equals(identifier.getType())) {
-                return identifier.getIdentifier();
-            }
-        }
-        // If neither is found, return an empty string
-        log.warn("No ISBN found in industry identifiers, relying on search ISBN");
-        return "";
-    }
-
-    /**
      * Extracts the genre from the volume info.
      * If mainCategory is available, it returns that.
      * If categories are available, it returns the first one.

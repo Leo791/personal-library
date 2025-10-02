@@ -35,61 +35,6 @@ class GoogleBooksResponseMapperUtilsTest {
         assertEquals("", firstAuthor, "First author should be an empty string for a null list");
     }
 
-    // ========== extractIsbn ==========
-
-    @Test
-    void testExtractIsbn() {
-        List<GoogleBookResponse.IndustryIdentifier> industryIdentifiers = List.of(
-                new GoogleBookResponse.IndustryIdentifier("ISBN_13", "9780134686097"),
-                new GoogleBookResponse.IndustryIdentifier("ISBN_10", "0134686098")
-        );
-
-        String isbn = GoogleBooksResponseMapperUtils.extractIsbn(industryIdentifiers);
-        assertEquals("9780134686097", isbn, "Should return ISBN_13 if available");
-    }
-
-    @Test
-    void testExtractIsbn_NoIsbn13() {
-        List<GoogleBookResponse.IndustryIdentifier> industryIdentifiers = List.of(
-                new GoogleBookResponse.IndustryIdentifier("ISBN_10", "0134686098")
-        );
-
-        String isbn = GoogleBooksResponseMapperUtils.extractIsbn(industryIdentifiers);
-        assertEquals("0134686098", isbn, "Should return ISBN_10 if ISBN_13 is not available");
-    }
-
-    @Test
-    void testExtractIsbn_NoValidIsbn() {
-        List<GoogleBookResponse.IndustryIdentifier> industryIdentifiers = List.of(
-                new GoogleBookResponse.IndustryIdentifier("OTHER", "1234567890")
-        );
-
-        String isbn = GoogleBooksResponseMapperUtils.extractIsbn(industryIdentifiers);
-        assertEquals("", isbn, "Should return an empty string if neither ISBN_13 nor ISBN_10 is available");
-    }
-
-    @Test
-    void testExtractIsbn_EmptyList() {
-        List<GoogleBookResponse.IndustryIdentifier> industryIdentifiers = List.of();
-
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            GoogleBooksResponseMapperUtils.extractIsbn(industryIdentifiers);
-        });
-
-        assertEquals("Industry identifiers list must not be null or empty", exception.getMessage(),
-                "Should throw an exception for an empty list");
-    }
-
-    @Test
-    void testExtractIsbn_NullList() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            GoogleBooksResponseMapperUtils.extractIsbn(null);
-        });
-
-        assertEquals("Industry identifiers list must not be null or empty", exception.getMessage(),
-                "Should throw an exception for a null list");
-    }
-
     // ========== extractGenre ==========
     @Test
     void testExtractGenre_MainCategoryExists() {

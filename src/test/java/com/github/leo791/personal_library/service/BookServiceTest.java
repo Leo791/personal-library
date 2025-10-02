@@ -124,7 +124,7 @@ class BookServiceTest {
 
         // Simulate the GoogleBooksClient returning a book response
         when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
-        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
+        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class), eq(isbn)))
                 .thenReturn(Frankenstein);
         when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankensteinDTO);
         when(libreTranslateClient.detect(Frankenstein.getDescription()))
@@ -161,7 +161,7 @@ class BookServiceTest {
         when(openLibraryClient.fetchBookByIsbn(isbn)).thenReturn(mockOpenLibraryResponse);
         when(openLibraryClient.fetchAuthorByKey("/author/OL12345A"))
                 .thenReturn("Mary Shelley");
-        when(bookMapper.fromOpenLibraryResponseToBook(mockOpenLibraryResponse, "Mary Shelley"))
+        when(bookMapper.fromOpenLibraryResponseToBook(mockOpenLibraryResponse, "Mary Shelley", isbn))
                 .thenReturn(Frankenstein);
         when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankensteinDTO);
 
@@ -198,7 +198,7 @@ class BookServiceTest {
         when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(googleBookResponse);
         when(openLibraryClient.fetchBookByIsbn(isbn)).thenReturn(mockOpenLibraryResponse);
 
-        when(bookMapper.fromOpenLibraryResponseToBook(mockOpenLibraryResponse, ""))
+        when(bookMapper.fromOpenLibraryResponseToBook(mockOpenLibraryResponse, "", isbn))
                 .thenReturn(Frankenstein);
         when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankensteinDTO);
 
@@ -246,7 +246,7 @@ class BookServiceTest {
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
         when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
-        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
+        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class), eq(isbn)))
                 .thenReturn(Frankenstein);
         when(bookMapper.bookToDto(any(Book.class))).thenReturn(FrankensteinDTO);
         when(libreTranslateClient.detect(Frankenstein.getDescription()))
@@ -292,7 +292,7 @@ class BookServiceTest {
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
         when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
-        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
+        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class), eq(isbn)))
                 .thenReturn(Frankenstein);
         when(libreTranslateClient.detect(Frankenstein.getDescription()))
                 .thenReturn("en");
@@ -320,7 +320,7 @@ class BookServiceTest {
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
         when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
-        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
+        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class), eq(isbn)))
                 .thenReturn(Frankenstein);
         when(libreTranslateClient.detect(Frankenstein.getDescription()))
                 .thenReturn("en");
@@ -345,7 +345,7 @@ class BookServiceTest {
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
         when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
-        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
+        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class), eq(isbn)))
                 .thenReturn(Frankenstein);
         // Simulate detection failure
         when(libreTranslateClient.detect(Frankenstein.getDescription()))
@@ -371,7 +371,7 @@ class BookServiceTest {
         // Mock
         when(bookRepository.existsByIsbn(isbn)).thenReturn(false);
         when(googleBooksClient.fetchBookByIsbn(isbn)).thenReturn(mockGoogleResponse);
-        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class)))
+        when(bookMapper.fromGoogleResponseToBook(any(GoogleBookResponse.class), eq(isbn)))
                 .thenReturn(Frankenstein);
         when(libreTranslateClient.detect(Frankenstein.getDescription()))
                 .thenReturn("en");

@@ -33,46 +33,6 @@ class OpenLibraryResponseMapperUtilsTest {
         assertEquals("", result, "Should return empty string when authors list is null");
     }
 
-
-    // ==== extractIsbn ====
-    @Test
-    void testExtractIsbn_WithValidIsbn13() {
-        OpenLibraryBookResponse testResponse = new OpenLibraryBookResponse();
-        testResponse.setIsbn13(List.of("9780134686097"));
-
-        String result = OpenLibraryResponseMapperUtils.extractIsbn(testResponse);
-        assertEquals("9780134686097", result);
-    }
-
-    @Test
-    void testExtractIsbn_WithValidIsbn10() {
-        OpenLibraryBookResponse testResponse = new OpenLibraryBookResponse();
-        testResponse.setIsbn13(List.of());
-        testResponse.setIsbn10(List.of("0134686097"));
-
-        String result = OpenLibraryResponseMapperUtils.extractIsbn(testResponse);
-        assertEquals("0134686097", result);
-
-    }
-
-    @Test
-    void testExtractIsbn_WithNoIsbn() {
-        OpenLibraryBookResponse testResponse = new OpenLibraryBookResponse();
-        testResponse.setIsbn13(List.of());
-        testResponse.setIsbn10(List.of());
-
-        String result = OpenLibraryResponseMapperUtils.extractIsbn(testResponse);
-        assertEquals("", result);
-    }
-
-    @Test
-    void testExtractIsbn_WithNullIsbns() {
-        OpenLibraryBookResponse testResponse = new OpenLibraryBookResponse();
-
-        String result = OpenLibraryResponseMapperUtils.extractIsbn(testResponse);
-        assertEquals("", result, "Should return empty string when isbn13 is null");
-    }
-
     // ==== extractLanguage ====
 
 

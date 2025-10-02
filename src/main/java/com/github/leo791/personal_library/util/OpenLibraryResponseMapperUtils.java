@@ -27,27 +27,6 @@ public class OpenLibraryResponseMapperUtils {
     }
 
     /**
-     * Extracts the ISBN-13 or 10 from the response object
-     * If none is found an error is thrown.
-     *
-     * @param openLibraryBookResponse The OpenLibraryBookResponse object containing industry identifiers
-     * @return The ISBN-13 or 10
-     */
-    public static String extractIsbn(OpenLibraryBookResponse openLibraryBookResponse) {
-        // Look for isbn13 first
-        if (openLibraryBookResponse.isbn13 != null && !openLibraryBookResponse.isbn13.isEmpty()) {
-            return openLibraryBookResponse.isbn13.getFirst();
-        }
-        // If not found, look for isbn10
-        if (openLibraryBookResponse.isbn10 != null && !openLibraryBookResponse.isbn10.isEmpty()) {
-            return openLibraryBookResponse.isbn10.getFirst();
-        }
-        // If neither is found, return an empty string
-        log.warn("No ISBN found in Open Library Response, relying on search ISBN");
-        return "";
-    }
-
-    /**
      * Extracts the language code from a given language string.
      * If the string is null or empty, returns an empty string.
      * The language code is expected to be in ISO 639-1 format (e.g., "en", "pt").

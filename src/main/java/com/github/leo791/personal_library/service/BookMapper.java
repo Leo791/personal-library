@@ -75,14 +75,13 @@ public class BookMapper {
      * @param googleBookResponse the GoogleBookResponse to convert
      * @return the converted Book entity, or null if the response has no items
      */
-    public Book fromGoogleResponseToBook(GoogleBookResponse googleBookResponse) {
+    public Book fromGoogleResponseToBook(GoogleBookResponse googleBookResponse, String isbn) {
         if (GoogleBookResponse.getTotalItems() == 0) {
             return null;
         }
         GoogleBookResponse.Item item = GoogleBookResponse.getItems().getFirst();
         GoogleBookResponse.VolumeInfo volumeInfo = item.getVolumeInfo();
 
-        String isbn = GoogleBooksResponseMapperUtils.extractIsbn(volumeInfo.getIndustryIdentifiers());
         String title = volumeInfo.getTitle();
         String author = GoogleBooksResponseMapperUtils.extractFirstAuthor(volumeInfo.getAuthors());
         String genre = GoogleBooksResponseMapperUtils.extractGenre(volumeInfo);
@@ -95,7 +94,7 @@ public class BookMapper {
         return new Book(isbn, title, author, genre, description, language, pageCount, publisher, publishedDate);
     }
 
-    public Book fromOpenLibraryResponseToBook(OpenLibraryBookResponse openLibraryResponse, String author) {
+    public Book fromOpenLibraryResponseToBook(OpenLibraryBookResponse openLibraryResponse, String author, String isbn) {
 
         if (openLibraryResponse == null) {
             return null;
@@ -105,9 +104,7 @@ public class BookMapper {
         log.warn("Genre is not provided by Open Library API");
         log.warn("Description is not provided by Open Library API");
 
-        String isbn = OpenLibraryResponseMapperUtils.extractIsbn(openLibraryResponse);
         String title = openLibraryResponse.getTitle();
-
         String language = OpenLibraryResponseMapperUtils.extractLanguage(openLibraryResponse.getLanguages());
         Integer pageCount = MapperUtils.extractPageCount(openLibraryResponse.getNumberOfPages());
         String publisher = OpenLibraryResponseMapperUtils.extractPublisher(openLibraryResponse.getPublishers());
